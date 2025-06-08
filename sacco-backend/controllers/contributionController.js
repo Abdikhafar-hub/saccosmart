@@ -1,6 +1,7 @@
 const User = require('../models/User');
 const Contribution = require('../models/Contribution');
 const Activity = require('../models/Activity');
+const axios = require('axios');
 
 // Robust createContribution function (used for POST /api/contribution)
 exports.createContribution = async (req, res) => {
@@ -107,5 +108,35 @@ exports.rejectContribution = async (req, res) => {
   } catch (err) {
     console.error('Reject Contribution Error:', err);
     res.status(500).json({ error: "Failed to reject contribution" });
+  }
+};
+
+exports.verifyPayment = async (req, res) => {
+  const { reference } = req.params;
+  try {
+    const response = await axios.get(`https://api.paystack.co/transaction/verify/${reference}`, {
+      headers: {
+        Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}`
+      }
+    });
+
+    const { status, data } = response.data;
+    if (status === 'success' && data.status === 'success') {
+      const { amount, reference } = data;
+      const contribution = await Contribution.create({
+        user: req.user.id,
+        amount: amount / 100, // Convert from kobo to Naira
+        reference,
+        method: 'Paystack',
+        status: 'success',
+        date: new Date()
+      });
+      return res.status(201).json(contribution);
+    } else {
+      return res.status(400).json({ error: 'Payment verification failed' });
+    }
+  } catch (error) {
+    console.error('Payment Verification Error:', error);
+    return res.status(500).json({ error: 'Internal server error' });
   }
 };

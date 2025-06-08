@@ -13,4 +13,8 @@ router.get('/loans', auth, role('member'), memberController.getMemberLoanLimit);
 // Add this route for updating member details
 router.put('/:id', auth, role('admin'), memberController.updateMember);
 
+// Add this line in routes/memberRoutes.js (below existing routes)
+router.get('/:id', auth, memberController.getMemberById);
+
+
 module.exports = router;

@@ -17,4 +17,7 @@ router.get('/all', auth, role('admin'), contributionController.getAllContributio
 router.put('/approve/:id', auth, role('admin'), contributionController.approveContribution);
 router.put('/reject/:id', auth, role('admin'), contributionController.rejectContribution);
 
+// New route for payment verification
+router.get('/payments/verify/:reference', auth, role(['member', 'admin']), contributionController.verifyPayment);
+
 module.exports = router;

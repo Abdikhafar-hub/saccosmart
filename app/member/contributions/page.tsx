@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { DashboardLayout } from "@/components/layout/dashboard-layout"
 import { DataTable } from "@/components/ui/data-table"
 import { Button } from "@/components/ui/button"
@@ -46,6 +46,7 @@ export default function MemberContributions() {
   const [isMpesaModalOpen, setIsMpesaModalOpen] = useState(false)
   const [isMpesaProcessing, setIsMpesaProcessing] = useState(false)
   const [mpesaError, setMpesaError] = useState("")
+  const paystackScriptLoaded = useRef(false)
 
   const user = {
     name: "John Doe",
@@ -72,6 +73,18 @@ export default function MemberContributions() {
   useEffect(() => {
     fetchContributions()
   }, [])
+
+  // Load Paystack script only once
+  useEffect(() => {
+    if (!paystackScriptLoaded.current) {
+      const script = document.createElement("script")
+      script.src = "https://js.paystack.co/v1/inline.js"
+      script.async = true
+      document.body.appendChild(script)
+      paystackScriptLoaded.current = true
+    }
+  }, [])
+  
 
   const columns = [
     {
@@ -160,6 +173,82 @@ export default function MemberContributions() {
       setLoading(false)
     }
   }
+
+  const handleCardPayment = () => {
+    if (!amount || Number.parseFloat(amount) <= 0) {
+      toast({
+        title: "Invalid Amount",
+        description: "Please enter a valid contribution amount",
+        variant: "destructive",
+      })
+      return
+    }
+  
+    const token = localStorage.getItem("token")
+  
+    const handler = (window as any).PaystackPop?.setup({
+      key: "pk_test_d937d9bb95efebe8c207d39f453ca9bc5b8f8d29", 
+      email: user.email,
+      amount: Number(amount) * 100, // Paystack uses kobo
+      currency: "KES",
+      metadata: {
+        memberId: user.email
+      },
+      callback: function (response: any) {
+        // No need to generate your own ref
+        console.log("Paystack response:", response.reference)
+        ;(async () => {
+          try {
+            const verifyRes = await axios.get(
+              `http://localhost:5000/api/card/verify/${response.reference}`,
+              {
+                headers: { Authorization: `Bearer ${token}` }
+              }
+            )
+            toast({
+              title: "Payment Successful",
+              description: `Your contribution of KES ${amount} has been received`,
+            })
+            setAmount("")
+            setReference("")
+            setPaymentDate("")
+            setMethod("M-Pesa")
+            setIsDialogOpen(false)
+            fetchContributions()
+          } catch (err) {
+            toast({
+              title: "Verification Error",
+              description: "Failed to verify card payment",
+              variant: "destructive",
+            })
+          }
+          setIsProcessing(false)
+        })()
+      },
+      onClose: () => {
+        setIsProcessing(false)
+        toast({
+          title: "Payment Cancelled",
+          description: "You cancelled the card payment.",
+          variant: "destructive",
+        })
+      }
+    })
+  
+    if (handler) {
+      handler.openIframe()
+      setIsProcessing(true)
+    } else {
+      toast({
+        title: "Paystack Error",
+        description: "Paystack failed to initialize",
+        variant: "destructive",
+      })
+    }
+  }
+  
+  
+  
 
   if (loading) return <div>Loading...</div>
   if (error) return <div className="text-red-500">{error}</div>
@@ -363,6 +452,14 @@ export default function MemberContributions() {
                       </DialogContent>
                     </Dialog>
                   </>
+                ) : method === "Card" ? (
+                  <Button
+                    onClick={handleCardPayment}
+                    disabled={isProcessing}
+                    className="bg-sacco-green hover:bg-sacco-green/90"
+                  >
+                    {isProcessing ? "Processing..." : "Pay with Card"}
+                  </Button>
                 ) : (
                   <Button
                     onClick={handleContribution}

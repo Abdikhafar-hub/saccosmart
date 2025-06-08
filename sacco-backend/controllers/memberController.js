@@ -45,6 +45,21 @@ exports.getMemberLoanLimit = async (req, res) => {
   }
 };
 
+exports.getMemberById = async (req, res) => {
+  try {
+    const member = await User.findById(req.params.id).select('_id name email');
+    if (!member) {
+      return res.status(404).json({ error: 'Member not found' });
+    }
+    res.status(200).json(member);
+  } catch (err) {
+    console.error('Get Member By ID Error:', err);
+    res.status(500).json({ error: 'Failed to fetch member' });
+  }
+};
+
+
+
 exports.updateMember = async (req, res) => {
   try {
     const { id } = req.params;
