@@ -93,21 +93,21 @@ export default function AdminContributions() {
   }
 
   // Fetch all contributions from backend
-    const fetchContributions = async () => {
-      setLoading(true)
-      setError("")
-      try {
-        const token = localStorage.getItem("token")
-        const res = await axios.get("http://localhost:5000/api/contribution/all", {
-          headers: { Authorization: `Bearer ${token}` }
-        })
-        setContributions(res.data)
-      } catch (err) {
-        setError("Failed to load contributions")
-      } finally {
-        setLoading(false)
-      }
+  const fetchContributions = async () => {
+    setLoading(true)
+    setError("")
+    try {
+      const token = localStorage.getItem("token")
+      const res = await axios.get("http://localhost:5000/api/contribution/all", {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+      setContributions(res.data)
+    } catch (err) {
+      setError("Failed to load contributions")
+    } finally {
+      setLoading(false)
     }
+  }
 
   useEffect(() => {
     fetchContributions()
@@ -636,49 +636,77 @@ export default function AdminContributions() {
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <StatsCard
-            title="Total Contributions"
-            value={`KES ${(totalContributions / 1_000_000).toFixed(1)}M`}
-            description="All time contributions"
-            icon={CreditCard}
-          />
-          <StatsCard
-            title="Monthly Progress"
-            value={`${monthlyProgress}%`}
-            description={`KES ${monthlyActual.toLocaleString()} of ${monthlyTarget.toLocaleString()}`}
-            icon={TrendingUp}
-          />
-          <StatsCard
-            title="Pending Verifications"
-            value={pendingVerifications}
-            description="Awaiting verification"
-            icon={AlertTriangle}
-          />
-          <StatsCard
-            title="Active Contributors"
-            value={activeContributors}
-            description="This month"
-            icon={DollarSign}
-          />
-          <StatsCard
-            title="Average Contribution"
-            value={`KES ${averageContribution.toLocaleString()}`}
-            description="Per member per month"
-            icon={CreditCard}
-          />
-          <StatsCard
-            title="Compliance Rate"
-            value={`${complianceRate}%`}
-            description="Members meeting targets"
-            icon={CheckCircle}
-          />
-          <StatsCard
-            title="Monthly Target"
-            value={`KES ${monthlyTarget.toLocaleString()}`}
-            description="Current month target"
-            icon={TrendingUp}
-          />
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+          <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5 flex gap-3 items-center">
+            <div className="bg-blue-100 text-blue-600 p-2 rounded-full">
+              <CreditCard className="h-6 w-6" />
+            </div>
+            <div>
+              <p className="text-sm text-gray-500">Total Contributions</p>
+              <p className="text-xl font-bold text-gray-800">KES {totalContributions.toLocaleString()}</p>
+              <p className="text-xs text-green-500">All time contributions</p>
+            </div>
+          </div>
+          <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5 flex gap-3 items-center">
+            <div className="bg-blue-100 text-blue-600 p-2 rounded-full">
+              <TrendingUp className="h-6 w-6" />
+            </div>
+            <div>
+              <p className="text-sm text-gray-500">Monthly Progress</p>
+              <p className="text-xl font-bold text-gray-800">{monthlyProgress}%</p>
+              <p className="text-xs text-green-500">KES {monthlyActual.toLocaleString()} of {monthlyTarget.toLocaleString()}</p>
+            </div>
+          </div>
+          <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5 flex gap-3 items-center">
+            <div className="bg-blue-100 text-blue-600 p-2 rounded-full">
+              <AlertTriangle className="h-6 w-6" />
+            </div>
+            <div>
+              <p className="text-sm text-gray-500">Pending Verifications</p>
+              <p className="text-xl font-bold text-gray-800">{pendingVerifications}</p>
+              <p className="text-xs text-red-500">Awaiting verification</p>
+            </div>
+          </div>
+          <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5 flex gap-3 items-center">
+            <div className="bg-blue-100 text-blue-600 p-2 rounded-full">
+              <DollarSign className="h-6 w-6" />
+            </div>
+            <div>
+              <p className="text-sm text-gray-500">Active Contributors</p>
+              <p className="text-xl font-bold text-gray-800">{activeContributors}</p>
+              <p className="text-xs text-green-500">This month</p>
+            </div>
+          </div>
+          <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5 flex gap-3 items-center">
+            <div className="bg-blue-100 text-blue-600 p-2 rounded-full">
+              <CreditCard className="h-6 w-6" />
+            </div>
+            <div>
+              <p className="text-sm text-gray-500">Average Contribution</p>
+              <p className="text-xl font-bold text-gray-800">KES {averageContribution.toLocaleString()}</p>
+              <p className="text-xs text-green-500">Per member per month</p>
+            </div>
+          </div>
+          <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5 flex gap-3 items-center">
+            <div className="bg-blue-100 text-blue-600 p-2 rounded-full">
+              <CheckCircle className="h-6 w-6" />
+            </div>
+            <div>
+              <p className="text-sm text-gray-500">Compliance Rate</p>
+              <p className="text-xl font-bold text-gray-800">{complianceRate}%</p>
+              <p className="text-xs text-green-500">Members meeting targets</p>
+            </div>
+          </div>
+          <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5 flex gap-3 items-center">
+            <div className="bg-blue-100 text-blue-600 p-2 rounded-full">
+              <TrendingUp className="h-6 w-6" />
+            </div>
+            <div>
+              <p className="text-sm text-gray-500">Monthly Target</p>
+              <p className="text-xl font-bold text-gray-800">KES {monthlyTarget.toLocaleString()}</p>
+              <p className="text-xs text-green-500">Current month target</p>
+            </div>
+          </div>
         </div>
 
         {/* Additional Stats */}

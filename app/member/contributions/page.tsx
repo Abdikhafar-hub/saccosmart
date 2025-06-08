@@ -22,6 +22,7 @@ import { useToast } from "@/hooks/use-toast"
 import axios from "axios"
 import { Select } from "@/components/ui/select"
 
+
 interface Contribution {
   _id?: string
   amount: number
@@ -174,7 +175,7 @@ export default function MemberContributions() {
     }
   }
 
-  const handleCardPayment = () => {
+  const handleCardPayment = async () => {
     if (!amount || Number.parseFloat(amount) <= 0) {
       toast({
         title: "Invalid Amount",
@@ -186,66 +187,91 @@ export default function MemberContributions() {
   
     const token = localStorage.getItem("token")
   
-    const handler = (window as any).PaystackPop?.setup({
-      key: "pk_test_d937d9bb95efebe8c207d39f453ca9bc5b8f8d29", 
-      email: user.email,
-      amount: Number(amount) * 100, // Paystack uses kobo
-      currency: "KES",
-      metadata: {
-        memberId: user.email
-      },
-      callback: function (response: any) {
-        // No need to generate your own ref
-        console.log("Paystack response:", response.reference)
-        ;(async () => {
-          try {
-            const verifyRes = await axios.get(
-              `http://localhost:5000/api/card/verify/${response.reference}`,
-              {
-                headers: { Authorization: `Bearer ${token}` }
-              }
-            )
-            toast({
-              title: "Payment Successful",
-              description: `Your contribution of KES ${amount} has been received`,
-            })
-            setAmount("")
-            setReference("")
-            setPaymentDate("")
-            setMethod("M-Pesa")
-            setIsDialogOpen(false)
-            fetchContributions()
-          } catch (err) {
-            toast({
-              title: "Verification Error",
-              description: "Failed to verify card payment",
-              variant: "destructive",
-            })
-          }
+    try {
+      // Step 1: Call backend to initiate Paystack transaction
+      const res = await axios.post(
+        "http://localhost:5000/api/card/initiate",
+        { amount: Number(amount) },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      )
+  
+      const { email, reference } = res.data
+  
+      // Step 2: Open Paystack modal using secure values from backend
+      const handler = (window as any).PaystackPop?.setup({
+        key: "pk_test_d937d9bb95efebe8c207d39f453ca9bc5b8f8d29",
+        email,
+        amount: Number(amount) * 100,
+        currency: "KES",
+        reference,
+        metadata: {
+          memberId: email,
+        },
+        callback: function (response: any) {
+          console.log("Paystack response:", response.reference)
+          ;(async () => {
+            try {
+              await axios.get(
+                `http://localhost:5000/api/card/verify/${response.reference}`,
+                {
+                  headers: { Authorization: `Bearer ${token}` },
+                }
+              )
+              toast({
+                title: "Payment Successful",
+                description: `Your contribution of KES ${amount} has been received`,
+              })
+              setAmount("")
+              setReference("")
+              setPaymentDate("")
+              setMethod("M-Pesa")
+              setIsDialogOpen(false)
+              fetchContributions()
+            } catch (err) {
+              toast({
+                title: "Verification Error",
+                description: "Failed to verify card payment",
+                variant: "destructive",
+              })
+            } finally {
+              setIsProcessing(false)
+            }
+          })()
+        },
+        
+        onClose: () => {
           setIsProcessing(false)
-        })()
-      },
-      onClose: () => {
-        setIsProcessing(false)
+          toast({
+            title: "Payment Cancelled",
+            description: "You cancelled the card payment.",
+            variant: "destructive",
+          })
+        },
+      })
+  
+      if (handler) {
+        handler.openIframe()
+        setIsProcessing(true)
+      } else {
         toast({
-          title: "Payment Cancelled",
-          description: "You cancelled the card payment.",
+          title: "Paystack Error",
+          description: "Paystack failed to initialize",
           variant: "destructive",
         })
       }
-    })
-  
-    if (handler) {
-      handler.openIframe()
-      setIsProcessing(true)
-    } else {
+    } catch (err) {
+      console.error("Initiation error:", err)
       toast({
-        title: "Paystack Error",
-        description: "Paystack failed to initialize",
+        title: "Error",
+        description: "Failed to initiate card payment",
         variant: "destructive",
       })
     }
   }
+  
+  
   
   
   
