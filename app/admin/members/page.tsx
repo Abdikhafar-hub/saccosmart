@@ -101,6 +101,15 @@ export default function AdminMembers() {
   // NEW: State for backend dashboard data
   const [dashboard, setDashboard] = useState<any>(null)
 
+  // Add state for edit modal
+  const [isEditOpen, setIsEditOpen] = useState(false);
+  const [editData, setEditData] = useState({
+    name: "",
+    email: "",
+    joinDate: "",
+    age: "",
+  });
+
   const user = {
     name: "Admin User",
     email: "admin@saccosmart.com",
@@ -144,14 +153,13 @@ export default function AdminMembers() {
       render: (value: any, row: any) => (
         <div className="flex items-center space-x-3">
           <Avatar className="h-10 w-10">
-            <AvatarImage src={row.avatar || "/placeholder.svg"} alt={`${row.firstName} ${row.lastName}`} />
+            <AvatarImage src={row.avatar || "/placeholder.svg"} alt={row.name} />
             <AvatarFallback>
-              {row.firstName?.[0]}
-              {row.lastName?.[0]}
+              {row.name.split(" ").map((word: string) => word[0]).join("")}
             </AvatarFallback>
           </Avatar>
           <div>
-            <p className="font-medium">{`${row.firstName || ""} ${row.lastName || ""}`}</p>
+            <p className="font-medium">{row.name}</p>
             <p className="text-sm text-gray-500">{row._id}</p>
           </div>
         </div>
@@ -161,7 +169,7 @@ export default function AdminMembers() {
       key: "status",
       label: "Status",
       render: (value: any) => (
-        <Badge className={value === "Active" ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-800"}>
+        <Badge className={value === "Active" ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}>
           {value}
         </Badge>
       ),
@@ -177,27 +185,105 @@ export default function AdminMembers() {
       render: (value: any) => (value ? new Date(value).toLocaleDateString() : "N/A"),
     },
     {
-      key: "email",
-      label: "Contact",
-      render: (value: any) => (
-        <Button variant="link" onClick={() => window.location.href = `mailto:${value}`}>
-          Contact
-        </Button>
-      ),
+      key: "totalContributions",
+      label: "Total Contributions",
+      render: (value: any) => `KES ${value ? value.toLocaleString() : "0"}`,
+    },
+    {
+      key: "totalLoanAmount",
+      label: "Total Loan Amount",
+      render: (value: any) => `KES ${value ? value.toLocaleString() : "0"}`,
     },
     {
       key: "view",
       label: "View",
       render: (value: any, row: any) => (
         <Button variant="link" onClick={() => setSelectedMember(row)}>
-          View
+          <Eye className="h-8 w-8" />
+        </Button>
+      ),
+    },
+    {
+      key: "edit",
+      label: "Edit",
+      render: (value: any, row: any) => (
+        <Button variant="link" onClick={() => {
+          setSelectedMember(row);
+          setEditData({
+            name: row.name,
+            email: row.email,
+            joinDate: row.joinDate ? new Date(row.joinDate).toISOString().split('T')[0] : "",
+            age: row.dateOfBirth ? (new Date().getFullYear() - new Date(row.dateOfBirth).getFullYear()).toString() : "",
+          });
+          setIsEditOpen(true);
+        }}>
+          <Edit className="h-8 w-8" />
+        </Button>
+      ),
+    },
+    {
+      key: "email",
+      label: "Contact",
+      render: (value: any) => (
+        <Button variant="link" onClick={() => window.location.href = `mailto:${value}`}>
+          <Mail className="h-8 w-8" />
         </Button>
       ),
     },
   ];
 
+  // Apply bold styling to table headers using CSS
+  const tableHeaderStyle = "font-bold";
+
+  // Function to handle saving changes
+  const handleSaveChanges = async () => {
+    if (!selectedMember) {
+      toast({ title: "Error", description: "No member selected for editing." });
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem("token");
+      await axios.put(`http://localhost:5000/api/members/${selectedMember._id}`, editData, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      toast({ title: "Success", description: "Member details updated successfully." });
+      setIsEditOpen(false);
+      // Refresh data
+      fetchDashboardData();
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        toast({ title: "Error", description: error.response?.data || "Failed to update member details." });
+      } else {
+        toast({ title: "Error", description: "An unexpected error occurred." });
+      }
+    }
+  };
+
+  // Function to fetch dashboard data
+  const fetchDashboardData = async () => {
+    setLoading(true);
+    setError("");
+    try {
+      const token = localStorage.getItem("token");
+      const res = await axios.get("http://localhost:5000/api/dashboard/members/full-summary", {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setDashboard(res.data);
+    } catch (err) {
+      setError("Failed to load dashboard data");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <DashboardLayout role="admin" user={user}>
+      <style jsx global>{`
+        th {
+          font-weight: bold;
+        }
+      `}</style>
       <div className="space-y-6">
         {/* Header */}
         <div className="flex justify-between items-center">
@@ -353,7 +439,7 @@ export default function AdminMembers() {
                         className={
                           selectedMember.status === "Active"
                             ? "bg-green-100 text-green-800"
-                            : "bg-gray-100 text-gray-800"
+                            : "bg-red-100 text-red-800"
                         }
                         variant="secondary"
                       >
@@ -652,6 +738,70 @@ export default function AdminMembers() {
               <Button onClick={() => {}} className="bg-sacco-blue hover:bg-sacco-blue/90">
                 <Send className="h-4 w-4 mr-2" />
                 Send Message
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Edit Member Dialog */}
+        <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>Edit Member Details</DialogTitle>
+              <DialogDescription>Update member information and save changes</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="name">Full Name</Label>
+                  <Input
+                    id="name"
+                    value={editData.name}
+                    onChange={(e) => setEditData({ ...editData, name: e.target.value })}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="email">Email Address</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    value={editData.email}
+                    onChange={(e) => setEditData({ ...editData, email: e.target.value })}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="joinDate">Joining Date</Label>
+                  <Input
+                    id="joinDate"
+                    type="date"
+                    value={editData.joinDate}
+                    onChange={(e) => setEditData({ ...editData, joinDate: e.target.value })}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="age">Age</Label>
+                  <Select
+                    value={editData.age}
+                    onValueChange={(value) => setEditData({ ...editData, age: value })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select age" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {[...Array(100).keys()].map(age => (
+                        <SelectItem key={age} value={age.toString()}>{age}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setIsEditOpen(false)}>
+                Cancel
+              </Button>
+              <Button onClick={() => handleSaveChanges()} className="bg-sacco-blue hover:bg-sacco-blue/90">
+                Save Changes
               </Button>
             </DialogFooter>
           </DialogContent>

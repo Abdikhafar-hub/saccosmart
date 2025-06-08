@@ -23,7 +23,8 @@ exports.register = async (req, res) => {
       password: hash,
       phone,
       role,
-      memberCode
+      memberCode,
+      joinDate: new Date()
     });
     res.json({ message: 'Registration successful. You can now log in.' });
   } catch (err) {

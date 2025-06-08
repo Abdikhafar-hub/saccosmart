@@ -44,3 +44,25 @@ exports.getMemberLoanLimit = async (req, res) => {
     res.status(500).json({ error: 'Failed to fetch member loan limit data' });
   }
 };
+
+exports.updateMember = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { name, email, joinDate, age } = req.body;
+
+    const updatedMember = await User.findByIdAndUpdate(id, {
+      name,
+      email,
+      joinDate: new Date(joinDate),
+      dateOfBirth: new Date(new Date().setFullYear(new Date().getFullYear() - age)),
+    }, { new: true });
+
+    if (!updatedMember) {
+      return res.status(404).json({ message: "Member not found" });
+    }
+
+    res.json({ message: "Member updated successfully", member: updatedMember });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to update member details" });
+  }
+};

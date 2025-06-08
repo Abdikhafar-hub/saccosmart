@@ -143,6 +143,25 @@ export default function MemberDashboard() {
     },
   ]
 
+  // Enhance Dashboard Cards styling
+  const StatsCard = ({ title, value, description, icon: Icon, trend }: any) => (
+    <div className="bg-white shadow-md rounded-xl p-4 flex items-center space-x-4">
+      <div className="flex-shrink-0 bg-blue-100 p-2 rounded-full">
+        <Icon className="h-6 w-6 text-blue-500" />
+      </div>
+      <div>
+        <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
+        <p className="text-2xl font-bold text-gray-800">{value}</p>
+        <p className="text-sm text-gray-500">{description}</p>
+        {trend && (
+          <p className={`text-sm ${trend.isPositive ? 'text-green-500' : 'text-red-500'}`}>
+            {trend.isPositive ? '+' : ''}{trend.value}% from last month
+          </p>
+        )}
+      </div>
+    </div>
+  )
+
   return (
     <DashboardLayout role="member" user={dashboardData.user}>
       <div className="space-y-6">
@@ -187,14 +206,16 @@ export default function MemberDashboard() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Monthly Contributions Chart */}
           <div className="lg:col-span-2">
-            <ChartCard
-              title="Monthly Contributions"
-              description="Your contribution history over the last 6 months"
-              type="bar"
-              data={monthlyContributionsChartData}
-              dataKey="value"
-              xAxisKey="name"
-            />
+            <div className="border border-[#E0EFFF] rounded-lg p-4">
+              <ChartCard
+                title="Monthly Contributions"
+                description="Your contribution history over the last 6 months"
+                type="bar"
+                data={monthlyContributionsChartData}
+                dataKey="value"
+                xAxisKey="name"
+              />
+            </div>
           </div>
 
           {/* Quick Actions */}
@@ -204,32 +225,40 @@ export default function MemberDashboard() {
               <CardDescription>Common tasks you can perform</CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
-              <Button
-                className="w-full justify-between bg-sacco-blue hover:bg-sacco-blue/90"
-                onClick={handleMakeContribution}
-              >
-                Make Contribution
-                <ArrowRight className="h-4 w-4" />
-              </Button>
-              <Button variant="outline" className="w-full justify-between" onClick={handleApplyForLoan}>
-                Apply for Loan
-                <ArrowRight className="h-4 w-4" />
-              </Button>
-              <Button variant="outline" className="w-full justify-between" onClick={handleViewStatements}>
-                View Statements
-                <ArrowRight className="h-4 w-4" />
-              </Button>
-              <Button variant="outline" className="w-full justify-between" onClick={handleDownloadReports}>
-                Download Reports
-                <ArrowRight className="h-4 w-4" />
-              </Button>
+              <div className="rounded-lg shadow-md hover:bg-[#F3F4F6] cursor-pointer p-4">
+                <Button
+                  className="w-full justify-between bg-sacco-blue hover:bg-sacco-blue/90"
+                  onClick={handleMakeContribution}
+                >
+                  Make Contribution
+                  <ArrowRight className="h-4 w-4" />
+                </Button>
+              </div>
+              <div className="rounded-lg shadow-md hover:bg-[#F3F4F6] cursor-pointer p-4">
+                <Button variant="outline" className="w-full justify-between" onClick={handleApplyForLoan}>
+                  Apply for Loan
+                  <ArrowRight className="h-4 w-4" />
+                </Button>
+              </div>
+              <div className="rounded-lg shadow-md hover:bg-[#F3F4F6] cursor-pointer p-4">
+                <Button variant="outline" className="w-full justify-between" onClick={handleViewStatements}>
+                  View Statements
+                  <ArrowRight className="h-4 w-4" />
+                </Button>
+              </div>
+              <div className="rounded-lg shadow-md hover:bg-[#F3F4F6] cursor-pointer p-4">
+                <Button variant="outline" className="w-full justify-between" onClick={handleDownloadReports}>
+                  Download Reports
+                  <ArrowRight className="h-4 w-4" />
+                </Button>
+              </div>
             </CardContent>
           </Card>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Monthly Contribution Progress */}
-          <Card>
+          <Card className="shadow-md rounded-lg">
             <CardHeader>
               <CardTitle>Monthly Contribution Progress</CardTitle>
               <CardDescription>Track your progress towards monthly target</CardDescription>
@@ -240,7 +269,7 @@ export default function MemberDashboard() {
                   <span>Current Month</span>
                   <span>KES {currentMonthContributed.toLocaleString()} / KES {monthlyTargetAmount.toLocaleString()}</span>
                 </div>
-                <Progress value={monthlyProgressPercentage} className="h-2" />
+                <Progress value={monthlyProgressPercentage} className="h-2 rounded-full" />
               </div>
               <div className="grid grid-cols-2 gap-4 text-sm">
                 <div>
@@ -256,7 +285,7 @@ export default function MemberDashboard() {
           </Card>
 
           {/* Recent Notifications */}
-          <Card>
+          <Card className="border border-blue-500 rounded-lg">
             <CardHeader>
               <CardTitle className="flex items-center">
                 <Bell className="h-5 w-5 mr-2" />
@@ -265,12 +294,27 @@ export default function MemberDashboard() {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {/* Notifications would be populated here */}
+                {notifications.map(notification => (
+                  <div key={notification.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100">
+                    <div>
+                      <h4 className="font-medium text-gray-800">{notification.title}</h4>
+                      <p className="text-sm text-gray-600">{notification.message}</p>
+                    </div>
+                    <span className="text-xs text-gray-500">{notification.time}</span>
+                  </div>
+                ))}
               </div>
             </CardContent>
           </Card>
         </div>
       </div>
+
+      {/* Apply global font style */}
+      <style jsx global>{`
+        body {
+          font-family: 'Poppins', sans-serif;
+        }
+      `}</style>
     </DashboardLayout>
   )
 }

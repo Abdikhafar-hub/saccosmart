@@ -76,6 +76,37 @@ const fetcher = (url: string) => {
   return axios.get(url, { headers: { Authorization: `Bearer ${token}` } }).then(res => res.data)
 }
 
+// Add modal for viewing loan details
+const LoanDetailsModal = ({ loan, isOpen, onClose }: { loan: Loan | null, isOpen: boolean, onClose: () => void }) => (
+  <Dialog open={isOpen} onOpenChange={onClose}>
+    <DialogContent>
+      <DialogHeader>
+        <DialogTitle>Loan Details</DialogTitle>
+        <DialogDescription>View complete loan information below.</DialogDescription>
+      </DialogHeader>
+      {loan && (
+        <div className="space-y-4">
+          <div>
+            <Label>Date Applied</Label>
+            <p>{loan.date ? new Date(loan.date).toLocaleDateString() : "N/A"}</p>
+          </div>
+          <div>
+            <Label>Loan Amount</Label>
+            <p>KES {loan.amount.toLocaleString()}</p>
+          </div>
+          <div>
+            <Label>Repayment Plan</Label>
+            <p>{loan.term || "N/A"}</p>
+          </div>
+        </div>
+      )}
+      <DialogFooter>
+        <Button onClick={onClose}>Close</Button>
+      </DialogFooter>
+    </DialogContent>
+  </Dialog>
+)
+
 export default function AdminDashboard() {
   // Top summary cards
   const { data: dashboardData, isLoading: loadingDashboard, error: errorDashboard } = useSWR(
@@ -114,6 +145,7 @@ export default function AdminDashboard() {
   const [selectedLoan, setSelectedLoan] = useState<Loan | null>(null)
   const [rejectionReason, setRejectionReason] = useState("")
   const { toast } = useToast()
+  const [isModalOpen, setIsModalOpen] = useState(false)
 
   const fetchDashboardData = async () => {
     setLoading(true)
@@ -210,15 +242,32 @@ export default function AdminDashboard() {
     },
   ]
 
-  const viewLoanDetails = (loanId: string) => {
+  const handleViewLoanDetails = (loanId: string) => {
     const loan = loans.find(l => l._id === loanId)
     if (loan) {
-      toast({
-        title: "Loan Details",
-        description: `Viewing details for loan ${loanId}`,
-      })
+      setSelectedLoan(loan)
+      setIsModalOpen(true)
     }
   }
+
+  // Update StatsCard styling
+  const StatsCard = ({ title, value, description, icon: Icon, trend }: any) => (
+    <div className="bg-white shadow-md rounded-xl p-4 flex items-center space-x-4">
+      <div className="flex-shrink-0 bg-blue-100 p-2 rounded-full">
+        <Icon className="h-6 w-6 text-blue-500" />
+      </div>
+      <div>
+        <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
+        <p className="text-2xl font-bold text-gray-800">{value}</p>
+        <p className="text-sm text-gray-500">{description}</p>
+        {trend && (
+          <p className={`text-sm ${trend.isPositive ? 'text-green-500' : 'text-red-500'}`}>
+            {trend.isPositive ? '+' : ''}{trend.value}% from last month
+          </p>
+        )}
+      </div>
+    </div>
+  )
 
   return (
     <DashboardLayout role="admin" user={{ name: "Admin", email: "", role: "Admin" }}>
@@ -284,20 +333,20 @@ export default function AdminDashboard() {
         {/* System Alerts */}
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center">
-              <AlertTriangle className="h-5 w-5 mr-2 text-orange-500" />
+            <CardTitle className="flex items-center text-2xl font-bold text-gray-800">
+              <AlertTriangle className="h-5 w-5 mr-2 text-red-500 animate-pulse" />
               System Alerts
             </CardTitle>
             <CardDescription>Important notifications requiring attention</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              <div className="flex items-center justify-between p-3 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
+              <div className="flex items-center justify-between p-3 bg-red-50 rounded-lg border border-red-200">
                 <div>
-                  <h4 className="font-medium text-red-800 dark:text-red-200">{overdue.count} Overdue Loan Payments</h4>
-                  <p className="text-sm text-red-600 dark:text-red-300">Total amount: KES {overdue.totalAmount.toLocaleString()}</p>
+                  <h4 className="font-medium text-red-800">{overdue.count} Overdue Loan Payments</h4>
+                  <p className="text-sm text-red-600">Total amount: KES {overdue.totalAmount.toLocaleString()}</p>
                 </div>
-                <Badge variant="destructive">High Priority</Badge>
+                <Badge className="bg-red-100 text-red-800 animate-pulse" variant="destructive">High Priority</Badge>
               </div>
               <div className="flex items-center justify-between p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-200 dark:border-yellow-800">
                 <div>
@@ -322,93 +371,93 @@ export default function AdminDashboard() {
         </Card>
 
         {/* Recent Activity */}
-        <DataTable
-          data={recentActivities}
-          columns={activityColumns}
-          title="Recent System Activity"
-          searchable={true}
-          filterable={true}
-          exportable={true}
-          pageSize={5}
-        />
+        <div className="border border-blue-500 rounded-lg">
+          <DataTable
+            data={recentActivities}
+            columns={activityColumns}
+            title="Recent System Activity"
+            searchable={true}
+            filterable={true}
+            exportable={true}
+            pageSize={5}
+          />
+        </div>
 
         {/* Loan Applications */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Loan Applications</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <DataTable
-              data={loans}
-              columns={[
-                {
-                  key: "_id",
-                  label: "Loan ID",
-                  sortable: true,
+        <div className="border border-blue-500 rounded-lg p-4 bg-white">
+          <h2 className="text-2xl font-bold text-gray-800">Loan Applications</h2>
+          <DataTable
+            data={loans}
+            columns={[
+              {
+                key: "_id",
+                label: "Loan ID",
+                sortable: true,
+              },
+              {
+                key: "userName",
+                label: "Member",
+                sortable: true,
+              },
+              {
+                key: "amount",
+                label: "Amount",
+                sortable: true,
+                render: (value: number) => `KES ${value.toLocaleString()}`,
+              },
+              {
+                key: "term",
+                label: "Term",
+              },
+              {
+                key: "date",
+                label: "Applied Date",
+                sortable: true,
+                render: (value: string | undefined) =>
+                  value ? new Date(value).toLocaleDateString() : "N/A",
+              },
+              {
+                key: "status",
+                label: "Status",
+                render: (value: string) => {
+                  const statusConfig = {
+                    pending: { color: "bg-yellow-100 text-yellow-800", icon: Clock },
+                    approved: { color: "bg-green-100 text-green-800", icon: CheckCircle },
+                    rejected: { color: "bg-red-100 text-red-800", icon: XCircle },
+                    active: { color: "bg-blue-100 text-blue-800", icon: CheckCircle },
+                    completed: { color: "bg-gray-100 text-gray-800", icon: CheckCircle },
+                  }
+                  const config = statusConfig[value as keyof typeof statusConfig] || statusConfig.pending
+                  const Icon = config.icon
+                  return (
+                    <Badge className={`${config.color} rounded-full`} variant="secondary">
+                      <Icon className="h-3 w-3 mr-1" />
+                      {value}
+                    </Badge>
+                  )
                 },
-                {
-                  key: "userName",
-                  label: "Member",
-                  sortable: true,
-                },
-                {
-                  key: "amount",
-                  label: "Amount",
-                  sortable: true,
-                  render: (value: number) => `KES ${value.toLocaleString()}`,
-                },
-                {
-                  key: "term",
-                  label: "Term",
-                },
-                {
-                  key: "date",
-                  label: "Applied Date",
-                  sortable: true,
-                  render: (value: string | undefined) =>
-                    value ? new Date(value).toLocaleDateString() : "N/A",
-                },
-                {
-                  key: "status",
-                  label: "Status",
-                  render: (value: string) => {
-                    const statusConfig = {
-                      pending: { color: "bg-yellow-100 text-yellow-800", icon: Clock },
-                      approved: { color: "bg-green-100 text-green-800", icon: CheckCircle },
-                      rejected: { color: "bg-red-100 text-red-800", icon: XCircle },
-                      active: { color: "bg-blue-100 text-blue-800", icon: CheckCircle },
-                      completed: { color: "bg-gray-100 text-gray-800", icon: CheckCircle },
-                    }
-                    const config = statusConfig[value as keyof typeof statusConfig] || statusConfig.pending
-                    const Icon = config.icon
-                    return (
-                      <Badge className={config.color} variant="secondary">
-                        <Icon className="h-3 w-3 mr-1" />
-                        {value}
-                      </Badge>
-                    )
-                  },
-                },
-                {
-                  key: "actions",
-                  label: "Actions",
-                  render: (value: any, row: any) => (
-                    <div className="flex space-x-2">
-                      <Button size="sm" variant="outline" onClick={() => viewLoanDetails(row._id)}>
-                        <Eye className="h-3 w-3 mr-1" />
-                        View
-                      </Button>
-                    </div>
-                  ),
-                },
-              ]}
-              title="Loan Applications"
-              searchable={true}
-              filterable={true}
-              exportable={true}
-            />
-          </CardContent>
-        </Card>
+              },
+              {
+                key: "actions",
+                label: "Actions",
+                render: (value: any, row: any) => (
+                  <div className="flex space-x-2">
+                    <Button size="sm" variant="outline" onClick={() => handleViewLoanDetails(row._id)}>
+                      <Eye className="h-3 w-3 mr-1" />
+                      View
+                    </Button>
+                  </div>
+                ),
+              },
+            ]}
+            searchable={true}
+            filterable={true}
+            exportable={true}
+          />
+        </div>
+
+        {/* Loan Details Modal */}
+        <LoanDetailsModal loan={selectedLoan} isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
       </div>
     </DashboardLayout>
   )

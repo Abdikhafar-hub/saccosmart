@@ -47,7 +47,7 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/whatsapp', whatsappRoutes);
 app.use('/api/contact', contactRoutes);
 
-app.use('/api/payments', require('./routes/payments'));
+app.use('/api/payments', require('./routes/mpesaPayments'));
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(` 📡 Server running on port ${PORT}`));

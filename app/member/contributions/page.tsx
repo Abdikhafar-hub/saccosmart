@@ -310,16 +310,15 @@ export default function MemberContributions() {
                               setIsMpesaProcessing(true);
                               setMpesaError("");
                               try {
-                                // Format phone number to ensure it starts with 07
-                                let formattedPhone = phone.replace(/\D/g, ''); // Remove non-digits
-                                if (formattedPhone.startsWith('254')) {
-                                  formattedPhone = '0' + formattedPhone.substring(3);
-                                } else if (formattedPhone.startsWith('+')) {
-                                  formattedPhone = '0' + formattedPhone.substring(4);
-                                }
+                                let formattedPhone = phone.replace(/\D/g, '');
+
                                 
-                                if (formattedPhone.length !== 10) {
-                                  setMpesaError("Phone number must be 10 digits (e.g., 07XXXXXXXX)");
+                                if (formattedPhone.startsWith("07") && formattedPhone.length === 10) {
+                                  formattedPhone = "254" + formattedPhone.substring(1); 
+                                } else if (formattedPhone.startsWith("254") && formattedPhone.length === 12) {
+                                  // already valid
+                                } else {
+                                  setMpesaError("Invalid phone number. Use format 07XXXXXXXX or 2547XXXXXXXX");
                                   setIsMpesaProcessing(false);
                                   return;
                                 }
@@ -329,7 +328,7 @@ export default function MemberContributions() {
                                 await axios.post(
                                   "http://localhost:5000/api/payments/mpesa-stk",
                                   {
-                                    amount: 1,
+                                    amount: Number(amount),
                                     phone: formattedPhone,
                                     memberId,
                                     method: "M-Pesa"

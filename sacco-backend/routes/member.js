@@ -10,4 +10,7 @@ router.get('/all', auth, role('admin'), memberController.getAllMembers);
 // Add this route for members to get their loan limit data
 router.get('/loans', auth, role('member'), memberController.getMemberLoanLimit);
 
+// Add this route for updating member details
+router.put('/:id', auth, role('admin'), memberController.updateMember);
+
 module.exports = router;

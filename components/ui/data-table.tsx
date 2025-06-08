@@ -131,10 +131,11 @@ export function DataTable({
                 {columns.map((column) => (
                   <TableHead
                     key={column.key}
-                    className={column.sortable ? "cursor-pointer hover:bg-gray-50" : ""}
+                    className={`font-semibold text-[0.95rem] text-[#1E293B] bg-[#F0F8FF] letter-spacing-[0.5px] py-3 border-b border-[#007BFF] ${column.sortable ? 'cursor-pointer hover:bg-gray-50' : ''}`}
                     onClick={() => column.sortable && handleSort(column.key)}
+                    style={{ borderRadius: '0.5rem 0 0 0' }}
                   >
-                    <div className="flex items-center space-x-1">
+                    <div className="flex items-center space-x-1 text-left">
                       <span>{column.label}</span>
                       {column.sortable && sortColumn === column.key && (
                         <span className="text-xs">{sortDirection === "asc" ? "↑" : "↓"}</span>

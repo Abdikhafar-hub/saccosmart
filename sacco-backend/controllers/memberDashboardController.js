@@ -59,6 +59,13 @@ exports.fullSummary = async (req, res) => {
       memberGrowthTrends.push({ name: month, new: newMembers, total: totalToDate })
     }
 
+    // Calculate new members this month
+    newThisMonth = members.filter(m => {
+      if (!m.joinDate) return false;
+      const joinDate = new Date(m.joinDate);
+      return joinDate.getMonth() === thisMonth && joinDate.getFullYear() === thisYear;
+    }).length;
+
     const activeMembersTable = []
     members.forEach(m => {
       const memberContributions = memberIdToContributions[m._id?.toString()] || []
@@ -68,8 +75,13 @@ exports.fullSummary = async (req, res) => {
         : null
       const isActive = hasLoanApplication || memberContributions.length > 0
 
-      if (isActive) activeMembers++
-      else inactiveMembers++
+      if (isActive) {
+        activeMembers++;
+        statusCounts["Active"] = (statusCounts["Active"] || 0) + 1;
+      } else {
+        inactiveMembers++;
+        statusCounts["Inactive"] = (statusCounts["Inactive"] || 0) + 1;
+      }
 
       const type = m.membershipType || "Unknown"
       membershipTypeCounts[type] = (membershipTypeCounts[type] || 0) + 1
@@ -84,13 +96,19 @@ exports.fullSummary = async (req, res) => {
         ageGroupCounts[group] = (ageGroupCounts[group] || 0) + 1
       }
 
-      const totalContrib = memberContributions.reduce((sum, c) => sum + (c.amount || 0), 0)
+      const totalContrib = memberContributions.reduce((sum, c) => sum + (c.amount || 0), 0) || 0;
       const complianceRate = 100 // You can implement your own logic
+      const totalLoanAmount = loans
+        .filter(loan => loan.user.toString() === m._id.toString())
+        .reduce((sum, loan) => sum + (loan.amount || 0), 0) || 0;
+
       activeMembersTable.push({
         ...m,
         firstName: m.firstName || "",
         lastName: m.lastName || "",
+        name: m.name || `${m.firstName || ""} ${m.lastName || ""}`,
         totalContributions: totalContrib,
+        totalLoanAmount,
         lastContribution: lastContribution ? lastContribution.date : null,
         complianceRate,
         currentBalance: m.currentBalance || 0,
