@@ -1,5 +1,6 @@
 const User = require('../models/User')
 const Contribution = require('../models/Contribution')
+const Loan = require('../models/Loan')
 
 // Helper for age group
 function getAgeGroup(age) {
@@ -15,6 +16,7 @@ exports.fullSummary = async (req, res) => {
   try {
     const members = await User.find({ role: "member" }).lean()
     const contributions = await Contribution.find({}).lean()
+    const loans = await Loan.find({}).lean()
 
     const memberIdToContributions = {}
     contributions.forEach(c => {
@@ -59,19 +61,20 @@ exports.fullSummary = async (req, res) => {
 
     const activeMembersTable = []
     members.forEach(m => {
-      if (m.status === "Active") activeMembers++
-      if (m.status === "Pending") pendingApproval++
-      if (m.status === "Inactive") inactiveMembers++
+      const memberContributions = memberIdToContributions[m._id?.toString()] || []
+      const hasLoanApplication = loans.some(loan => loan.user.toString() === m._id.toString())
+      const lastContribution = memberContributions.length > 0
+        ? memberContributions.reduce((latest, c) => new Date(c.date) > new Date(latest.date) ? c : latest, memberContributions[0])
+        : null
+      const isActive = hasLoanApplication || memberContributions.length > 0
 
-      if (m.joinDate) {
-        const jd = new Date(m.joinDate)
-        if (jd.getMonth() === thisMonth && jd.getFullYear() === thisYear) newThisMonth++
-      }
+      if (isActive) activeMembers++
+      else inactiveMembers++
 
       const type = m.membershipType || "Unknown"
       membershipTypeCounts[type] = (membershipTypeCounts[type] || 0) + 1
 
-      const status = m.status || "Unknown"
+      const status = isActive ? "Active" : "Inactive"
       statusCounts[status] = (statusCounts[status] || 0) + 1
 
       if (m.dateOfBirth) {
@@ -81,23 +84,21 @@ exports.fullSummary = async (req, res) => {
         ageGroupCounts[group] = (ageGroupCounts[group] || 0) + 1
       }
 
-      if (m.status === "Active") {
-        const memberContributions = memberIdToContributions[m._id?.toString()] || []
-        const totalContrib = memberContributions.reduce((sum, c) => sum + (c.amount || 0), 0)
-        const lastContrib = memberContributions.length > 0
-          ? memberContributions.reduce((latest, c) => new Date(c.date) > new Date(latest.date) ? c : latest, memberContributions[0])
-          : null
-        const complianceRate = 100 // You can implement your own logic
-        activeMembersTable.push({
-          ...m,
-          totalContributions: totalContrib,
-          lastContribution: lastContrib ? lastContrib.date : null,
-          complianceRate,
-          currentBalance: m.currentBalance || 0,
-          loanBalance: m.loanBalance || 0,
-        })
-        totalContributions += totalContrib
-      }
+      const totalContrib = memberContributions.reduce((sum, c) => sum + (c.amount || 0), 0)
+      const complianceRate = 100 // You can implement your own logic
+      activeMembersTable.push({
+        ...m,
+        firstName: m.firstName || "",
+        lastName: m.lastName || "",
+        totalContributions: totalContrib,
+        lastContribution: lastContribution ? lastContribution.date : null,
+        complianceRate,
+        currentBalance: m.currentBalance || 0,
+        loanBalance: m.loanBalance || 0,
+        status,
+        hasLoanApplication,
+      })
+      totalContributions += totalContrib
     })
 
     const averageContribution = activeMembers > 0 ? Math.round(totalContributions / activeMembers) : 0

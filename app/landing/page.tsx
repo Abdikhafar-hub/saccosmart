@@ -512,7 +512,7 @@ export default function LandingPage() {
           <div
             key={idx}
             className={`absolute inset-0 w-full h-full transition-opacity duration-1000 ${currentSlide === idx ? 'opacity-100 z-10' : 'opacity-0 z-0'}`}
-            style={{
+        style={{
               backgroundImage: `url('${slide.image}')`,
               backgroundSize: 'cover',
               backgroundPosition: 'center',
@@ -524,13 +524,13 @@ export default function LandingPage() {
             <div className="relative z-20 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 lg:py-32 flex flex-col lg:flex-row items-center justify-center min-h-screen">
               {/* Left: Text Content */}
               <div className="text-white flex-1 flex flex-col justify-center items-start">
-                <Badge className="bg-white/20 text-white border-white/30 mb-6">
-                  🚀 Trusted by 500+ SACCOs across Kenya
-                </Badge>
-                <h1 className="text-4xl lg:text-6xl font-bold leading-tight mb-6 text-shadow-lg">
+              <Badge className="bg-white/20 text-white border-white/30 mb-6">
+                🚀 Trusted by 500+ SACCOs across Kenya
+              </Badge>
+              <h1 className="text-4xl lg:text-6xl font-bold leading-tight mb-6 text-shadow-lg">
                   {slide.title}
-                </h1>
-                <p className="text-xl lg:text-2xl text-white/95 mb-8 leading-relaxed text-shadow">
+              </h1>
+              <p className="text-xl lg:text-2xl text-white/95 mb-8 leading-relaxed text-shadow">
                   {slide.description}
                 </p>
                 <div className="flex flex-col sm:flex-row gap-4 mb-8 w-full sm:w-auto">
@@ -540,44 +540,44 @@ export default function LandingPage() {
                         <Button size="lg" className="bg-sacco-blue hover:bg-sacco-blue/90 text-white font-semibold px-8 shadow-lg">
                           {btn.text}
                           {btn.text.toLowerCase().includes('trial') && <ArrowRight className="ml-2 h-5 w-5" />}
-                        </Button>
-                      </Link>
+                  </Button>
+                </Link>
                     ) : (
                       <Link key={bidx} href={btn.href}>
-                        <Button
-                          size="lg"
-                          variant="outline"
+                <Button
+                  size="lg"
+                  variant="outline"
                           className={`border-white text-white bg-white/20 hover:bg-white hover:text-sacco-blue font-semibold px-8 shadow-lg transition-colors duration-200 ${idx === 0 ? '' : 'hidden'}`}
-                        >
+                >
                           {btn.text}
-                        </Button>
+                </Button>
                       </Link>
                     )
                   )}
-                </div>
+              </div>
                 {/* Feature Highlights */}
-                <div className="flex items-center space-x-6 text-white/90">
-                  <div className="flex items-center space-x-2">
-                    <CheckCircle className="h-5 w-5 text-sacco-green" />
-                    <span className="text-shadow">No setup fees</span>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <CheckCircle className="h-5 w-5 text-sacco-green" />
-                    <span className="text-shadow">30-day free trial</span>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <CheckCircle className="h-5 w-5 text-sacco-green" />
-                    <span className="text-shadow">24/7 support</span>
-                  </div>
+              <div className="flex items-center space-x-6 text-white/90">
+                <div className="flex items-center space-x-2">
+                  <CheckCircle className="h-5 w-5 text-sacco-green" />
+                  <span className="text-shadow">No setup fees</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <CheckCircle className="h-5 w-5 text-sacco-green" />
+                  <span className="text-shadow">30-day free trial</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <CheckCircle className="h-5 w-5 text-sacco-green" />
+                  <span className="text-shadow">24/7 support</span>
                 </div>
               </div>
+            </div>
               {/* Right: Dashboard/Relevant Image */}
               <div className="flex-1 flex justify-center items-center w-full lg:w-auto mt-12 lg:mt-0">
                 {/* Only show DashboardVideo for first slide */}
                 {idx === 0 ? (
-                  <DashboardVideo />
+            <DashboardVideo />
                 ) : null}
-              </div>
+          </div>
             </div>
           </div>
         ))}
@@ -643,7 +643,7 @@ export default function LandingPage() {
                         alt={feature.title}
                         className="w-full h-full object-cover"
                       />
-                    </div>
+                  </div>
                     
                     {/* Icon and Title Row */}
                     <div className="flex items-center gap-4 p-6 pb-2">
@@ -657,8 +657,8 @@ export default function LandingPage() {
                     <div className="px-6 pb-6">
                       <p className="text-gray-700 leading-relaxed">{feature.description}</p>
                     </div>
-                  </CardContent>
-                </Card>
+                </CardContent>
+              </Card>
               </div>
             ))}
           </div>
@@ -681,9 +681,9 @@ export default function LandingPage() {
                     <div className="flex items-start space-x-4 p-6 rounded-lg">
                       <div className={`p-3 ${iconColors[index % iconColors.length]} rounded-lg`}>
                         <benefit.icon className="h-6 w-6 text-white" />
-                      </div>
-                      <div>
-                        <h3 className="font-semibold text-gray-900 mb-2">{benefit.title}</h3>
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-gray-900 mb-2">{benefit.title}</h3>
                         <p className="text-gray-700">{benefit.description}</p>
                       </div>
                     </div>
@@ -786,27 +786,27 @@ export default function LandingPage() {
             {testimonials.map((testimonial, index) => (
               <div key={index} className="border border-gray-200 rounded-lg shadow-md hover:shadow-xl transition-all duration-300 hover:scale-[1.02]">
                 <Card className="border-0 shadow-none">
-                  <CardContent className="p-6">
-                    <div className="flex items-center mb-4">
-                      {[...Array(testimonial.rating)].map((_, i) => (
-                        <Star key={i} className="h-5 w-5 text-yellow-400 fill-current" />
-                      ))}
+                <CardContent className="p-6">
+                  <div className="flex items-center mb-4">
+                    {[...Array(testimonial.rating)].map((_, i) => (
+                      <Star key={i} className="h-5 w-5 text-yellow-400 fill-current" />
+                    ))}
+                  </div>
+                  <p className="text-gray-600 mb-6 leading-relaxed">"{testimonial.content}"</p>
+                  <div className="flex items-center space-x-3">
+                    <img
+                      src={testimonial.avatar || "/placeholder.svg"}
+                      alt={testimonial.name}
+                      className="h-12 w-12 rounded-full object-cover"
+                    />
+                    <div>
+                      <p className="font-semibold text-gray-900">{testimonial.name}</p>
+                      <p className="text-sm text-gray-600">{testimonial.role}</p>
+                      <p className="text-sm text-sacco-blue">{testimonial.company}</p>
                     </div>
-                    <p className="text-gray-600 mb-6 leading-relaxed">"{testimonial.content}"</p>
-                    <div className="flex items-center space-x-3">
-                      <img
-                        src={testimonial.avatar || "/placeholder.svg"}
-                        alt={testimonial.name}
-                        className="h-12 w-12 rounded-full object-cover"
-                      />
-                      <div>
-                        <p className="font-semibold text-gray-900">{testimonial.name}</p>
-                        <p className="text-sm text-gray-600">{testimonial.role}</p>
-                        <p className="text-sm text-sacco-blue">{testimonial.company}</p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
+                  </div>
+                </CardContent>
+              </Card>
               </div>
             ))}
           </div>
@@ -994,27 +994,27 @@ export default function LandingPage() {
   <div className="absolute inset-0 bg-black/60"></div>
 
   <div className="relative max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
-    <h2 className="text-3xl lg:text-4xl font-bold text-white mb-6">Ready to Transform Your SACCO?</h2>
-    <p className="text-xl text-white/90 mb-8">
-      Join hundreds of SACCOs already using SaccoSmart to improve their operations and member satisfaction.
-    </p>
-    <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-8">
-      <Input
-        type="email"
-        placeholder="Enter your email address"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        className="max-w-sm bg-white"
-      />
-      <Button size="lg" className="bg-white text-sacco-blue hover:bg-white/90 font-semibold px-8">
-        Start Free Trial
-      </Button>
-    </div>
-    <p className="text-white/80 text-sm">
-      No credit card required • 30-day free trial • Setup assistance included
-    </p>
-  </div>
-</section>
+          <h2 className="text-3xl lg:text-4xl font-bold text-white mb-6">Ready to Transform Your SACCO?</h2>
+          <p className="text-xl text-white/90 mb-8">
+            Join hundreds of SACCOs already using SaccoSmart to improve their operations and member satisfaction.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-8">
+            <Input
+              type="email"
+              placeholder="Enter your email address"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="max-w-sm bg-white"
+            />
+            <Button size="lg" className="bg-white text-sacco-blue hover:bg-white/90 font-semibold px-8">
+              Start Free Trial
+            </Button>
+          </div>
+          <p className="text-white/80 text-sm">
+            No credit card required • 30-day free trial • Setup assistance included
+          </p>
+        </div>
+      </section>
 
 
       {/* Footer */}

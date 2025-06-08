@@ -101,6 +101,11 @@ export function SidebarNavigation({ role }: SidebarNavigationProps) {
 
     // Admin-only pages
     if (role === "admin") {
+      baseItems.splice(2, 0, {
+        title: "Loans",
+        href: `/${role}/loans`,
+        icon: Banknote,
+      })
       baseItems.push(
         {
           title: "Documents",

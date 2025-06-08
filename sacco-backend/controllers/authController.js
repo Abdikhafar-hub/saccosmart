@@ -2,8 +2,6 @@ const User = require('../models/User');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const nodemailer = require('nodemailer');
-const { sendSMS } = require('../utils/sendSMS');
-const crypto = require('crypto');
 
 // Member Registration
 exports.register = async (req, res) => {
@@ -15,69 +13,27 @@ exports.register = async (req, res) => {
   try {
     const existingUser = await User.findOne({ $or: [{ email }, { phone }] });
     if (existingUser) {
-      if (existingUser.isVerified) {
-        return res.status(409).json({ message: 'User already registered and verified' });
-      } else {
-        // Update OTP and resend
-        existingUser.otp = crypto.randomInt(100000, 999999).toString();
-        existingUser.otpExpiresAt = new Date(Date.now() + 5 * 60 * 1000);
-        await existingUser.save();
-        await sendSMS(phone, `Your OTP is ${existingUser.otp}`);
-        return res.json({ message: 'OTP resent. Please verify your phone number.' });
-      }
+      return res.status(409).json({ message: 'Account already exists.' });
     }
 
     const hash = await bcrypt.hash(password, 10);
-    const otp = crypto.randomInt(100000, 999999).toString();
-    const otpExpiresAt = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes from now
     const user = await User.create({
       name,
       email,
       password: hash,
       phone,
       role,
-      memberCode,
-      otp,
-      otpExpiresAt,
-      isVerified: false
+      memberCode
     });
-    await sendSMS(phone, `Your OTP is ${otp}`);
-    res.json({ message: 'Registration successful. OTP sent to your phone.' });
+    res.json({ message: 'Registration successful. You can now log in.' });
   } catch (err) {
     res.status(400).json({ error: err.message });
   }
 };
 
-// Verify OTP
+// Remove OTP verification logic
 exports.verifyOtp = async (req, res) => {
-  const { phone, otp } = req.body;
-  const user = await User.findOne({ phone });
-  if (!user) return res.status(400).json({ message: 'User not found' });
-  if (user.otp !== otp) return res.status(400).json({ message: 'Invalid OTP' });
-  if (user.otpExpiresAt < Date.now()) return res.status(400).json({ message: 'OTP expired' });
-  user.isVerified = true;
-  user.otp = undefined;
-  user.otpExpiresAt = undefined;
-  await user.save();
-  res.json({ message: 'Phone number verified successfully' });
-};
-
-// Resend OTP
-exports.resendOtp = async (req, res) => {
-  const { phone } = req.body;
-  const user = await User.findOne({ phone });
-  if (!user) return res.status(400).json({ message: 'User not found' });
-  if (user.otpResendCount >= 3 && user.lastOtpSentAt > Date.now() - 15 * 60 * 1000) {
-    return res.status(429).json({ message: 'Too many OTP requests. Please try again later.' });
-  }
-  const otp = crypto.randomInt(100000, 999999).toString();
-  user.otp = otp;
-  user.otpExpiresAt = new Date(Date.now() + 5 * 60 * 1000);
-  user.otpResendCount += 1;
-  user.lastOtpSentAt = new Date();
-  await user.save();
-  await sendSMS(phone, `Your new OTP is ${otp}`);
-  res.json({ message: 'OTP resent successfully' });
+  res.status(400).json({ message: 'OTP verification is not required.' });
 };
 
 // Login (Admin or Member)
@@ -85,10 +41,6 @@ exports.login = async (req, res) => {
   const { email, password } = req.body;
   const user = await User.findOne({ email });
   if (!user) return res.status(400).json({ message: 'Invalid credentials' });
-
-  if (!user.isVerified) {
-    return res.status(403).json({ message: 'Please verify your phone number before logging in.' });
-  }
 
   const valid = await bcrypt.compare(password, user.password);
   if (!valid) return res.status(400).json({ message: 'Invalid credentials' });

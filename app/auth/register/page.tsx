@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Eye, EyeOff, Building2, Check, X, Home } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import axios from "axios"
+import { toast } from 'react-toastify'
 
 export default function RegisterPage() {
   const [showPassword, setShowPassword] = useState(false)
@@ -28,8 +29,6 @@ export default function RegisterPage() {
   const router = useRouter()
   const { toast } = useToast()
   const [error, setError] = useState("")
-  const [otp, setOtp] = useState("")
-  const [isOtpSent, setIsOtpSent] = useState(false)
 
   const passwordRequirements = [
     { text: "At least 8 characters", met: formData.password.length >= 8 },
@@ -70,39 +69,16 @@ export default function RegisterPage() {
         role: formData.role,
         memberCode: formData.memberCode,
       });
-      setIsOtpSent(true);
       toast({
         title: "Registration Successful",
         description: response.data.message,
       });
+      router.push("/auth/login");
     } catch (err: any) {
       setError(err.response?.data?.message || "Registration failed");
       toast({
         title: "Registration Failed",
         description: err.response?.data?.message || "Registration failed",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleOtpVerification = async () => {
-    setIsLoading(true);
-    try {
-      const response = await axios.post("http://localhost:5000/api/auth/verify-otp", {
-        phone: formData.phone,
-        otp,
-      });
-      toast({
-        title: "Verification Successful",
-        description: response.data.message,
-      });
-      router.push("/auth/login");
-    } catch (err: any) {
-      toast({
-        title: "Verification Failed",
-        description: err.response?.data?.message || "OTP verification failed",
         variant: "destructive",
       });
     } finally {
@@ -147,152 +123,122 @@ export default function RegisterPage() {
             <CardDescription>Create your SACCO account</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            {!isOtpSent ? (
-              <>
-                <div className="space-y-2">
-                  <Label htmlFor="name">Full Name</Label>
-                  <Input
-                    id="name"
-                    placeholder="Enter your full name"
-                    value={formData.name}
-                    onChange={(e) => handleInputChange("name", e.target.value)}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder="Enter your email"
-                    value={formData.email}
-                    onChange={(e) => handleInputChange("email", e.target.value)}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="phone">Phone Number</Label>
-                  <Input
-                    id="phone"
-                    placeholder="e.g., +254712345678"
-                    value={formData.phone}
-                    onChange={(e) => handleInputChange("phone", e.target.value)}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="role">Role</Label>
-                  <Select onValueChange={(value) => handleInputChange("role", value)}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select your role" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="member">Member</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="memberCode">Member Code</Label>
-                  <Input
-                    id="memberCode"
-                    placeholder="Enter your member code"
-                    value={formData.memberCode}
-                    onChange={(e) => handleInputChange("memberCode", e.target.value)}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="password">Password</Label>
-                  <div className="relative">
-                    <Input
-                      id="password"
-                      type={showPassword ? "text" : "password"}
-                      placeholder="Create a password"
-                      value={formData.password}
-                      onChange={(e) => handleInputChange("password", e.target.value)}
-                      required
-                    />
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                      onClick={() => setShowPassword(!showPassword)}
-                    >
-                      {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                    </Button>
-                  </div>
-                  {formData.password && (
-                    <div className="space-y-1">
-                      {passwordRequirements.map((req, index) => (
-                        <div key={index} className="flex items-center space-x-2 text-xs">
-                          {req.met ? <Check className="h-3 w-3 text-green-500" /> : <X className="h-3 w-3 text-red-500" />}
-                          <span className={req.met ? "text-green-600" : "text-red-600"}>{req.text}</span>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="confirmPassword">Confirm Password</Label>
-                  <div className="relative">
-                    <Input
-                      id="confirmPassword"
-                      type={showConfirmPassword ? "text" : "password"}
-                      placeholder="Confirm your password"
-                      value={formData.confirmPassword}
-                      onChange={(e) => handleInputChange("confirmPassword", e.target.value)}
-                      required
-                    />
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    >
-                      {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                    </Button>
-                  </div>
-                </div>
-              </>
-            ) : (
-              <div className="space-y-2">
-                <Label htmlFor="otp">Enter OTP</Label>
+            <div className="space-y-2">
+              <Label htmlFor="name">Full Name</Label>
+              <Input
+                id="name"
+                placeholder="Enter your full name"
+                value={formData.name}
+                onChange={(e) => handleInputChange("name", e.target.value)}
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="Enter your email"
+                value={formData.email}
+                onChange={(e) => handleInputChange("email", e.target.value)}
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="phone">Phone Number</Label>
+              <Input
+                id="phone"
+                placeholder="e.g., +254712345678"
+                value={formData.phone}
+                onChange={(e) => handleInputChange("phone", e.target.value)}
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="role">Role</Label>
+              <Select onValueChange={(value) => handleInputChange("role", value)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select your role" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="member">Member</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="memberCode">Member Code</Label>
+              <Input
+                id="memberCode"
+                placeholder="Enter your member code"
+                value={formData.memberCode}
+                onChange={(e) => handleInputChange("memberCode", e.target.value)}
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="password">Password</Label>
+              <div className="relative">
                 <Input
-                  id="otp"
-                  placeholder="Enter the OTP sent to your phone"
-                  value={otp}
-                  onChange={(e) => setOtp(e.target.value)}
+                  id="password"
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Create a password"
+                  value={formData.password}
+                  onChange={(e) => handleInputChange("password", e.target.value)}
                   required
                 />
                 <Button
-                  onClick={handleOtpVerification}
-                  disabled={isLoading}
-                  className="w-full bg-sacco-green hover:bg-sacco-green/90"
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                  onClick={() => setShowPassword(!showPassword)}
                 >
-                  {isLoading ? "Verifying..." : "Verify OTP"}
+                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </Button>
               </div>
-            )}
+              {formData.password && (
+                <div className="space-y-1">
+                  {passwordRequirements.map((req, index) => (
+                    <div key={index} className="flex items-center space-x-2 text-xs">
+                      {req.met ? <Check className="h-3 w-3 text-green-500" /> : <X className="h-3 w-3 text-red-500" />}
+                      <span className={req.met ? "text-green-600" : "text-red-600"}>{req.text}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="confirmPassword">Confirm Password</Label>
+              <div className="relative">
+                <Input
+                  id="confirmPassword"
+                  type={showConfirmPassword ? "text" : "password"}
+                  placeholder="Confirm your password"
+                  value={formData.confirmPassword}
+                  onChange={(e) => handleInputChange("confirmPassword", e.target.value)}
+                  required
+                />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                >
+                  {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </Button>
+              </div>
+            </div>
           </CardContent>
           <CardFooter className="flex flex-col space-y-3">
             {error && <div className="text-red-500">{error}</div>}
-            {!isOtpSent && (
-              <Button
-                onClick={handleRegister}
-                disabled={isLoading}
-                className="w-full bg-sacco-blue hover:bg-sacco-blue/90"
-              >
-                {isLoading ? "Registering..." : "Register"}
-              </Button>
-            )}
-            <p className="text-sm text-muted-foreground text-center">
-              Already have an account?{" "}
-              <Link href="/auth/login" className="text-sacco-blue hover:underline">
-                Sign in
-              </Link>
-            </p>
+            <Button
+              onClick={handleRegister}
+              disabled={isLoading}
+              className="w-full bg-sacco-blue hover:bg-sacco-blue/90"
+            >
+              {isLoading ? "Registering..." : "Register"}
+            </Button>
           </CardFooter>
         </Card>
       </div>

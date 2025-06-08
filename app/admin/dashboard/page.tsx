@@ -210,88 +210,6 @@ export default function AdminDashboard() {
     },
   ]
 
-  const handleApproveLoan = async (loanId: string) => {
-    const loan = loans.find(l => l._id === loanId)
-    if (!loan) {
-      toast({
-        title: "Error",
-        description: "Loan not found",
-        variant: "destructive",
-      })
-      return
-    }
-    if (loan.status !== "pending") {
-      toast({
-        title: "Error",
-        description: "Only pending loans can be approved",
-        variant: "destructive",
-      })
-      return
-    }
-    try {
-      const token = localStorage.getItem("token")
-      await axios.post(
-        `http://localhost:5000/api/loan/admin/${loanId}/approve`,
-        {},
-        { headers: { Authorization: `Bearer ${token}` } }
-      )
-      toast({
-        title: "Loan Approved",
-        description: "The loan has been approved successfully",
-      })
-      fetchDashboardData()
-    } catch (err: any) {
-      toast({
-        title: "Error",
-        description: "Failed to approve loan",
-        variant: "destructive",
-      })
-      console.error("Failed to approve loan:", err.response?.data || err)
-    }
-  }
-
-  const handleRejectLoan = async () => {
-    if (!selectedLoan || !rejectionReason) {
-      toast({
-        title: "Missing Information",
-        description: "Please provide a reason for rejection",
-        variant: "destructive",
-      })
-      return
-    }
-    if (selectedLoan.status !== "pending") {
-      toast({
-        title: "Error",
-        description: "Only pending loans can be rejected",
-        variant: "destructive",
-      })
-      return
-    }
-    try {
-      const token = localStorage.getItem("token")
-      await axios.post(
-        `http://localhost:5000/api/loan/admin/${selectedLoan._id}/reject`,
-        { reason: rejectionReason },
-        { headers: { Authorization: `Bearer ${token}` } }
-      )
-      toast({
-        title: "Loan Rejected",
-        description: "The loan has been rejected successfully",
-      })
-      setIsRejectDialogOpen(false)
-      setSelectedLoan(null)
-      setRejectionReason("")
-      fetchDashboardData()
-    } catch (err: any) {
-      toast({
-        title: "Error",
-        description: "Failed to reject loan",
-        variant: "destructive",
-      })
-      console.error("Failed to reject loan:", err.response?.data || err)
-    }
-  }
-
   const viewLoanDetails = (loanId: string) => {
     const loan = loans.find(l => l._id === loanId)
     if (loan) {
@@ -480,31 +398,6 @@ export default function AdminDashboard() {
                         <Eye className="h-3 w-3 mr-1" />
                         View
                       </Button>
-                      {row.status === "pending" && (
-                        <>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            className="bg-green-100 text-green-800 hover:bg-green-200"
-                            onClick={() => handleApproveLoan(row._id)}
-                          >
-                            <CheckCircle className="h-3 w-3 mr-1" />
-                            Approve
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            className="bg-red-100 text-red-800 hover:bg-red-200"
-                            onClick={() => {
-                              setSelectedLoan(row)
-                              setIsRejectDialogOpen(true)
-                            }}
-                          >
-                            <XCircle className="h-3 w-3 mr-1" />
-                            Reject
-                          </Button>
-                        </>
-                      )}
                     </div>
                   ),
                 },
@@ -516,42 +409,6 @@ export default function AdminDashboard() {
             />
           </CardContent>
         </Card>
-
-        {/* Reject Loan Dialog */}
-        <Dialog open={isRejectDialogOpen} onOpenChange={setIsRejectDialogOpen}>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Reject Loan Application</DialogTitle>
-              <DialogDescription>
-                Please provide a reason for rejecting this loan application. This will be communicated to the member.
-              </DialogDescription>
-            </DialogHeader>
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="reason">Rejection Reason</Label>
-                <Textarea
-                  id="reason"
-                  placeholder="Enter reason for rejection"
-                  value={rejectionReason}
-                  onChange={(e) => setRejectionReason(e.target.value)}
-                  rows={3}
-                />
-              </div>
-            </div>
-            <DialogFooter>
-              <Button variant="outline" onClick={() => setIsRejectDialogOpen(false)}>
-                Cancel
-              </Button>
-              <Button
-                variant="destructive"
-                onClick={handleRejectLoan}
-                disabled={!rejectionReason.trim()}
-              >
-                Reject Application
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
       </div>
     </DashboardLayout>
   )

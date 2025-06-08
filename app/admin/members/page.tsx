@@ -133,10 +133,13 @@ export default function AdminMembers() {
   // Use dashboard.stats, dashboard.memberGrowthTrends, etc. everywhere below
   // All your UI, columns, dialogs, and actions remain unchanged
 
-  const activeColumns = [
+  // Update the active members count
+  const activeMembersCount = dashboard.activeMembers.filter((member: Member) => member.status === "Active").length;
+
+  const allColumns = [
     {
       key: "name",
-      label: "Member",
+      label: "Full Name",
       sortable: true,
       render: (value: any, row: any) => (
         <div className="flex items-center space-x-3">
@@ -149,13 +152,49 @@ export default function AdminMembers() {
           </Avatar>
           <div>
             <p className="font-medium">{`${row.firstName || ""} ${row.lastName || ""}`}</p>
-            <p className="text-sm text-gray-500">{row.id || row._id}</p>
+            <p className="text-sm text-gray-500">{row._id}</p>
           </div>
         </div>
       ),
     },
-    // ...rest of your columns...
-  ]
+    {
+      key: "status",
+      label: "Status",
+      render: (value: any) => (
+        <Badge className={value === "Active" ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-800"}>
+          {value}
+        </Badge>
+      ),
+    },
+    {
+      key: "hasLoanApplication",
+      label: "Loan Participation",
+      render: (value: any) => (value ? "Yes" : "No"),
+    },
+    {
+      key: "lastContribution",
+      label: "Last Contribution Date",
+      render: (value: any) => (value ? new Date(value).toLocaleDateString() : "N/A"),
+    },
+    {
+      key: "email",
+      label: "Contact",
+      render: (value: any) => (
+        <Button variant="link" onClick={() => window.location.href = `mailto:${value}`}>
+          Contact
+        </Button>
+      ),
+    },
+    {
+      key: "view",
+      label: "View",
+      render: (value: any, row: any) => (
+        <Button variant="link" onClick={() => setSelectedMember(row)}>
+          View
+        </Button>
+      ),
+    },
+  ];
 
   return (
     <DashboardLayout role="admin" user={user}>
@@ -181,7 +220,7 @@ export default function AdminMembers() {
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <StatsCard title="Total Members" value={dashboard.stats.totalMembers} description="All registered members" icon={Users} />
-          <StatsCard title="Active Members" value={dashboard.stats.activeMembers} description={`${dashboard.stats.totalMembers > 0 ? Math.round((dashboard.stats.activeMembers / dashboard.stats.totalMembers) * 100) : 0}% of total`} icon={UserCheck} />
+          <StatsCard title="Active Members" value={activeMembersCount} description={`${dashboard.stats.totalMembers > 0 ? Math.round((activeMembersCount / dashboard.stats.totalMembers) * 100) : 0}% of total`} icon={UserCheck} />
           <StatsCard title="Pending Approval" value={dashboard.stats.pendingApproval} description="Awaiting verification" icon={Clock} />
           <StatsCard title="New This Month" value={dashboard.stats.newThisMonth} description="Recent registrations" icon={TrendingUp} />
         </div>
@@ -273,14 +312,14 @@ export default function AdminMembers() {
         </div>
 
         {/* Member Management Tabs */}
-        <Tabs defaultValue="active" className="space-y-6">
+        <Tabs defaultValue="all" className="space-y-6">
           <TabsList className="grid w-full grid-cols-1">
-            <TabsTrigger value="active">Active Members ({dashboard.activeMembers.length})</TabsTrigger>
+            <TabsTrigger value="all">All Members ({dashboard.stats.totalMembers})</TabsTrigger>
           </TabsList>
-          <TabsContent value="active" className="space-y-6">
+          <TabsContent value="all" className="space-y-6">
             <DataTable
               data={dashboard.activeMembers}
-              columns={activeColumns}
+              columns={allColumns}
               searchable={true}
               filterable={true}
               exportable={true}
@@ -314,9 +353,7 @@ export default function AdminMembers() {
                         className={
                           selectedMember.status === "Active"
                             ? "bg-green-100 text-green-800"
-                            : selectedMember.status === "Pending"
-                              ? "bg-yellow-100 text-yellow-800"
-                              : "bg-red-100 text-red-800"
+                            : "bg-gray-100 text-gray-800"
                         }
                         variant="secondary"
                       >

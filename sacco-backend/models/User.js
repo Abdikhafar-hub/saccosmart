@@ -17,7 +17,9 @@ const userSchema = new mongoose.Schema({
   otpExpiresAt: Date,
   isVerified: { type: Boolean, default: false },
   otpResendCount: { type: Number, default: 0 },
-  lastOtpSentAt: Date
+  lastOtpSentAt: Date,
+  firstName: { type: String },
+  lastName: { type: String },
 });
 
 module.exports = mongoose.model('User', userSchema);
