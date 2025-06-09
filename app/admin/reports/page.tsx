@@ -55,6 +55,8 @@ export default function AdminReportsPage() {
   const [selectedReportType, setSelectedReportType] = useState("all")
   const [dateRange, setDateRange] = useState("last30")
   const [showGenerateDialog, setShowGenerateDialog] = useState(false)
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [recentReports, setRecentReports] = useState<{ id: string; name: string; type: string; date: string; status: string; format: string; }[]>([]);
 
   // Mock user for layout
   const user = {
@@ -63,6 +65,24 @@ export default function AdminReportsPage() {
     role: "Administrator",
     avatar: "/placeholder.svg?height=32&width=32",
   }
+
+  const handleGenerateReport = async () => {
+    setIsGenerating(true);
+    await generatePDFReport();
+    setIsGenerating(false);
+    setShowGenerateDialog(false);
+
+    // Add the new report to the recent reports
+    const newReport = {
+      id: `REP-${recentReports.length + 1}`.padStart(7, '0'),
+      name: "Generated Report",
+      type: selectedReportType,
+      date: new Date().toISOString().split('T')[0],
+      status: "Generated",
+      format: "PDF",
+    };
+    setRecentReports([...recentReports, newReport]);
+  };
 
   return (
     <DashboardLayout role="admin" user={user}>
@@ -168,11 +188,8 @@ export default function AdminReportsPage() {
                     <Button variant="outline" onClick={() => setShowGenerateDialog(false)}>
                       Cancel
                     </Button>
-                    <Button type="submit" onClick={async () => {
-                      await generatePDFReport();
-                      setShowGenerateDialog(false);
-                    }}>
-                      Generate Report
+                    <Button type="submit" onClick={handleGenerateReport}>
+                      {isGenerating ? "Generating..." : "Generate Report"}
                     </Button>
                   </DialogFooter>
                 </DialogContent>
