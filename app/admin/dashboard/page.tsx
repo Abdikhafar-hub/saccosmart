@@ -149,6 +149,7 @@ export default function AdminDashboard() {
   const [rejectionReason, setRejectionReason] = useState("")
   const { toast } = useToast()
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [isGenerating, setIsGenerating] = useState(false)
 
   const fetchDashboardData = async () => {
     setLoading(true)
@@ -176,6 +177,12 @@ export default function AdminDashboard() {
   useEffect(() => {
     fetchDashboardData()
   }, [])
+
+  const handleGenerateReport = async () => {
+    setIsGenerating(true)
+    await generatePDFReport()
+    setIsGenerating(false)
+  }
 
   // Loading and error handling
   if (loadingDashboard || loadingTrend || loadingLoanStatus || loadingAlerts || loadingActivity || loading) {
@@ -281,8 +288,8 @@ export default function AdminDashboard() {
             <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Admin Dashboard</h1>
             <p className="text-gray-600 dark:text-gray-400">Overview of your SACCO management system</p>
           </div>
-          <Button onClick={generatePDFReport} className="bg-blue-500 text-white px-4 py-2 rounded-md shadow-md hover:bg-blue-600">
-            Generate Report
+          <Button onClick={handleGenerateReport} className="bg-blue-500 text-white px-4 py-2 rounded-md shadow-md hover:bg-blue-600">
+            {isGenerating ? "Generating..." : "Generate Report"}
           </Button>
         </div>
 
