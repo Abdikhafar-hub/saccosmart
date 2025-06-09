@@ -272,6 +272,57 @@ export default function MemberContributions() {
     }
   }
   
+  const handleMpesaPayment = async () => {
+    if (!amount || Number.parseFloat(amount) <= 0) {
+      toast({
+        title: "Invalid Amount",
+        description: "Please enter a valid contribution amount",
+        variant: "destructive",
+      });
+      return;
+    }
+  
+    const token = localStorage.getItem("token");
+    const userEmail = user?.email; // Ensure this is the logged-in user's email
+  
+    if (!userEmail) {
+      toast({
+        title: "User not logged in",
+        description: "Please log in first to make a contribution",
+        variant: "destructive",
+      });
+      return;
+    }
+  
+    try {
+      // Call backend to initiate M-Pesa payment (STK Push)
+      const res = await axios.post(
+        "http://localhost:5000/api/mpesa-stk",
+        {
+          amount: Number(amount),
+          phone: phone,
+          memberId: userEmail, // Pass logged-in user's email here
+        },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+  
+      toast({
+        title: "Processing payment...",
+        description: "Check your phone to complete the payment.",
+      });
+  
+      setPhone("");
+    } catch (err) {
+      toast({
+        title: "Error",
+        description: "Failed to initiate M-Pesa payment",
+        variant: "destructive",
+      });
+    }
+  };
+  
+  
+  
   
   
   

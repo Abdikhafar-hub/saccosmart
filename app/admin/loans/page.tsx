@@ -230,7 +230,7 @@ export default function LoansPage() {
               {
                 key: "actions",
                 label: "Actions",
-                render: (loan: Loan | undefined) => (
+                render: (_: any, loan: Loan) => (
                   <div className="flex space-x-2 items-center">
                     {loan ? (
                       <>
@@ -245,10 +245,8 @@ export default function LoansPage() {
                           Approve
                         </Button>
                         <Button onClick={() => {
-                          if (loan) {
-                            setSelectedLoan(loan);
-                            setIsRejectDialogOpen(true);
-                          }
+                          setSelectedLoan(loan);
+                          setIsRejectDialogOpen(true);
                         }} disabled={loan.status !== "pending"} className="bg-red-500 text-white hover:bg-red-600">
                           Reject
                         </Button>

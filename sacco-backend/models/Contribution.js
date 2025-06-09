@@ -7,7 +7,11 @@ const contributionSchema = new mongoose.Schema({
   mpesaCode: { type: String },
   bankRef: { type: String },
   reference: { type: String },
-  status: { type: String, enum: ['Pending', 'Verified', 'Rejected'], default: 'Pending' },
+  status: { 
+    type: String, 
+    enum: ['Pending', 'Verified', 'Rejected', 'success'], // Add 'success' here
+    default: 'Pending' 
+  },
   verifiedBy: { type: String },
   verifiedAt: { type: Date },
   rejectedBy: { type: String },
