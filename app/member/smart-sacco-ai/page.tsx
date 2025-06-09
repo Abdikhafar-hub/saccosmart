@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { cn } from "@/lib/utils"
 import { DashboardLayout } from "@/components/layout/dashboard-layout"
+import { LoadingSpinner } from "@/components/ui/loading-spinner"
 
 interface Message {
   id: string
@@ -23,7 +24,8 @@ interface Message {
 export default function SmartSaccoAI() {
   const [messages, setMessages] = useState<Message[]>([])
   const [input, setInput] = useState("")
-  const [isLoading, setIsLoading] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState("")
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
@@ -96,7 +98,7 @@ export default function SmartSaccoAI() {
 
     setMessages(prev => [...prev, userMessage])
     setInput("")
-    setIsLoading(true)
+    setLoading(true)
 
     // Await AI response from backend
     const aiText = await getAIResponse(input)
@@ -107,7 +109,7 @@ export default function SmartSaccoAI() {
       timestamp: new Date()
     }
     setMessages(prev => [...prev, aiResponse])
-    setIsLoading(false)
+    setLoading(false)
   }
 
   const handleRefresh = () => {
@@ -135,7 +137,7 @@ export default function SmartSaccoAI() {
     }
 
     setMessages(prev => [...prev, fileMessage])
-    setIsLoading(true)
+    setLoading(true)
 
     // Simulate AI response to file upload
     setTimeout(() => {
@@ -146,9 +148,12 @@ export default function SmartSaccoAI() {
         timestamp: new Date()
       }
       setMessages(prev => [...prev, aiResponse])
-      setIsLoading(false)
+      setLoading(false)
     }, 1500)
   }
+
+  if (loading) return <LoadingSpinner fullScreen />
+  if (error) return <div className="text-red-500">{error}</div>
 
   return (
     <DashboardLayout role="member" user={user}>
@@ -215,7 +220,7 @@ export default function SmartSaccoAI() {
               </div>
             ))
           )}
-          {isLoading && (
+          {loading && (
             <div className="flex justify-start">
               <div className="bg-gray-100 dark:bg-gray-800 rounded-2xl shadow-md px-5 py-3 text-gray-800 dark:text-gray-200">
                 <div className="flex space-x-1">
@@ -260,7 +265,7 @@ export default function SmartSaccoAI() {
               size="sm"
               className="bg-blue-600 hover:bg-green-500 text-white font-bold rounded-2xl px-6 py-2 shadow-md transition-colors duration-200"
               onClick={handleSendMessage}
-              disabled={!input.trim() || isLoading}
+              disabled={!input.trim() || loading}
               style={{ fontWeight: 700 }}
             >
               <Send className="h-4 w-4" />

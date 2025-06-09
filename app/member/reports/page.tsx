@@ -21,6 +21,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
 import { Download, FileText, BarChart3, TrendingUp, Banknote, Eye, Mail } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
+import { LoadingSpinner } from "@/components/ui/loading-spinner"
 
 // Function to fetch loan data
 const fetchLoanData = async () => {
@@ -57,6 +58,8 @@ export default function MemberReports() {
   const { toast } = useToast()
   const [loanData, setLoanData] = useState([])
   const [contributionData, setContributionData] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState("")
 
   const user = {
     name: "John Doe",
@@ -65,12 +68,28 @@ export default function MemberReports() {
   }
 
   useEffect(() => {
-    // Fetch loan data
-    fetchLoanData().then(data => setLoanData(data))
+    const fetchData = async () => {
+      setLoading(true)
+      setError("")
+      try {
+        // Fetch loan data
+        const loanRes = await fetchLoanData()
+        setLoanData(loanRes)
 
-    // Fetch contribution data
-    fetchContributionData().then(data => setContributionData(data))
+        // Fetch contribution data
+        const contributionRes = await fetchContributionData()
+        setContributionData(contributionRes)
+      } catch (err) {
+        setError("Failed to load report data")
+      } finally {
+        setLoading(false)
+      }
+    }
+    fetchData()
   }, [])
+
+  if (loading) return <LoadingSpinner fullScreen />
+  if (error) return <div className="text-red-500">{error}</div>
 
   const handleGenerateReport = () => {
     if (!reportType || !startDate || !endDate) {

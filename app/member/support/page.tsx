@@ -13,6 +13,7 @@ import { Badge } from "@/components/ui/badge"
 import { Mail, Phone, Clock, Send, Ticket } from "lucide-react"
 import { useState, useEffect } from "react"
 import axios from "axios"
+import { LoadingSpinner } from "@/components/ui/loading-spinner"
 
 const supportTickets = [
   {
@@ -235,7 +236,7 @@ export default function MemberSupportPage() {
           </CardHeader>
           <CardContent>
             {loading ? (
-              <div>Loading...</div>
+              <LoadingSpinner fullScreen />
             ) : error ? (
               <div className="text-red-500">{error}</div>
             ) : (

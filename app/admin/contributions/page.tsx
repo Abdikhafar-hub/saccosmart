@@ -39,6 +39,7 @@ import {
 } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import axios from "axios"
+import { LoadingSpinner } from "@/components/ui/loading-spinner"
 
 interface Contribution {
   _id: string
@@ -207,7 +208,7 @@ export default function AdminContributions() {
 
   const complianceRate = 0 // No logic yet, so always 0
 
-  if (loading) return <div>Loading...</div>
+  if (loading) return <LoadingSpinner fullScreen />
   if (error) return <div className="text-red-500">{error}</div>
 
   // Filter contributions by status

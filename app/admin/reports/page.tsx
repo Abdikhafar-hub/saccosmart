@@ -40,6 +40,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import { generatePDFReport } from "@/utils/reportGenerator"
+import { LoadingSpinner } from "@/components/ui/loading-spinner"
 
 // Mock data for reports
 const recentReports: { id: string; name: string; type: string; date: string; status: string; format: string; }[] = [];
@@ -57,6 +58,8 @@ export default function AdminReportsPage() {
   const [showGenerateDialog, setShowGenerateDialog] = useState(false)
   const [isGenerating, setIsGenerating] = useState(false);
   const [recentReports, setRecentReports] = useState<{ id: string; name: string; type: string; date: string; status: string; format: string; }[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   // Mock user for layout
   const user = {
@@ -68,21 +71,35 @@ export default function AdminReportsPage() {
 
   const handleGenerateReport = async () => {
     setIsGenerating(true);
-    await generatePDFReport();
-    setIsGenerating(false);
-    setShowGenerateDialog(false);
+    setLoading(true);
+    setError(null);
 
-    // Add the new report to the recent reports
-    const newReport = {
-      id: `REP-${recentReports.length + 1}`.padStart(7, '0'),
-      name: "Generated Report",
-      type: selectedReportType,
-      date: new Date().toISOString().split('T')[0],
-      status: "Generated",
-      format: "PDF",
-    };
-    setRecentReports([...recentReports, newReport]);
+    try {
+      await generatePDFReport();
+      setIsGenerating(false);
+      setShowGenerateDialog(false);
+
+      // Add the new report to the recent reports
+      const newReport = {
+        id: `REP-${recentReports.length + 1}`.padStart(7, '0'),
+        name: "Generated Report",
+        type: selectedReportType,
+        date: new Date().toISOString().split('T')[0],
+        status: "Generated",
+        format: "PDF",
+      };
+      setRecentReports([...recentReports, newReport]);
+    } catch (e) {
+      setIsGenerating(false);
+      setShowGenerateDialog(false);
+      setError("An error occurred while generating the report.");
+    } finally {
+      setLoading(false);
+    }
   };
+
+  if (loading) return <LoadingSpinner fullScreen />
+  if (error) return <div className="text-red-500">{error}</div>
 
   return (
     <DashboardLayout role="admin" user={user}>

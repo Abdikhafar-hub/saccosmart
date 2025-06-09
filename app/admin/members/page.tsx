@@ -41,6 +41,7 @@ import {
 } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import axios from "axios"
+import { LoadingSpinner } from "@/components/ui/loading-spinner"
 
 interface Member {
   _id: string
@@ -60,6 +61,15 @@ interface Member {
   documents?: string[]
   referredBy?: string
   // Add any other fields you use in your table or profile modal
+}
+
+interface BulkMessageState {
+  subject: string;
+  message: string;
+  recipients: string;
+  messageType: "email" | "sms";
+  phoneNumbers: string;
+  emailAddress: string;
 }
 
 export default function AdminMembers() {
@@ -91,10 +101,13 @@ export default function AdminMembers() {
     membershipType: "",
     initialContribution: "",
   })
-  const [bulkMessage, setBulkMessage] = useState({
+  const [bulkMessage, setBulkMessage] = useState<BulkMessageState>({
     subject: "",
     message: "",
     recipients: "all",
+    messageType: "email",
+    phoneNumbers: "",
+    emailAddress: ""
   })
   const { toast } = useToast()
 
@@ -109,6 +122,8 @@ export default function AdminMembers() {
     joinDate: "",
     age: "",
   });
+
+  const [isSending, setIsSending] = useState(false);
 
   const user = {
     name: "Admin User",
@@ -135,7 +150,7 @@ export default function AdminMembers() {
     fetchDashboard()
   }, [])
 
-  if (loading) return <div>Loading...</div>
+  if (loading) return <LoadingSpinner fullScreen />
   if (error) return <div className="text-red-500">{error}</div>
   if (!dashboard) return null
 
@@ -274,6 +289,108 @@ export default function AdminMembers() {
       setError("Failed to load dashboard data");
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Add function to handle bulk email sending
+  const handleSendBulkEmail = async () => {
+    try {
+      setIsSending(true);
+      toast({
+        title: "Sending",
+        description: "Sending email..."
+      });
+
+      const token = localStorage.getItem("token");
+      const response = await axios.post(
+        "http://localhost:5000/api/send-email",
+        {
+          to: bulkMessage.emailAddress,
+          subject: "SACCO Message",
+          message: bulkMessage.message
+        },
+        {
+          headers: { Authorization: `Bearer ${token}` }
+        }
+      );
+
+      if (response.data.success) {
+        toast({
+          title: "Success",
+          description: "Email sent"
+        });
+        setIsBulkMessageOpen(false);
+      }
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        toast({
+          title: "Error",
+          description: error.response?.data?.message || "Failed to send email",
+          variant: "destructive"
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: "An unexpected error occurred",
+          variant: "destructive"
+        });
+      }
+    } finally {
+      setIsSending(false);
+    }
+  };
+
+  // Update the SMS sending function to handle phone numbers
+  const handleSendBulkMessage = async () => {
+    try {
+      setIsSending(true);
+      toast({
+        title: "Sending",
+        description: "Sending SMS..."
+      });
+
+      const token = localStorage.getItem("token");
+      
+      // Parse phone numbers if provided
+      let recipients: string | string[] = bulkMessage.recipients;
+      if (bulkMessage.recipients === "custom" && bulkMessage.phoneNumbers) {
+        recipients = bulkMessage.phoneNumbers.split(',').map(phone => phone.trim());
+      }
+
+      const response = await axios.post(
+        "http://localhost:5000/api/send-bulk-sms",
+        {
+          message: bulkMessage.message,
+          recipients: recipients
+        },
+        {
+          headers: { Authorization: `Bearer ${token}` }
+        }
+      );
+
+      if (response.data.success) {
+        toast({
+          title: "Success",
+          description: "SMS sent"
+        });
+        setIsBulkMessageOpen(false);
+      }
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        toast({
+          title: "Error",
+          description: error.response?.data?.message || "Failed to send SMS",
+          variant: "destructive"
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: "An unexpected error occurred",
+          variant: "destructive"
+        });
+      }
+    } finally {
+      setIsSending(false);
     }
   };
 
@@ -695,49 +812,99 @@ export default function AdminMembers() {
             </DialogHeader>
             <div className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="recipients">Recipients</Label>
+                <Label htmlFor="messageType">Message Type</Label>
                 <Select
-                  value={bulkMessage.recipients}
-                  onValueChange={(value) => setBulkMessage({ ...bulkMessage, recipients: value })}
+                  value={bulkMessage.messageType}
+                  onValueChange={(value) => setBulkMessage({ ...bulkMessage, messageType: value as "email" | "sms" })}
                 >
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">All Members</SelectItem>
-                    <SelectItem value="active">Active Members Only</SelectItem>
-                    <SelectItem value="inactive">Inactive Members Only</SelectItem>
-                    <SelectItem value="pending">Pending Applications</SelectItem>
+                    <SelectItem value="email">Email</SelectItem>
+                    <SelectItem value="sms">SMS</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="subject">Subject</Label>
-                <Input
-                  id="subject"
-                  value={bulkMessage.subject}
-                  onChange={(e) => setBulkMessage({ ...bulkMessage, subject: e.target.value })}
-                  placeholder="Enter message subject"
-                />
-              </div>
+              {bulkMessage.messageType === "email" ? (
+                <div className="space-y-2">
+                  <Label htmlFor="email">Email Address</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    value={bulkMessage.emailAddress}
+                    onChange={(e) => setBulkMessage({ ...bulkMessage, emailAddress: e.target.value })}
+                    placeholder="Enter email address"
+                  />
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  <Label htmlFor="recipients">Recipients</Label>
+                  <Select
+                    value={typeof bulkMessage.recipients === 'string' ? bulkMessage.recipients : 'custom'}
+                    onValueChange={(value) => setBulkMessage({ ...bulkMessage, recipients: value })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Members</SelectItem>
+                      <SelectItem value="custom">Custom Phone Number</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  {bulkMessage.recipients === "custom" && (
+                    <div className="space-y-2">
+                      <Label htmlFor="phoneNumbers">Phone Number</Label>
+                      <Input
+                        id="phoneNumbers"
+                        value={bulkMessage.phoneNumbers}
+                        onChange={(e) => setBulkMessage({ ...bulkMessage, phoneNumbers: e.target.value })}
+                        placeholder="Enter phone number (e.g., 0712345678)"
+                      />
+                      <div className="space-y-1">
+                        <p className="text-sm text-gray-500">
+                          Enter a Kenyan phone number in any of these formats:
+                        </p>
+                        <ul className="text-sm text-gray-500 list-disc list-inside">
+                          <li>0712345678 (starting with 0)</li>
+                          <li>+254712345678 (with country code)</li>
+                          <li>254712345678 (without +)</li>
+                        </ul>
+                        <p className="text-sm text-gray-500 mt-2">
+                          Number will be automatically formatted to the required format.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
               <div className="space-y-2">
                 <Label htmlFor="message">Message</Label>
                 <Textarea
                   id="message"
                   value={bulkMessage.message}
                   onChange={(e) => setBulkMessage({ ...bulkMessage, message: e.target.value })}
-                  placeholder="Enter your message..."
+                  placeholder={`Enter your ${bulkMessage.messageType === "sms" ? "SMS" : "email"} message...`}
                   rows={5}
                 />
+                {bulkMessage.messageType === "sms" && (
+                  <p className="text-sm text-gray-500">
+                    Characters: {bulkMessage.message.length}/160
+                  </p>
+                )}
               </div>
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setIsBulkMessageOpen(false)}>
                 Cancel
               </Button>
-              <Button onClick={() => {}} className="bg-sacco-blue hover:bg-sacco-blue/90">
+              <Button 
+                onClick={() => bulkMessage.messageType === "sms" ? handleSendBulkMessage() : handleSendBulkEmail()} 
+                className="bg-sacco-blue hover:bg-sacco-blue/90"
+                disabled={isSending}
+              >
                 <Send className="h-4 w-4 mr-2" />
-                Send Message
+                {isSending ? "Sending..." : `Send ${bulkMessage.messageType === "sms" ? "SMS" : "Email"}`}
               </Button>
             </DialogFooter>
           </DialogContent>

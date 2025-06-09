@@ -14,6 +14,7 @@ import { Badge } from "@/components/ui/badge"
 import { DataTable } from "@/components/ui/data-table"
 import { Mail, Phone, MapPin, MessageSquare, Clock, User } from "lucide-react"
 import axios from "axios"
+import { LoadingSpinner } from "@/components/ui/loading-spinner"
 
 export default function AdminSupportPage() {
   const [feedbackForm, setFeedbackForm] = useState({
@@ -151,6 +152,9 @@ export default function AdminSupportPage() {
       description: "",
     })
   }
+
+  if (loading) return <LoadingSpinner fullScreen />
+  if (error) return <div className="text-red-500">{error}</div>
 
   return (
     <DashboardLayout
@@ -331,83 +335,77 @@ export default function AdminSupportPage() {
             <CardDescription>Track and manage user support requests and issues</CardDescription>
           </CardHeader>
           <CardContent>
-            {loading ? (
-              <div>Loading...</div>
-            ) : error ? (
-              <div className="text-red-500">{error}</div>
-            ) : (
-              <div className="space-y-4">
-                {tickets.map((ticket) => (
-                  <div key={ticket._id} className="border rounded-lg p-4 mb-2">
-                    <div className="flex justify-between items-center">
+            <div className="space-y-4">
+              {tickets.map((ticket) => (
+                <div key={ticket._id} className="border rounded-lg p-4 mb-2">
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <div className="font-bold">{ticket.title || ticket.subject}</div>
+                      <div className="text-sm text-gray-600">{ticket.user?.name} ({ticket.user?.email})</div>
+                      <div className="text-xs text-gray-500">ID: {ticket._id} | {new Date(ticket.createdAt).toLocaleDateString()}</div>
                       <div>
-                        <div className="font-bold">{ticket.title || ticket.subject}</div>
-                        <div className="text-sm text-gray-600">{ticket.user?.name} ({ticket.user?.email})</div>
-                        <div className="text-xs text-gray-500">ID: {ticket._id} | {new Date(ticket.createdAt).toLocaleDateString()}</div>
-                        <div>
-                          <Badge variant="outline">{ticket.category}</Badge>{" "}
-                          <Badge variant="outline">{ticket.priority}</Badge>{" "}
-                          <Badge variant="outline">{ticket.status}</Badge>
+                        <Badge variant="outline">{ticket.category}</Badge>{" "}
+                        <Badge variant="outline">{ticket.priority}</Badge>{" "}
+                        <Badge variant="outline">{ticket.status}</Badge>
+                      </div>
+                      <div className="mt-2">{ticket.description}</div>
+                      {ticket.responses && ticket.responses.length > 0 && (
+                        <div className="mt-2">
+                          <span className="font-semibold">Responses:</span>
+                          <ul className="ml-4 list-disc">
+                            {ticket.responses.map((resp: any, idx: number) => (
+                              <li key={idx}>
+                                <span className="text-xs text-gray-600">{new Date(resp.date).toLocaleString()}:</span>{" "}
+                                {resp.message}
+                              </li>
+                            ))}
+                          </ul>
                         </div>
-                        <div className="mt-2">{ticket.description}</div>
-                        {ticket.responses && ticket.responses.length > 0 && (
-                          <div className="mt-2">
-                            <span className="font-semibold">Responses:</span>
-                            <ul className="ml-4 list-disc">
-                              {ticket.responses.map((resp: any, idx: number) => (
-                                <li key={idx}>
-                                  <span className="text-xs text-gray-600">{new Date(resp.date).toLocaleString()}:</span>{" "}
-                                  {resp.message}
-                                </li>
-                              ))}
-                            </ul>
+                      )}
+                    </div>
+                    <div>
+                      {replyingTicketId === ticket._id ? (
+                        <div>
+                          <textarea
+                            className="border rounded p-1 w-48"
+                            value={reply}
+                            onChange={e => setReply(e.target.value)}
+                            placeholder="Type your reply..."
+                          />
+                          <div className="flex gap-2 mt-1">
+                            <Button
+                              size="sm"
+                              onClick={() => handleReply(ticket._id)}
+                              disabled={!reply.trim()}
+                            >
+                              Send
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => {
+                                setReply("")
+                                setReplyingTicketId(null)
+                              }}
+                            >
+                              Cancel
+                            </Button>
                           </div>
-                        )}
-                      </div>
-                      <div>
-                        {replyingTicketId === ticket._id ? (
-                          <div>
-                            <textarea
-                              className="border rounded p-1 w-48"
-                              value={reply}
-                              onChange={e => setReply(e.target.value)}
-                              placeholder="Type your reply..."
-                            />
-                            <div className="flex gap-2 mt-1">
-                              <Button
-                                size="sm"
-                                onClick={() => handleReply(ticket._id)}
-                                disabled={!reply.trim()}
-                              >
-                                Send
-                              </Button>
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={() => {
-                                  setReply("")
-                                  setReplyingTicketId(null)
-                                }}
-                              >
-                                Cancel
-                              </Button>
-                            </div>
-                          </div>
-                        ) : (
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => setReplyingTicketId(ticket._id)}
-                          >
-                            Reply
-                          </Button>
-                        )}
-                      </div>
+                        </div>
+                      ) : (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => setReplyingTicketId(ticket._id)}
+                        >
+                          Reply
+                        </Button>
+                      )}
                     </div>
                   </div>
-                ))}
-              </div>
-            )}
+                </div>
+              ))}
+            </div>
           </CardContent>
         </Card>
       </div>

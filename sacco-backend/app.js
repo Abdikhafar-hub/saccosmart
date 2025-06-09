@@ -42,6 +42,8 @@ const adminRoutes = require('./routes/admin');
 const whatsappRoutes = require('./routes/whatsapp');
 const contactRoutes = require('./routes/contact');
 const aiRoutes = require('./routes/ai');
+const smsRoutes = require('./routes/sms');
+const emailRoutes = require('./routes/email');
 
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/analytics', analyticsRoutes);
@@ -50,6 +52,8 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/whatsapp', whatsappRoutes);
 app.use('/api/contact', contactRoutes);
 app.use('/api/ai', aiRoutes);
+app.use('/api/sms', smsRoutes);
+app.use('/api', emailRoutes);
 
 app.use('/api/payments', require('./routes/mpesaPayments'));
 app.use('/api/card', require('./routes/cardPayments'));

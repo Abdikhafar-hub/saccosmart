@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Bell, CheckCircle, Clock, Mail, AlertCircle, Info } from "lucide-react"
 import { io } from 'socket.io-client'
+import { LoadingSpinner } from "@/components/ui/loading-spinner"
 
 interface Notification {
   _id: string;
@@ -125,6 +126,9 @@ export default function MemberNotificationsPage() {
     },
   }
 
+  if (loading) return <LoadingSpinner fullScreen />
+  if (error) return <div className="text-red-500">{error}</div>
+
   return (
     <DashboardLayout role="member" user={user}>
       <div className="space-y-8">
@@ -190,56 +194,50 @@ export default function MemberNotificationsPage() {
             <CardDescription className="text-base">View and manage your notifications from SACCO administrators</CardDescription>
           </CardHeader>
           <CardContent>
-            {loading ? (
-              <div className="text-center py-8 text-gray-500">Loading notifications...</div>
-            ) : error ? (
-              <div className="text-center py-8 text-red-500">{error}</div>
-            ) : (
-              <Tabs value={activeTab} onValueChange={setActiveTab}>
-                <TabsList className="grid w-full grid-cols-3 rounded-full bg-sacco-blue/10 mb-4">
-                  <TabsTrigger value="all" className="rounded-full data-[state=active]:bg-sacco-blue data-[state=active]:text-white transition">All ({totalCount})</TabsTrigger>
-                  <TabsTrigger value="unread" className="rounded-full data-[state=active]:bg-yellow-400 data-[state=active]:text-white transition">Unread ({unreadCount})</TabsTrigger>
-                  <TabsTrigger value="read" className="rounded-full data-[state=active]:bg-green-500 data-[state=active]:text-white transition">Read ({totalCount - unreadCount})</TabsTrigger>
-                </TabsList>
+            <Tabs value={activeTab} onValueChange={setActiveTab}>
+              <TabsList className="grid w-full grid-cols-3 rounded-full bg-sacco-blue/10 mb-4">
+                <TabsTrigger value="all" className="rounded-full data-[state=active]:bg-sacco-blue data-[state=active]:text-white transition">All ({totalCount})</TabsTrigger>
+                <TabsTrigger value="unread" className="rounded-full data-[state=active]:bg-yellow-400 data-[state=active]:text-white transition">Unread ({unreadCount})</TabsTrigger>
+                <TabsTrigger value="read" className="rounded-full data-[state=active]:bg-green-500 data-[state=active]:text-white transition">Read ({totalCount - unreadCount})</TabsTrigger>
+              </TabsList>
 
-                <TabsContent value={activeTab} className="mt-6">
-                  <div className="space-y-4">
-                    {getFilteredNotifications().length === 0 ? (
-                      <div className="text-center py-12">
-                        <Bell className="h-16 w-16 text-sacco-blue mx-auto mb-4 animate-bounce" />
-                        <p className="text-gray-500 text-lg font-semibold">No notifications found</p>
-                      </div>
-                    ) : (
-                      getFilteredNotifications().map((notification) => {
-                        const type = notification.type || "default"
-                        const style = typeStyles[type] || typeStyles.default
-                        return (
-                          <Card
-                            key={notification._id}
-                            className={`transition-all shadow-md border-l-8 ${style.border} ${style.bg} hover:scale-[1.01] rounded-xl`}
-                          >
-                            <CardContent className="p-5 flex items-start space-x-4">
-                              <div className={`rounded-full p-3 ${style.iconBg} flex-shrink-0`}>{style.icon}</div>
-                              <div className="flex-1">
-                                <div className="flex items-center space-x-2 mb-1">
-                                  <h3 className="font-bold text-lg text-gray-900">{notification.title}</h3>
-                                  <Badge variant="secondary" className="text-xs bg-yellow-400 text-white">New</Badge>
-                                </div>
-                                <p className="text-gray-700 text-base mb-2">{notification.message}</p>
-                                <div className="flex items-center justify-between text-xs text-gray-500">
-                                  <span>From: {notification.sentBy || "Admin"}</span>
-                                  <span>{notification.sentAt ? formatTimestamp(notification.sentAt) : ""}</span>
-                                </div>
+              <TabsContent value={activeTab} className="mt-6">
+                <div className="space-y-4">
+                  {getFilteredNotifications().length === 0 ? (
+                    <div className="text-center py-12">
+                      <Bell className="h-16 w-16 text-sacco-blue mx-auto mb-4 animate-bounce" />
+                      <p className="text-gray-500 text-lg font-semibold">No notifications found</p>
+                    </div>
+                  ) : (
+                    getFilteredNotifications().map((notification) => {
+                      const type = notification.type || "default"
+                      const style = typeStyles[type] || typeStyles.default
+                      return (
+                        <Card
+                          key={notification._id}
+                          className={`transition-all shadow-md border-l-8 ${style.border} ${style.bg} hover:scale-[1.01] rounded-xl`}
+                        >
+                          <CardContent className="p-5 flex items-start space-x-4">
+                            <div className={`rounded-full p-3 ${style.iconBg} flex-shrink-0`}>{style.icon}</div>
+                            <div className="flex-1">
+                              <div className="flex items-center space-x-2 mb-1">
+                                <h3 className="font-bold text-lg text-gray-900">{notification.title}</h3>
+                                <Badge variant="secondary" className="text-xs bg-yellow-400 text-white">New</Badge>
                               </div>
-                            </CardContent>
-                          </Card>
-                        )
-                      })
-                    )}
-                  </div>
-                </TabsContent>
-              </Tabs>
-            )}
+                              <p className="text-gray-700 text-base mb-2">{notification.message}</p>
+                              <div className="flex items-center justify-between text-xs text-gray-500">
+                                <span>From: {notification.sentBy || "Admin"}</span>
+                                <span>{notification.sentAt ? formatTimestamp(notification.sentAt) : ""}</span>
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      )
+                    })
+                  )}
+                </div>
+              </TabsContent>
+            </Tabs>
           </CardContent>
         </Card>
       </div>

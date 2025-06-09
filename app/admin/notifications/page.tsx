@@ -22,6 +22,7 @@ import axios from "axios"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { DataTable } from "@/components/ui/data-table"
 import { io } from 'socket.io-client';
+import { LoadingSpinner } from "@/components/ui/loading-spinner"
 
 interface Member {
   _id: string;
@@ -321,6 +322,9 @@ export default function AdminNotificationsPage() {
       socket.disconnect();
     };
   }, []);
+
+  if (loading) return <LoadingSpinner fullScreen />
+  if (error) return <div className="text-red-500">{error}</div>
 
   return (
     <DashboardLayout

@@ -46,6 +46,7 @@ import {
 } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import axios from "axios"
+import { LoadingSpinner } from "@/components/ui/loading-spinner"
 
 interface Loan {
   _id: string
@@ -227,7 +228,7 @@ export default function MemberLoans() {
     return loanData.loanLimit
   }
 
-  if (loading) return <div>Loading...</div>
+  if (loading) return <LoadingSpinner fullScreen />
   if (error) return <div className="text-red-500">{error}</div>
 
   return (

@@ -38,6 +38,7 @@ import { useToast } from "@/hooks/use-toast"
 import jsPDF from "jspdf"
 import html2canvas from "html2canvas"
 import { generatePDFReport } from "@/utils/reportGenerator"
+import { LoadingSpinner } from "@/components/ui/loading-spinner"
 
 interface AdminDashboardData {
   members: { name: string; email: string }[]
@@ -186,7 +187,7 @@ export default function AdminDashboard() {
 
   // Loading and error handling
   if (loadingDashboard || loadingTrend || loadingLoanStatus || loadingAlerts || loadingActivity || loading) {
-    return <div>Loading...</div>
+    return <LoadingSpinner fullScreen />
   }
 
   if (errorDashboard || error) {

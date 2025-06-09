@@ -21,6 +21,7 @@ import { CreditCard, Smartphone, CheckCircle, Clock, XCircle } from "lucide-reac
 import { useToast } from "@/hooks/use-toast"
 import axios from "axios"
 import { Select } from "@/components/ui/select"
+import { LoadingSpinner } from "@/components/ui/loading-spinner"
 
 
 interface Contribution {
@@ -276,7 +277,7 @@ export default function MemberContributions() {
   
   
 
-  if (loading) return <div>Loading...</div>
+  if (loading) return <LoadingSpinner fullScreen />
   if (error) return <div className="text-red-500">{error}</div>
 
   const total = contributions.reduce((sum, c) => sum + (c.amount || 0), 0)

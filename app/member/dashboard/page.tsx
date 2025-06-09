@@ -12,6 +12,7 @@ import { useRouter } from "next/navigation"
 import { useToast } from "@/hooks/use-toast"
 import { useEffect, useState } from "react"
 import axios from "axios"
+import { LoadingSpinner } from "@/components/ui/loading-spinner"
 
 interface DashboardData {
   user: { name: string; email: string; role: string }
@@ -59,7 +60,7 @@ export default function MemberDashboard() {
     fetchDashboard()
   }, [])
 
-  if (loading) return <div>Loading...</div>
+  if (loading) return <LoadingSpinner fullScreen />
   if (error) return <div className="text-red-500">{error}</div>
   if (!dashboardData || !dashboardData.user) return null
 

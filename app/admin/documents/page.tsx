@@ -19,6 +19,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import axios from "axios"
+import { LoadingSpinner } from "@/components/ui/loading-spinner"
 
 interface Document {
   _id: string
@@ -144,6 +145,9 @@ export default function AdminDocumentsPage() {
       doc.title.toLowerCase().includes(search.toLowerCase()) ||
       doc.type.toLowerCase().includes(search.toLowerCase())
   )
+
+  if (loading) return <LoadingSpinner fullScreen />
+  if (error) return <div className="text-red-500">{error}</div>
 
   return (
     <DashboardLayout

@@ -12,6 +12,7 @@ import { Clock, CheckCircle, XCircle, Banknote } from "lucide-react"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { motion } from "framer-motion"
 import { TooltipProvider } from "@/components/ui/tooltip"
+import { LoadingSpinner } from "@/components/ui/loading-spinner"
 
 interface Loan {
   _id: string
@@ -147,6 +148,9 @@ export default function LoansPage() {
       console.error("Failed to reject loan:", err.response?.data || err)
     }
   }
+
+  if (loading) return <LoadingSpinner fullScreen />
+  if (error) return <div className="text-red-500">{error}</div>
 
   return (
     <TooltipProvider>

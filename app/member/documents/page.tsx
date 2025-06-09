@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Download } from "lucide-react"
 import axios from "axios"
+import { LoadingSpinner } from "@/components/ui/loading-spinner"
 
 const columns = [
   { key: "title", label: "Title" },
@@ -62,6 +63,9 @@ export default function MemberDocumentsPage() {
   // Get unique types for filter dropdown
   const types = Array.from(new Set(documents.map(doc => doc.type)))
 
+  if (loading) return <LoadingSpinner fullScreen />
+  if (error) return <div className="text-red-500">{error}</div>
+
   return (
     <DashboardLayout role="member" user={{ name: "Member", email: "member@sacco.com", role: "member" }}>
       <div className="space-y-6">
@@ -94,13 +98,7 @@ export default function MemberDocumentsPage() {
             <CardTitle>Document Library</CardTitle>
           </CardHeader>
           <CardContent>
-            {loading ? (
-              <div>Loading...</div>
-            ) : error ? (
-              <div className="text-red-500">{error}</div>
-            ) : (
-              <DataTable columns={columns} data={filtered} />
-            )}
+            <DataTable columns={columns} data={filtered} />
           </CardContent>
         </Card>
       </div>
