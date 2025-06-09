@@ -617,21 +617,13 @@ export default function AdminContributions() {
         {/* Header */}
         <div className="flex justify-between items-center">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Contribution Management</h1>
-            <p className="text-gray-600 dark:text-gray-400">Monitor and manage member contributions and verification</p>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Contributions</h1>
+            <p className="text-gray-600 dark:text-gray-400">Manage member contributions and track payment history</p>
           </div>
           <div className="flex space-x-3">
-            <Button variant="outline" onClick={() => setIsBulkUploadOpen(true)}>
-              <Upload className="h-4 w-4 mr-2" />
-              Bulk Upload
-            </Button>
-            <Button variant="outline" onClick={handleGenerateReport}>
-              <FileText className="h-4 w-4 mr-2" />
-              Generate Report
-            </Button>
-            <Button className="bg-sacco-blue hover:bg-sacco-blue/90" onClick={() => setIsManualEntryOpen(true)}>
+            <Button variant="outline" onClick={() => setIsManualEntryOpen(true)}>
               <Plus className="h-4 w-4 mr-2" />
-              Manual Entry
+              Add Contribution
             </Button>
           </div>
         </div>
