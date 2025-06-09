@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { DashboardLayout } from "@/components/layout/dashboard-layout"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -42,43 +42,44 @@ import {
 } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { useTheme } from "next-themes"
+import axios from "axios"
 
 export default function MemberSettings() {
   const [profileData, setProfileData] = useState({
-    firstName: "John",
-    lastName: "Doe",
-    email: "john.doe@example.com",
-    phone: "+254712345678",
-    address: "123 Main Street, Nairobi",
-    dateOfBirth: "1990-05-15",
-    nationalId: "12345678",
-    nextOfKin: "Jane Doe",
-    nextOfKinPhone: "+254723456789",
-    bio: "SACCO member since 2020",
+    firstName: "",
+    lastName: "",
+    email: "",
+    phone: "",
+    address: "",
+    dateOfBirth: "",
+    nationalId: "",
+    nextOfKin: "",
+    nextOfKinPhone: "",
+    bio: "",
   })
 
   const [notifications, setNotifications] = useState({
-    emailContributions: true,
-    emailLoans: true,
+    emailContributions: false,
+    emailLoans: false,
     emailReports: false,
-    smsContributions: true,
-    smsLoans: true,
+    smsContributions: false,
+    smsLoans: false,
     smsReports: false,
-    pushNotifications: true,
+    pushNotifications: false,
     marketingEmails: false,
   })
 
   const [security, setSecurity] = useState({
     twoFactorEnabled: false,
-    loginAlerts: true,
-    sessionTimeout: "30",
+    loginAlerts: false,
+    sessionTimeout: "",
   })
 
   const [preferences, setPreferences] = useState({
-    language: "en",
-    currency: "KES",
-    dateFormat: "DD/MM/YYYY",
-    theme: "system",
+    language: "",
+    currency: "",
+    dateFormat: "",
+    theme: "",
   })
 
   const [showCurrentPassword, setShowCurrentPassword] = useState(false)
@@ -149,12 +150,32 @@ export default function MemberSettings() {
     })
   }
 
-  const handleAvatarUpload = () => {
-    toast({
-      title: "Avatar Upload",
-      description: "Avatar upload functionality would be implemented here",
-    })
-  }
+  const handleAvatarUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (event.target.files && event.target.files[0]) {
+      const file = event.target.files[0];
+      const formData = new FormData();
+      formData.append('avatar', file);
+
+      try {
+        const token = localStorage.getItem('token');
+        const response = await axios.post('/api/member/avatar', formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        toast({
+          title: "Success",
+          description: response.data.message,
+        });
+      } catch (error: any) {
+        toast({
+          title: "Error",
+          description: error.response ? error.response.data : "An error occurred",
+        });
+      }
+    }
+  };
 
   const handleDataExport = () => {
     toast({
@@ -171,53 +192,44 @@ export default function MemberSettings() {
     })
   }
 
-  const connectedDevices = [
-    {
-      id: 1,
-      device: "iPhone 13 Pro",
-      location: "Nairobi, Kenya",
-      lastActive: "Active now",
-      current: true,
-    },
-    {
-      id: 2,
-      device: "MacBook Pro",
-      location: "Nairobi, Kenya",
-      lastActive: "2 hours ago",
-      current: false,
-    },
-    {
-      id: 3,
-      device: "Chrome on Windows",
-      location: "Mombasa, Kenya",
-      lastActive: "3 days ago",
-      current: false,
-    },
-  ]
+  const connectedDevices: { id: number; device: string; location: string; lastActive: string; current: boolean; }[] = []
 
-  const loginHistory = [
-    {
-      id: 1,
-      device: "iPhone 13 Pro",
-      location: "Nairobi, Kenya",
-      timestamp: "2024-01-15 09:30 AM",
-      status: "Success",
-    },
-    {
-      id: 2,
-      device: "MacBook Pro",
-      location: "Nairobi, Kenya",
-      timestamp: "2024-01-14 02:15 PM",
-      status: "Success",
-    },
-    {
-      id: 3,
-      device: "Unknown Device",
-      location: "Lagos, Nigeria",
-      timestamp: "2024-01-13 11:45 PM",
-      status: "Blocked",
-    },
-  ]
+  const loginHistory: { id: number; device: string; location: string; timestamp: string; status: string; }[] = []
+
+  const updateSettings = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.put('/api/member/settings', {
+        firstName: profileData.firstName,
+        lastName: profileData.lastName,
+        email: profileData.email,
+        phoneNumber: profileData.phone,
+        dateOfBirth: profileData.dateOfBirth,
+        nationalId: profileData.nationalId,
+        address: profileData.address,
+        bio: profileData.bio,
+        nextOfKin: profileData.nextOfKin,
+        nextOfKinPhone: profileData.nextOfKinPhone
+      }, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+      toast({
+        title: "Success",
+        description: response.data.message
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.response ? error.response.data : "An error occurred"
+      });
+    }
+  };
+
+  useEffect(() => {
+    // Call updateSettings when needed, e.g., after form submission
+  }, []);
 
   return (
     <DashboardLayout role="member" user={user}>
@@ -257,8 +269,9 @@ export default function MemberSettings() {
                     </AvatarFallback>
                   </Avatar>
                   <div>
-                    <Button onClick={handleAvatarUpload} className="mb-2">
+                    <Button className="mb-2">
                       <Camera className="h-4 w-4 mr-2" />
+                      <input type="file" onChange={handleAvatarUpload} accept="image/*" />
                       Change Avatar
                     </Button>
                     <p className="text-sm text-gray-600 dark:text-gray-400">JPG, PNG or GIF. Max size 2MB.</p>
@@ -367,7 +380,7 @@ export default function MemberSettings() {
                   </div>
                 </div>
 
-                <Button onClick={handleProfileUpdate} className="bg-sacco-blue hover:bg-sacco-blue/90">
+                <Button onClick={updateSettings} className="bg-sacco-blue hover:bg-sacco-blue/90">
                   Save Changes
                 </Button>
               </CardContent>
@@ -824,21 +837,20 @@ export default function MemberSettings() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <Label>Member ID</Label>
-                    <p className="text-lg font-semibold">SACCO-2024-001</p>
+                    <p className="text-lg font-semibold"></p>
                   </div>
                   <div>
                     <Label>Member Since</Label>
-                    <p className="text-lg font-semibold">January 15, 2020</p>
+                    <p className="text-lg font-semibold"></p>
                   </div>
                   <div>
                     <Label>Account Status</Label>
                     <Badge className="bg-green-100 text-green-800" variant="secondary">
-                      Active
                     </Badge>
                   </div>
                   <div>
                     <Label>Membership Type</Label>
-                    <p className="text-lg font-semibold">Regular Member</p>
+                    <p className="text-lg font-semibold"></p>
                   </div>
                 </div>
               </CardContent>

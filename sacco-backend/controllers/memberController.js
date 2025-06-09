@@ -1,6 +1,7 @@
 const User = require('../models/User');
 const Contribution = require('../models/Contribution');
 const Loan = require('../models/Loan');
+const Member = require('../models/Member');
 
 exports.getAllMembers = async (req, res) => {
   try {
@@ -58,8 +59,6 @@ exports.getMemberById = async (req, res) => {
   }
 };
 
-
-
 exports.updateMember = async (req, res) => {
   try {
     const { id } = req.params;
@@ -79,5 +78,15 @@ exports.updateMember = async (req, res) => {
     res.json({ message: "Member updated successfully", member: updatedMember });
   } catch (err) {
     res.status(500).json({ error: "Failed to update member details" });
+  }
+};
+
+exports.updateMemberSettings = async (req, res) => {
+  try {
+    const updatedMember = await Member.findByIdAndUpdate(req.user.id, req.body, { new: true });
+    if (!updatedMember) return res.status(404).send('Member not found.');
+    res.send({ message: 'Member settings updated successfully.', member: updatedMember });
+  } catch (err) {
+    res.status(500).send('Server error.');
   }
 };

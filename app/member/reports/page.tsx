@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { DashboardLayout } from "@/components/layout/dashboard-layout"
 import { ChartCard } from "@/components/ui/chart-card"
 import { Button } from "@/components/ui/button"
@@ -22,6 +22,32 @@ import { Badge } from "@/components/ui/badge"
 import { Download, FileText, BarChart3, TrendingUp, Banknote, Eye, Mail } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 
+// Function to fetch loan data
+const fetchLoanData = async () => {
+  const response = await fetch("/api/loans", {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${localStorage.getItem('token')}` // Assuming token is stored in localStorage
+    }
+  })
+  const data = await response.json()
+  return data
+}
+
+// Function to fetch contribution data
+const fetchContributionData = async () => {
+  const response = await fetch("/api/contributions", {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${localStorage.getItem('token')}` // Assuming token is stored in localStorage
+    }
+  })
+  const data = await response.json()
+  return data
+}
+
 export default function MemberReports() {
   const [reportType, setReportType] = useState("")
   const [startDate, setStartDate] = useState("")
@@ -29,6 +55,8 @@ export default function MemberReports() {
   const [isGenerateOpen, setIsGenerateOpen] = useState(false)
   const [selectedPeriod, setSelectedPeriod] = useState("6months")
   const { toast } = useToast()
+  const [loanData, setLoanData] = useState([])
+  const [contributionData, setContributionData] = useState([])
 
   const user = {
     name: "John Doe",
@@ -36,100 +64,13 @@ export default function MemberReports() {
     role: "Member",
   }
 
-  // Mock data for charts
-  const contributionTrends = [
-    { name: "Jul", value: 5000 },
-    { name: "Aug", value: 7000 },
-    { name: "Sep", value: 6000 },
-    { name: "Oct", value: 8000 },
-    { name: "Nov", value: 9000 },
-    { name: "Dec", value: 7500 },
-  ]
+  useEffect(() => {
+    // Fetch loan data
+    fetchLoanData().then(data => setLoanData(data))
 
-  const loanRepaymentTrends = [
-    { name: "Jul", value: 4500 },
-    { name: "Aug", value: 4500 },
-    { name: "Sep", value: 4500 },
-    { name: "Oct", value: 9000 },
-    { name: "Nov", value: 9000 },
-    { name: "Dec", value: 9000 },
-  ]
-
-  const accountBreakdown = [
-    { name: "Savings", value: 45000 },
-    { name: "Shares", value: 15000 },
-    { name: "Dividends", value: 8000 },
-    { name: "Interest", value: 3000 },
-  ]
-
-  const loanStatusBreakdown = [
-    { name: "Active Loans", value: 2 },
-    { name: "Completed", value: 1 },
-    { name: "Pending", value: 1 },
-  ]
-
-  // Mock report history
-  const reportHistory = [
-    {
-      id: "RPT001",
-      type: "Financial Statement",
-      period: "Jan 2024 - Dec 2024",
-      generatedDate: "2024-01-15",
-      status: "Ready",
-      size: "2.3 MB",
-    },
-    {
-      id: "RPT002",
-      type: "Contribution Summary",
-      period: "Jul 2023 - Dec 2023",
-      generatedDate: "2024-01-01",
-      status: "Ready",
-      size: "1.8 MB",
-    },
-    {
-      id: "RPT003",
-      type: "Loan Statement",
-      period: "Jan 2023 - Dec 2023",
-      generatedDate: "2023-12-31",
-      status: "Ready",
-      size: "1.2 MB",
-    },
-    {
-      id: "RPT004",
-      type: "Tax Certificate",
-      period: "2023",
-      generatedDate: "2023-12-15",
-      status: "Ready",
-      size: "0.5 MB",
-    },
-  ]
-
-  const quickReports = [
-    {
-      title: "Monthly Statement",
-      description: "Current month contributions and transactions",
-      icon: FileText,
-      type: "monthly",
-    },
-    {
-      title: "Annual Summary",
-      description: "Complete year financial summary",
-      icon: BarChart3,
-      type: "annual",
-    },
-    {
-      title: "Loan Statement",
-      description: "All loan details and payment history",
-      icon: Banknote,
-      type: "loans",
-    },
-    {
-      title: "Tax Certificate",
-      description: "Certificate for tax purposes",
-      icon: FileText,
-      type: "tax",
-    },
-  ]
+    // Fetch contribution data
+    fetchContributionData().then(data => setContributionData(data))
+  }, [])
 
   const handleGenerateReport = () => {
     if (!reportType || !startDate || !endDate) {
@@ -265,7 +206,7 @@ export default function MemberReports() {
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              {quickReports.map((report, index) => (
+              {/* quickReports.map((report, index) => (
                 <div
                   key={index}
                   className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:shadow-md transition-shadow cursor-pointer"
@@ -281,7 +222,7 @@ export default function MemberReports() {
                   </div>
                   <p className="text-sm text-gray-600 dark:text-gray-400">{report.description}</p>
                 </div>
-              ))}
+              )) */}
             </div>
           </CardContent>
         </Card>
@@ -317,7 +258,7 @@ export default function MemberReports() {
                 title="Account Balance Breakdown"
                 description="Distribution of your SACCO account"
                 type="pie"
-                data={accountBreakdown}
+                data={loanData}
                 dataKey="value"
                 xAxisKey="name"
               />
@@ -325,7 +266,7 @@ export default function MemberReports() {
                 title="Monthly Contributions"
                 description="Your contribution trends over time"
                 type="bar"
-                data={contributionTrends}
+                data={contributionData}
                 dataKey="value"
                 xAxisKey="name"
               />
@@ -338,7 +279,7 @@ export default function MemberReports() {
                 title="Contribution Trends"
                 description="Monthly contribution patterns"
                 type="line"
-                data={contributionTrends}
+                data={contributionData}
                 dataKey="value"
                 xAxisKey="name"
               />
@@ -377,7 +318,7 @@ export default function MemberReports() {
                 title="Loan Repayment History"
                 description="Monthly loan payments over time"
                 type="bar"
-                data={loanRepaymentTrends}
+                data={loanData}
                 dataKey="value"
                 xAxisKey="name"
               />
@@ -385,7 +326,7 @@ export default function MemberReports() {
                 title="Loan Status Distribution"
                 description="Current status of all your loans"
                 type="pie"
-                data={loanStatusBreakdown}
+                data={loanData}
                 dataKey="value"
                 xAxisKey="name"
               />
@@ -399,7 +340,7 @@ export default function MemberReports() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {reportHistory.map((report) => (
+                  {[] /* reportHistory.map((report) => (
                     <div
                       key={report.id}
                       className="flex items-center justify-between p-4 border border-gray-200 dark:border-gray-700 rounded-lg"
@@ -435,7 +376,7 @@ export default function MemberReports() {
                         </Button>
                       </div>
                     </div>
-                  ))}
+                  )) */}
                 </div>
               </CardContent>
             </Card>

@@ -11,7 +11,7 @@ const inter = Inter({ subsets: ["latin"] })
 export const metadata: Metadata = {
   title: "SaccoSmart - SACCO Management System",
   description: "Complete SACCO management solution for members, treasurers, and administrators",
-    generator: 'v0.dev'
+    generator: 'Abdikhafar'
 }
 
 export default function RootLayout({
