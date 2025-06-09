@@ -3,6 +3,8 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const path = require('path');
+const http = require('http');
+const socketIo = require('socket.io');
 
 const app = express();
 app.use(cors());
@@ -50,6 +52,28 @@ app.use('/api/contact', contactRoutes);
 app.use('/api/payments', require('./routes/mpesaPayments'));
 app.use('/api/card', require('./routes/cardPayments'));
 
+// Create an HTTP server
+const server = http.createServer(app);
+
+// Initialize Socket.IO
+const io = socketIo(server, {
+  cors: {
+    origin: '*',
+    methods: ['GET', 'POST']
+  }
+});
+
+// Socket.IO connection
+io.on('connection', (socket) => {
+  console.log('A user connected');
+
+  socket.on('disconnect', () => {
+    console.log('User disconnected');
+  });
+});
+
+// Attach the Socket.IO instance to the app
+app.set('io', io);
 
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(` 📡 Server running on port ${PORT}`));
+server.listen(PORT, () => console.log(` 📡 Server running on port ${PORT}`));

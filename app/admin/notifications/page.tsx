@@ -21,6 +21,7 @@ import {
 import axios from "axios"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { DataTable } from "@/components/ui/data-table"
+import { io } from 'socket.io-client';
 
 interface Member {
   _id: string;
@@ -308,6 +309,18 @@ export default function AdminNotificationsPage() {
       setError("Failed to update notification")
     }
   }
+
+  useEffect(() => {
+    const socket = io('http://localhost:5000');
+
+    socket.on('notification', (newNotification) => {
+      setNotifications((prevNotifications) => [newNotification, ...prevNotifications]);
+    });
+
+    return () => {
+      socket.disconnect();
+    };
+  }, []);
 
   return (
     <DashboardLayout

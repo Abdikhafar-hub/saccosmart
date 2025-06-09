@@ -52,6 +52,10 @@ exports.create = async (req, res) => {
   }
   const notification = new Notification(notificationData)
   await notification.save()
+
+  // Emit a notification event
+  req.app.get('io').emit('notification', notification);
+
   res.status(201).json(notification)
 }
 

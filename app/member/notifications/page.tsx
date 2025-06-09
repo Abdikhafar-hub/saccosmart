@@ -1,5 +1,6 @@
 "use client"
 
+import React from 'react'
 import { useState, useEffect } from "react"
 import { DashboardLayout } from "@/components/layout/dashboard-layout"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -7,9 +8,19 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Bell, CheckCircle, Clock, Mail, AlertCircle, Info } from "lucide-react"
+import { io } from 'socket.io-client'
+
+interface Notification {
+  _id: string;
+  title: string;
+  message: string;
+  type: 'alert' | 'success' | 'info' | 'default';
+  sentBy: string;
+  sentAt: string;
+}
 
 export default function MemberNotificationsPage() {
-  const [notifications, setNotifications] = useState([])
+  const [notifications, setNotifications] = useState<Notification[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
 
@@ -43,7 +54,19 @@ export default function MemberNotificationsPage() {
     fetchNotifications()
   }, [])
 
-  const markAsRead = (id) => {}
+  useEffect(() => {
+    const socket = io('http://localhost:5000');
+
+    socket.on('notification', (newNotification: Notification) => {
+      setNotifications((prevNotifications) => [newNotification, ...prevNotifications]);
+    });
+
+    return () => {
+      socket.disconnect();
+    };
+  }, []);
+
+  const markAsRead = (id: string) => {}
   const markAllAsRead = () => {}
 
   const getFilteredNotifications = () => {
@@ -61,7 +84,7 @@ export default function MemberNotificationsPage() {
 
   const getTypeColor = () => "bg-gray-100 text-gray-800"
 
-  const formatTimestamp = (timestamp) => {
+  const formatTimestamp = (timestamp: string) => {
     const date = new Date(timestamp)
     return date.toLocaleDateString() + " at " + date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
   }
@@ -69,7 +92,13 @@ export default function MemberNotificationsPage() {
   const unreadCount = notifications.length
   const totalCount = notifications.length
 
-  const typeStyles = {
+  const typeStyles: Record<Notification['type'], {
+    border: string;
+    bg: string;
+    iconBg: string;
+    icon: React.ReactNode;
+
+  }> = {
     alert: {
       border: "border-red-500",
       bg: "bg-red-50",
