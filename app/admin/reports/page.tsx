@@ -39,176 +39,17 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
+import { generatePDFReport } from "@/utils/reportGenerator"
 
 // Mock data for reports
-const recentReports = [
-  {
-    id: "REP-001",
-    name: "Monthly Financial Summary",
-    type: "Financial",
-    date: "2025-05-25",
-    status: "Generated",
-    format: "PDF",
-  },
-  {
-    id: "REP-002",
-    name: "Loan Portfolio Analysis",
-    type: "Loans",
-    date: "2025-05-24",
-    status: "Generated",
-    format: "Excel",
-  },
-  {
-    id: "REP-003",
-    name: "Member Contribution Trends",
-    type: "Contributions",
-    date: "2025-05-23",
-    status: "Generated",
-    format: "PDF",
-  },
-  {
-    id: "REP-004",
-    name: "Defaulted Loans Report",
-    type: "Loans",
-    date: "2025-05-22",
-    status: "Generated",
-    format: "Excel",
-  },
-  {
-    id: "REP-005",
-    name: "New Member Registrations",
-    type: "Members",
-    date: "2025-05-21",
-    status: "Generated",
-    format: "PDF",
-  },
-  {
-    id: "REP-006",
-    name: "Quarterly Compliance Report",
-    type: "Compliance",
-    date: "2025-05-20",
-    status: "Generated",
-    format: "PDF",
-  },
-  {
-    id: "REP-007",
-    name: "Annual Financial Statement",
-    type: "Financial",
-    date: "2025-05-15",
-    status: "Generated",
-    format: "PDF",
-  },
-]
-
-const scheduledReports = [
-  {
-    id: "SCH-001",
-    name: "Monthly Financial Summary",
-    frequency: "Monthly",
-    nextRun: "2025-06-01",
-    recipients: "Board Members",
-    format: "PDF",
-  },
-  {
-    id: "SCH-002",
-    name: "Loan Portfolio Analysis",
-    frequency: "Weekly",
-    nextRun: "2025-06-03",
-    recipients: "Loan Officers",
-    format: "Excel",
-  },
-  {
-    id: "SCH-003",
-    name: "Member Contribution Trends",
-    frequency: "Monthly",
-    nextRun: "2025-06-01",
-    recipients: "Finance Team",
-    format: "PDF",
-  },
-  {
-    id: "SCH-004",
-    name: "Compliance Status Report",
-    frequency: "Quarterly",
-    nextRun: "2025-07-01",
-    recipients: "Compliance Officer",
-    format: "PDF",
-  },
-]
-
-const reportTemplates = [
-  {
-    id: "TEMP-001",
-    name: "Financial Summary",
-    category: "Financial",
-    lastUsed: "2025-05-25",
-    format: "PDF",
-  },
-  {
-    id: "TEMP-002",
-    name: "Loan Portfolio Analysis",
-    category: "Loans",
-    lastUsed: "2025-05-24",
-    format: "Excel",
-  },
-  {
-    id: "TEMP-003",
-    name: "Member Contribution Report",
-    category: "Contributions",
-    lastUsed: "2025-05-23",
-    format: "PDF",
-  },
-  {
-    id: "TEMP-004",
-    name: "Defaulted Loans Summary",
-    category: "Loans",
-    lastUsed: "2025-05-22",
-    format: "Excel",
-  },
-  {
-    id: "TEMP-005",
-    name: "New Member Registration",
-    category: "Members",
-    lastUsed: "2025-05-21",
-    format: "PDF",
-  },
-  {
-    id: "TEMP-006",
-    name: "Compliance Status",
-    category: "Compliance",
-    lastUsed: "2025-05-20",
-    format: "PDF",
-  },
-  {
-    id: "TEMP-007",
-    name: "Annual Financial Statement",
-    category: "Financial",
-    lastUsed: "2025-05-15",
-    format: "PDF",
-  },
-]
+const recentReports: { id: string; name: string; type: string; date: string; status: string; format: string; }[] = [];
+const scheduledReports: { id: string; name: string; frequency: string; nextRun: string; recipients: string; format: string; }[] = [];
+const reportTemplates: { id: string; name: string; category: string; lastUsed: string; format: string; }[] = [];
 
 // Mock data for charts
-const monthlyReportGeneration = [
-  { name: "Jan", value: 45 },
-  { name: "Feb", value: 52 },
-  { name: "Mar", value: 48 },
-  { name: "Apr", value: 61 },
-  { name: "May", value: 58 },
-]
-
-const reportTypeDistribution = [
-  { name: "Financial", value: 35 },
-  { name: "Loans", value: 25 },
-  { name: "Members", value: 20 },
-  { name: "Contributions", value: 15 },
-  { name: "Compliance", value: 5 },
-]
-
-const reportFormatDistribution = [
-  { name: "PDF", value: 65 },
-  { name: "Excel", value: 25 },
-  { name: "CSV", value: 10 },
-]
+const monthlyReportGeneration: { name: string; value: number; }[] = [];
+const reportTypeDistribution: { name: string; value: number; }[] = [];
+const reportFormatDistribution: { name: string; value: number; }[] = [];
 
 export default function AdminReportsPage() {
   const [selectedReportType, setSelectedReportType] = useState("all")
@@ -237,25 +78,25 @@ export default function AdminReportsPage() {
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           <StatsCard
             title="Total Reports Generated"
-            value="248"
+            value="0"
             description="This month"
             icon={FileText}
-            trend={{ value: 12, isPositive: true }}
+            trend={{ value: 0, isPositive: true }}
           />
           <StatsCard
             title="Scheduled Reports"
-            value="16"
+            value="0"
             description="Active schedules"
             icon={Calendar}
-            trend={{ value: 4, isPositive: true }}
+            trend={{ value: 0, isPositive: true }}
           />
-          <StatsCard title="Report Templates" value="24" description="Available templates" icon={FileBarChart} />
+          <StatsCard title="Report Templates" value="0" description="Available templates" icon={FileBarChart} />
           <StatsCard
             title="Downloads"
-            value="186"
+            value="0"
             description="This month"
             icon={Download}
-            trend={{ value: 8, isPositive: true }}
+            trend={{ value: 0, isPositive: true }}
           />
         </div>
 
@@ -327,27 +168,15 @@ export default function AdminReportsPage() {
                     <Button variant="outline" onClick={() => setShowGenerateDialog(false)}>
                       Cancel
                     </Button>
-                    <Button type="submit" onClick={() => setShowGenerateDialog(false)}>
+                    <Button type="submit" onClick={async () => {
+                      await generatePDFReport();
+                      setShowGenerateDialog(false);
+                    }}>
                       Generate Report
                     </Button>
                   </DialogFooter>
                 </DialogContent>
               </Dialog>
-
-              <Button variant="outline" className="h-24 flex flex-col items-center justify-center space-y-2">
-                <Calendar className="h-6 w-6" />
-                <span>Schedule Report</span>
-              </Button>
-
-              <Button variant="outline" className="h-24 flex flex-col items-center justify-center space-y-2">
-                <FileBarChart className="h-6 w-6" />
-                <span>Custom Report</span>
-              </Button>
-
-              <Button variant="outline" className="h-24 flex flex-col items-center justify-center space-y-2">
-                <Download className="h-6 w-6" />
-                <span>Download Center</span>
-              </Button>
             </div>
           </CardContent>
         </Card>
