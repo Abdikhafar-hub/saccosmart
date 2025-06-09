@@ -35,6 +35,9 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { useToast } from "@/hooks/use-toast"
+import jsPDF from "jspdf"
+import html2canvas from "html2canvas"
+import { generatePDFReport } from "@/utils/reportGenerator"
 
 interface AdminDashboardData {
   members: { name: string; email: string }[]
@@ -273,9 +276,14 @@ export default function AdminDashboard() {
     <DashboardLayout role="admin" user={{ name: "Admin", email: "", role: "Admin" }}>
       <div className="space-y-6">
         {/* Welcome Section */}
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Admin Dashboard</h1>
-          <p className="text-gray-600 dark:text-gray-400">Overview of your SACCO management system</p>
+        <div className="flex justify-between items-center">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Admin Dashboard</h1>
+            <p className="text-gray-600 dark:text-gray-400">Overview of your SACCO management system</p>
+          </div>
+          <Button onClick={generatePDFReport} className="bg-blue-500 text-white px-4 py-2 rounded-md shadow-md hover:bg-blue-600">
+            Generate Report
+          </Button>
         </div>
 
         {/* Stats Cards */}

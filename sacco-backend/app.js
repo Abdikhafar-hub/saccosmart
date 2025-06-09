@@ -50,5 +50,6 @@ app.use('/api/contact', contactRoutes);
 app.use('/api/payments', require('./routes/mpesaPayments'));
 app.use('/api/card', require('./routes/cardPayments'));
 
+
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(` 📡 Server running on port ${PORT}`));
