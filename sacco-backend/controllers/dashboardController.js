@@ -33,26 +33,44 @@ exports.memberDashboard = async (req, res) => {
       (contributionsThisMonth > 0 ? 100 : 0) :
       ((contributionsThisMonth - contributionsLastMonth) / contributionsLastMonth) * 100;
 
-    // Active Loan Trend (assuming trend is based on change in active balance, which might need more complex logic, using loan count for simplicity for now)
+    // Active Loan Trend (dynamic calculation)
     const activeLoans = loans.filter(l => ['approved', 'active'].includes(l.status));
     const currentLoanBalance = activeLoans.reduce((sum, l) => sum + (l.amount || 0), 0);
-    // For a real trend, you'd need loan repayment history and track balance over time.
-    // Placeholder trend for now:
-    const activeLoanTrend = -8; // Replace with real calculation if possible
-    const isLoanTrendPositive = false; // Based on placeholder value
+
+    // Calculate last month's active loan balance
+    const lastMonthLoans = loans.filter(l => ['approved', 'active'].includes(l.status) && l.date >= startOfLastMonth && l.date <= endOfLastMonth);
+    const lastMonthLoanBalance = lastMonthLoans.reduce((sum, l) => sum + (l.amount || 0), 0);
+
+    let activeLoanTrend = 0;
+    let isLoanTrendPositive = false;
+    if (lastMonthLoanBalance === 0) {
+      activeLoanTrend = 0;
+      isLoanTrendPositive = true;
+    } else {
+      activeLoanTrend = ((currentLoanBalance - lastMonthLoanBalance) / lastMonthLoanBalance) * 100;
+      isLoanTrendPositive = activeLoanTrend >= 0;
+    }
 
     // Monthly Target & Progress (assuming a fixed target for now, fetch from config/DB if dynamic)
-    const monthlyTargetAmount = 5000;
+    const monthlyTargetAmount = 50000;
     const currentMonthContributed = contributionsThisMonth; // Already calculated
     const monthlyProgressPercentage = monthlyTargetAmount === 0 ?
       (currentMonthContributed > 0 ? 100 : 0) :
       (currentMonthContributed / monthlyTargetAmount) * 100;
 
-    // Next Due Date (assuming latest active loan has a dueDate field - needs model update if not)
-    const latestActiveLoan = activeLoans.length > 0 ? activeLoans[0] : null;
-    // Assuming loan model has 'dueDate' field
-    const nextDueDate = latestActiveLoan?.dueDate || null; // Needs Loan model update
-    const nextDueDateDescription = nextDueDate ? "Loan payment due" : "No active loans";
+    // Next Due Date (dynamic: soonest nextDueDate among active loans)
+    let nextDueDate = null;
+    let nextDueDateDescription = "No active loans";
+    if (activeLoans.length > 0) {
+      // Filter out loans without a nextDueDate
+      const loansWithDueDate = activeLoans.filter(l => l.nextDueDate);
+      if (loansWithDueDate.length > 0) {
+        nextDueDate = loansWithDueDate.reduce((soonest, l) => {
+          return (!soonest || l.nextDueDate < soonest.nextDueDate) ? l : soonest;
+        }).nextDueDate;
+        nextDueDateDescription = "Loan payment due";
+      }
+    }
 
     // --- Prepare Response --- //
     res.json({
@@ -60,12 +78,12 @@ exports.memberDashboard = async (req, res) => {
       totalContributions,
       totalContributionsTrend: Number(totalContributionsTrend.toFixed(2)),
       activeLoanBalance: currentLoanBalance,
-      activeLoanTrend: activeLoanTrend, // Placeholder
-      isLoanTrendPositive: isLoanTrendPositive, // Placeholder
+      activeLoanTrend: Number(activeLoanTrend.toFixed(2)),
+      isLoanTrendPositive: isLoanTrendPositive,
       monthlyTargetAmount: monthlyTargetAmount, // Placeholder
       currentMonthContributed: currentMonthContributed,
       monthlyProgressPercentage: Number(monthlyProgressPercentage.toFixed(2)),
-      nextDueDate: nextDueDate, // Needs Loan model update
+      nextDueDate: nextDueDate,
       nextDueDateDescription: nextDueDateDescription,
       // Include contributions and loans if still needed on dashboard page, or fetch separately
       contributions: contributions, // Still sending for chart calculation on frontend

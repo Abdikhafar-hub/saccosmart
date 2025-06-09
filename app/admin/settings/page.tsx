@@ -46,47 +46,18 @@ export default function AdminSettingsPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [showApiKey, setShowApiKey] = useState(false)
 
-  // Mock data for settings
-  const systemStats = [
-    { title: "Active Users", value: "1,247", icon: Users, trend: "+12%" },
-    { title: "System Uptime", value: "99.9%", icon: Zap, trend: "+0.1%" },
-    { title: "Storage Used", value: "2.4 GB", icon: Database, trend: "+15%" },
-    { title: "API Calls", value: "45,231", icon: Globe, trend: "+8%" },
-  ]
-
-  const userRoles = [
-    { id: 1, name: "Super Admin", users: 2, permissions: "Full Access", status: "Active" },
-    { id: 2, name: "Admin", users: 5, permissions: "Management", status: "Active" },
-    { id: 3, name: "Treasurer", users: 3, permissions: "Financial", status: "Active" },
-    { id: 4, name: "Member", users: 1237, permissions: "Limited", status: "Active" },
-  ]
-
-  const auditLogs = [
-    { id: 1, action: "User Login", user: "admin@sacco.com", timestamp: "2024-01-15 10:30:00", status: "Success" },
-    { id: 2, action: "Settings Updated", user: "admin@sacco.com", timestamp: "2024-01-15 09:15:00", status: "Success" },
-    { id: 3, action: "Backup Created", user: "system", timestamp: "2024-01-15 02:00:00", status: "Success" },
-    { id: 4, action: "Failed Login", user: "unknown", timestamp: "2024-01-14 23:45:00", status: "Failed" },
-  ]
-
-  const integrations = [
-    { name: "M-Pesa", status: "Connected", lastSync: "2 hours ago", icon: Phone },
-    { name: "Email Service", status: "Connected", lastSync: "1 hour ago", icon: Mail },
-    { name: "SMS Gateway", status: "Disconnected", lastSync: "2 days ago", icon: Phone },
-    { name: "Backup Service", status: "Connected", lastSync: "6 hours ago", icon: Database },
-  ]
-
   const handleSaveSettings = async () => {
     setIsLoading(true)
-    // Simulate API call
+    // TODO: Implement settings save functionality
     await new Promise((resolve) => setTimeout(resolve, 2000))
     setIsLoading(false)
   }
 
   const user = {
-    name: "Admin User",
-    email: "admin@umojasacco.co.ke",
-    role: "Super Admin",
-    avatar: "/placeholder.svg?height=32&width=32",
+    name: "",
+    email: "",
+    role: "admin",
+    avatar: ""
   }
 
   return (
@@ -111,13 +82,6 @@ export default function AdminSettingsPage() {
               </>
             )}
           </Button>
-        </div>
-
-        {/* System Stats */}
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          {systemStats.map((stat, index) => (
-            <StatsCard key={index} {...stat} />
-          ))}
         </div>
 
         {/* Settings Tabs */}
@@ -168,19 +132,19 @@ export default function AdminSettingsPage() {
                 <CardContent className="space-y-4">
                   <div className="space-y-2">
                     <Label htmlFor="org-name">Organization Name</Label>
-                    <Input id="org-name" defaultValue="Umoja SACCO Society" />
+                    <Input id="org-name" />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="org-code">SACCO Code</Label>
-                    <Input id="org-code" defaultValue="UMJ001" />
+                    <Input id="org-code" />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="registration">Registration Number</Label>
-                    <Input id="registration" defaultValue="REG/2020/001" />
+                    <Input id="registration" />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="address">Address</Label>
-                    <Textarea id="address" defaultValue="123 Main Street, Nairobi, Kenya" />
+                    <Textarea id="address" />
                   </div>
                 </CardContent>
               </Card>
@@ -193,21 +157,21 @@ export default function AdminSettingsPage() {
                 <CardContent className="space-y-4">
                   <div className="space-y-2">
                     <Label htmlFor="phone">Phone Number</Label>
-                    <Input id="phone" defaultValue="+254 700 123 456" />
+                    <Input id="phone" />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="email">Email Address</Label>
-                    <Input id="email" type="email" defaultValue="info@umojasacco.co.ke" />
+                    <Input id="email" type="email" />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="website">Website</Label>
-                    <Input id="website" defaultValue="www.umojasacco.co.ke" />
+                    <Input id="website" />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="timezone">Timezone</Label>
-                    <Select defaultValue="africa/nairobi">
+                    <Select>
                       <SelectTrigger>
-                        <SelectValue />
+                        <SelectValue placeholder="Select timezone" />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="africa/nairobi">Africa/Nairobi (EAT)</SelectItem>
@@ -237,14 +201,14 @@ export default function AdminSettingsPage() {
                       <Label>Auto Backup</Label>
                       <p className="text-sm text-muted-foreground">Automatically backup data daily</p>
                     </div>
-                    <Switch defaultChecked />
+                    <Switch />
                   </div>
                   <div className="flex items-center justify-between">
                     <div className="space-y-0.5">
                       <Label>Email Notifications</Label>
                       <p className="text-sm text-muted-foreground">Send system notifications via email</p>
                     </div>
-                    <Switch defaultChecked />
+                    <Switch />
                   </div>
                 </CardContent>
               </Card>
@@ -257,9 +221,9 @@ export default function AdminSettingsPage() {
                 <CardContent className="space-y-4">
                   <div className="space-y-2">
                     <Label htmlFor="theme">Theme</Label>
-                    <Select defaultValue="light">
+                    <Select>
                       <SelectTrigger>
-                        <SelectValue />
+                        <SelectValue placeholder="Select theme" />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="light">Light</SelectItem>
@@ -272,7 +236,7 @@ export default function AdminSettingsPage() {
                     <Label htmlFor="primary-color">Primary Color</Label>
                     <div className="flex items-center space-x-2">
                       <div className="w-8 h-8 bg-blue-600 rounded border"></div>
-                      <Input id="primary-color" defaultValue="#2563eb" />
+                      <Input id="primary-color" type="color" />
                     </div>
                   </div>
                   <div className="space-y-2">
@@ -300,35 +264,6 @@ export default function AdminSettingsPage() {
               </Button>
             </div>
 
-            <div className="grid gap-4">
-              {userRoles.map((role) => (
-                <Card key={role.id}>
-                  <CardContent className="flex items-center justify-between p-6">
-                    <div className="flex items-center space-x-4">
-                      <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                        <Users className="h-5 w-5 text-blue-600" />
-                      </div>
-                      <div>
-                        <h4 className="font-medium">{role.name}</h4>
-                        <p className="text-sm text-muted-foreground">
-                          {role.users} users • {role.permissions}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <Badge variant={role.status === "Active" ? "default" : "secondary"}>{role.status}</Badge>
-                      <Button variant="outline" size="sm">
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                      <Button variant="outline" size="sm">
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-
             <Card>
               <CardHeader>
                 <CardTitle>Session Management</CardTitle>
@@ -338,11 +273,11 @@ export default function AdminSettingsPage() {
                 <div className="grid gap-4 md:grid-cols-2">
                   <div className="space-y-2">
                     <Label htmlFor="session-timeout">Session Timeout (minutes)</Label>
-                    <Input id="session-timeout" type="number" defaultValue="30" />
+                    <Input id="session-timeout" type="number" />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="max-sessions">Max Concurrent Sessions</Label>
-                    <Input id="max-sessions" type="number" defaultValue="3" />
+                    <Input id="max-sessions" type="number" />
                   </div>
                 </div>
                 <div className="flex items-center justify-between">
@@ -350,7 +285,7 @@ export default function AdminSettingsPage() {
                     <Label>Force Password Change</Label>
                     <p className="text-sm text-muted-foreground">Require users to change password every 90 days</p>
                   </div>
-                  <Switch defaultChecked />
+                  <Switch />
                 </div>
               </CardContent>
             </Card>
@@ -367,23 +302,23 @@ export default function AdminSettingsPage() {
                 <CardContent className="space-y-4">
                   <div className="space-y-2">
                     <Label htmlFor="min-length">Minimum Length</Label>
-                    <Input id="min-length" type="number" defaultValue="8" />
+                    <Input id="min-length" type="number" />
                   </div>
                   <div className="flex items-center justify-between">
                     <Label>Require Uppercase</Label>
-                    <Switch defaultChecked />
+                    <Switch />
                   </div>
                   <div className="flex items-center justify-between">
                     <Label>Require Numbers</Label>
-                    <Switch defaultChecked />
+                    <Switch />
                   </div>
                   <div className="flex items-center justify-between">
                     <Label>Require Special Characters</Label>
-                    <Switch defaultChecked />
+                    <Switch />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="password-history">Password History</Label>
-                    <Input id="password-history" type="number" defaultValue="5" />
+                    <Input id="password-history" type="number" />
                   </div>
                 </CardContent>
               </Card>
@@ -399,14 +334,14 @@ export default function AdminSettingsPage() {
                       <Label>Enforce 2FA for Admins</Label>
                       <p className="text-sm text-muted-foreground">Require 2FA for all admin users</p>
                     </div>
-                    <Switch defaultChecked />
+                    <Switch />
                   </div>
                   <div className="flex items-center justify-between">
                     <div className="space-y-0.5">
                       <Label>SMS Authentication</Label>
                       <p className="text-sm text-muted-foreground">Enable SMS-based 2FA</p>
                     </div>
-                    <Switch defaultChecked />
+                    <Switch />
                   </div>
                   <div className="flex items-center justify-between">
                     <div className="space-y-0.5">
@@ -426,11 +361,11 @@ export default function AdminSettingsPage() {
                 <CardContent className="space-y-4">
                   <div className="space-y-2">
                     <Label htmlFor="max-attempts">Max Login Attempts</Label>
-                    <Input id="max-attempts" type="number" defaultValue="5" />
+                    <Input id="max-attempts" type="number" />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="lockout-duration">Lockout Duration (minutes)</Label>
-                    <Input id="lockout-duration" type="number" defaultValue="15" />
+                    <Input id="lockout-duration" type="number" />
                   </div>
                   <div className="flex items-center justify-between">
                     <div className="space-y-0.5">
@@ -451,7 +386,7 @@ export default function AdminSettingsPage() {
                   <div className="space-y-2">
                     <Label>API Key</Label>
                     <div className="flex items-center space-x-2">
-                      <Input type={showApiKey ? "text" : "password"} defaultValue="sk_live_1234567890abcdef" readOnly />
+                      <Input type={showApiKey ? "text" : "password"} readOnly />
                       <Button variant="outline" size="sm" onClick={() => setShowApiKey(!showApiKey)}>
                         {showApiKey ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                       </Button>
@@ -459,7 +394,7 @@ export default function AdminSettingsPage() {
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="rate-limit">Rate Limit (requests/hour)</Label>
-                    <Input id="rate-limit" type="number" defaultValue="1000" />
+                    <Input id="rate-limit" type="number" />
                   </div>
                   <Button variant="outline" className="w-full">
                     <RefreshCw className="mr-2 h-4 w-4" />
@@ -481,9 +416,9 @@ export default function AdminSettingsPage() {
                 <CardContent className="space-y-4">
                   <div className="space-y-2">
                     <Label htmlFor="currency">Base Currency</Label>
-                    <Select defaultValue="kes">
+                    <Select>
                       <SelectTrigger>
-                        <SelectValue />
+                        <SelectValue placeholder="Select currency" />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="kes">KES - Kenyan Shilling</SelectItem>
@@ -494,15 +429,15 @@ export default function AdminSettingsPage() {
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="savings-rate">Savings Interest Rate (%)</Label>
-                    <Input id="savings-rate" type="number" step="0.01" defaultValue="6.5" />
+                    <Input id="savings-rate" type="number" step="0.01" />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="loan-rate">Default Loan Interest Rate (%)</Label>
-                    <Input id="loan-rate" type="number" step="0.01" defaultValue="12.0" />
+                    <Input id="loan-rate" type="number" step="0.01" />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="penalty-rate">Penalty Rate (%)</Label>
-                    <Input id="penalty-rate" type="number" step="0.01" defaultValue="2.0" />
+                    <Input id="penalty-rate" type="number" step="0.01" />
                   </div>
                 </CardContent>
               </Card>
@@ -515,19 +450,19 @@ export default function AdminSettingsPage() {
                 <CardContent className="space-y-4">
                   <div className="space-y-2">
                     <Label htmlFor="min-deposit">Minimum Deposit</Label>
-                    <Input id="min-deposit" type="number" defaultValue="100" />
+                    <Input id="min-deposit" type="number" />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="max-withdrawal">Maximum Withdrawal</Label>
-                    <Input id="max-withdrawal" type="number" defaultValue="50000" />
+                    <Input id="max-withdrawal" type="number" />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="transaction-fee">Transaction Fee</Label>
-                    <Input id="transaction-fee" type="number" step="0.01" defaultValue="10.00" />
+                    <Input id="transaction-fee" type="number" step="0.01" />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="processing-fee">Processing Fee (%)</Label>
-                    <Input id="processing-fee" type="number" step="0.01" defaultValue="1.5" />
+                    <Input id="processing-fee" type="number" step="0.01" />
                   </div>
                 </CardContent>
               </Card>
@@ -540,15 +475,15 @@ export default function AdminSettingsPage() {
                 <CardContent className="space-y-4">
                   <div className="space-y-2">
                     <Label htmlFor="max-loan">Maximum Loan Amount</Label>
-                    <Input id="max-loan" type="number" defaultValue="500000" />
+                    <Input id="max-loan" type="number" />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="loan-term">Maximum Loan Term (months)</Label>
-                    <Input id="loan-term" type="number" defaultValue="60" />
+                    <Input id="loan-term" type="number" />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="collateral-ratio">Collateral Ratio (%)</Label>
-                    <Input id="collateral-ratio" type="number" defaultValue="150" />
+                    <Input id="collateral-ratio" type="number" />
                   </div>
                   <div className="flex items-center justify-between">
                     <div className="space-y-0.5">
@@ -568,9 +503,9 @@ export default function AdminSettingsPage() {
                 <CardContent className="space-y-4">
                   <div className="space-y-2">
                     <Label htmlFor="fiscal-year">Fiscal Year Start</Label>
-                    <Select defaultValue="january">
+                    <Select>
                       <SelectTrigger>
-                        <SelectValue />
+                        <SelectValue placeholder="Select month" />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="january">January</SelectItem>
@@ -582,9 +517,9 @@ export default function AdminSettingsPage() {
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="depreciation">Depreciation Method</Label>
-                    <Select defaultValue="straight-line">
+                    <Select>
                       <SelectTrigger>
-                        <SelectValue />
+                        <SelectValue placeholder="Select method" />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="straight-line">Straight Line</SelectItem>
@@ -598,7 +533,7 @@ export default function AdminSettingsPage() {
                       <Label>Auto-reconciliation</Label>
                       <p className="text-sm text-muted-foreground">Automatically reconcile daily transactions</p>
                     </div>
-                    <Switch defaultChecked />
+                    <Switch />
                   </div>
                 </CardContent>
               </Card>
@@ -619,28 +554,28 @@ export default function AdminSettingsPage() {
                       <Label>Loan Applications</Label>
                       <p className="text-sm text-muted-foreground">Notify when new loan applications are submitted</p>
                     </div>
-                    <Switch defaultChecked />
+                    <Switch />
                   </div>
                   <div className="flex items-center justify-between">
                     <div className="space-y-0.5">
                       <Label>Payment Reminders</Label>
                       <p className="text-sm text-muted-foreground">Send payment due reminders to members</p>
                     </div>
-                    <Switch defaultChecked />
+                    <Switch />
                   </div>
                   <div className="flex items-center justify-between">
                     <div className="space-y-0.5">
                       <Label>System Alerts</Label>
                       <p className="text-sm text-muted-foreground">Notify admins of system issues</p>
                     </div>
-                    <Switch defaultChecked />
+                    <Switch />
                   </div>
                   <div className="flex items-center justify-between">
                     <div className="space-y-0.5">
                       <Label>Monthly Statements</Label>
                       <p className="text-sm text-muted-foreground">Send monthly account statements</p>
                     </div>
-                    <Switch defaultChecked />
+                    <Switch />
                   </div>
                 </CardContent>
               </Card>
@@ -656,25 +591,25 @@ export default function AdminSettingsPage() {
                       <Label>Transaction Alerts</Label>
                       <p className="text-sm text-muted-foreground">Send SMS for all transactions</p>
                     </div>
-                    <Switch defaultChecked />
+                    <Switch />
                   </div>
                   <div className="flex items-center justify-between">
                     <div className="space-y-0.5">
                       <Label>Loan Approvals</Label>
                       <p className="text-sm text-muted-foreground">Notify members of loan status changes</p>
                     </div>
-                    <Switch defaultChecked />
+                    <Switch />
                   </div>
                   <div className="flex items-center justify-between">
                     <div className="space-y-0.5">
                       <Label>Security Alerts</Label>
                       <p className="text-sm text-muted-foreground">Send SMS for security events</p>
                     </div>
-                    <Switch defaultChecked />
+                    <Switch />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="sms-sender">SMS Sender ID</Label>
-                    <Input id="sms-sender" defaultValue="UMOJA-SACCO" />
+                    <Input id="sms-sender" />
                   </div>
                 </CardContent>
               </Card>
@@ -690,7 +625,7 @@ export default function AdminSettingsPage() {
                       <Label>Account Updates</Label>
                       <p className="text-sm text-muted-foreground">Push notifications for account changes</p>
                     </div>
-                    <Switch defaultChecked />
+                    <Switch />
                   </div>
                   <div className="flex items-center justify-between">
                     <div className="space-y-0.5">
@@ -704,7 +639,7 @@ export default function AdminSettingsPage() {
                       <Label>Meeting Reminders</Label>
                       <p className="text-sm text-muted-foreground">Remind members of upcoming meetings</p>
                     </div>
-                    <Switch defaultChecked />
+                    <Switch />
                   </div>
                 </CardContent>
               </Card>
@@ -717,19 +652,11 @@ export default function AdminSettingsPage() {
                 <CardContent className="space-y-4">
                   <div className="space-y-2">
                     <Label htmlFor="welcome-template">Welcome Message</Label>
-                    <Textarea
-                      id="welcome-template"
-                      defaultValue="Welcome to Umoja SACCO! Your account has been successfully created."
-                      rows={3}
-                    />
+                    <Textarea id="welcome-template" rows={3} />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="payment-template">Payment Reminder</Label>
-                    <Textarea
-                      id="payment-template"
-                      defaultValue="Dear {name}, your loan payment of KES {amount} is due on {date}."
-                      rows={3}
-                    />
+                    <Textarea id="payment-template" rows={3} />
                   </div>
                   <Button variant="outline" className="w-full">
                     <Edit className="mr-2 h-4 w-4" />
@@ -742,40 +669,6 @@ export default function AdminSettingsPage() {
 
           {/* Integrations */}
           <TabsContent value="integrations" className="space-y-6">
-            <div className="grid gap-4">
-              {integrations.map((integration, index) => (
-                <Card key={index}>
-                  <CardContent className="flex items-center justify-between p-6">
-                    <div className="flex items-center space-x-4">
-                      <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                        <integration.icon className="h-5 w-5 text-blue-600" />
-                      </div>
-                      <div>
-                        <h4 className="font-medium">{integration.name}</h4>
-                        <p className="text-sm text-muted-foreground">Last sync: {integration.lastSync}</p>
-                      </div>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <Badge
-                        variant={integration.status === "Connected" ? "default" : "destructive"}
-                        className="flex items-center gap-1"
-                      >
-                        {integration.status === "Connected" ? (
-                          <Wifi className="h-3 w-3" />
-                        ) : (
-                          <WifiOff className="h-3 w-3" />
-                        )}
-                        {integration.status}
-                      </Badge>
-                      <Button variant="outline" size="sm">
-                        Configure
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-
             <div className="grid gap-6 md:grid-cols-2">
               <Card>
                 <CardHeader>
@@ -785,15 +678,15 @@ export default function AdminSettingsPage() {
                 <CardContent className="space-y-4">
                   <div className="space-y-2">
                     <Label htmlFor="mpesa-shortcode">Shortcode</Label>
-                    <Input id="mpesa-shortcode" defaultValue="174379" />
+                    <Input id="mpesa-shortcode" />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="mpesa-passkey">Passkey</Label>
-                    <Input id="mpesa-passkey" type="password" defaultValue="••••••••••••••••" />
+                    <Input id="mpesa-passkey" type="password" />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="mpesa-callback">Callback URL</Label>
-                    <Input id="mpesa-callback" defaultValue="https://api.umojasacco.co.ke/mpesa/callback" />
+                    <Input id="mpesa-callback" />
                   </div>
                   <div className="flex items-center justify-between">
                     <div className="space-y-0.5">
@@ -813,19 +706,19 @@ export default function AdminSettingsPage() {
                 <CardContent className="space-y-4">
                   <div className="space-y-2">
                     <Label htmlFor="smtp-host">SMTP Host</Label>
-                    <Input id="smtp-host" defaultValue="smtp.gmail.com" />
+                    <Input id="smtp-host" />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="smtp-port">SMTP Port</Label>
-                    <Input id="smtp-port" type="number" defaultValue="587" />
+                    <Input id="smtp-port" type="number" />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="smtp-username">Username</Label>
-                    <Input id="smtp-username" defaultValue="noreply@umojasacco.co.ke" />
+                    <Input id="smtp-username" />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="smtp-password">Password</Label>
-                    <Input id="smtp-password" type="password" defaultValue="••••••••••••••••" />
+                    <Input id="smtp-password" type="password" />
                   </div>
                 </CardContent>
               </Card>
@@ -846,21 +739,21 @@ export default function AdminSettingsPage() {
                       <Label>Auto Backup</Label>
                       <p className="text-sm text-muted-foreground">Automatically backup data daily</p>
                     </div>
-                    <Switch defaultChecked />
+                    <Switch />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="backup-time">Backup Time</Label>
-                    <Input id="backup-time" type="time" defaultValue="02:00" />
+                    <Input id="backup-time" type="time" />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="retention">Retention Period (days)</Label>
-                    <Input id="retention" type="number" defaultValue="30" />
+                    <Input id="retention" type="number" />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="backup-location">Backup Location</Label>
-                    <Select defaultValue="cloud">
+                    <Select>
                       <SelectTrigger>
-                        <SelectValue />
+                        <SelectValue placeholder="Select location" />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="local">Local Storage</SelectItem>
@@ -880,7 +773,7 @@ export default function AdminSettingsPage() {
                 <CardContent className="space-y-4">
                   <Alert>
                     <AlertTriangle className="h-4 w-4" />
-                    <AlertDescription>Last backup: January 15, 2024 at 2:00 AM</AlertDescription>
+                    <AlertDescription>No backup has been created yet</AlertDescription>
                   </Alert>
                   <div className="space-y-2">
                     <Button className="w-full">
@@ -891,23 +784,6 @@ export default function AdminSettingsPage() {
                       <Upload className="mr-2 h-4 w-4" />
                       Restore from Backup
                     </Button>
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Recent Backups</Label>
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between p-2 border rounded">
-                        <span className="text-sm">backup_2024-01-15.sql</span>
-                        <Button variant="ghost" size="sm">
-                          <Download className="h-4 w-4" />
-                        </Button>
-                      </div>
-                      <div className="flex items-center justify-between p-2 border rounded">
-                        <span className="text-sm">backup_2024-01-14.sql</span>
-                        <Button variant="ghost" size="sm">
-                          <Download className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </div>
                   </div>
                 </CardContent>
               </Card>
@@ -952,28 +828,28 @@ export default function AdminSettingsPage() {
                   <div className="space-y-2">
                     <div className="flex justify-between text-sm">
                       <span>Database</span>
-                      <span>1.2 GB</span>
+                      <span>0 GB</span>
                     </div>
                     <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div className="bg-blue-600 h-2 rounded-full" style={{ width: "60%" }}></div>
+                      <div className="bg-blue-600 h-2 rounded-full" style={{ width: "0%" }}></div>
                     </div>
                   </div>
                   <div className="space-y-2">
                     <div className="flex justify-between text-sm">
                       <span>Files & Documents</span>
-                      <span>800 MB</span>
+                      <span>0 GB</span>
                     </div>
                     <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div className="bg-green-600 h-2 rounded-full" style={{ width: "40%" }}></div>
+                      <div className="bg-green-600 h-2 rounded-full" style={{ width: "0%" }}></div>
                     </div>
                   </div>
                   <div className="space-y-2">
                     <div className="flex justify-between text-sm">
                       <span>Backups</span>
-                      <span>400 MB</span>
+                      <span>0 GB</span>
                     </div>
                     <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div className="bg-yellow-600 h-2 rounded-full" style={{ width: "20%" }}></div>
+                      <div className="bg-yellow-600 h-2 rounded-full" style={{ width: "0%" }}></div>
                     </div>
                   </div>
                   <Button variant="outline" className="w-full">
@@ -1006,100 +882,71 @@ export default function AdminSettingsPage() {
 
             <Card>
               <CardHeader>
-                <CardTitle>Recent Activities</CardTitle>
-                <CardDescription>Latest system activities and user actions</CardDescription>
+                <CardTitle>Audit Configuration</CardTitle>
+                <CardDescription>Configure audit logging settings</CardDescription>
               </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {auditLogs.map((log) => (
-                    <div key={log.id} className="flex items-center justify-between p-4 border rounded-lg">
-                      <div className="flex items-center space-x-4">
-                        <div
-                          className={`w-2 h-2 rounded-full ${log.status === "Success" ? "bg-green-500" : "bg-red-500"}`}
-                        ></div>
-                        <div>
-                          <p className="font-medium">{log.action}</p>
-                          <p className="text-sm text-muted-foreground">
-                            {log.user} • {log.timestamp}
-                          </p>
-                        </div>
-                      </div>
-                      <Badge variant={log.status === "Success" ? "default" : "destructive"}>{log.status}</Badge>
-                    </div>
-                  ))}
+              <CardContent className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="space-y-0.5">
+                    <Label>Log User Actions</Label>
+                    <p className="text-sm text-muted-foreground">Track all user activities</p>
+                  </div>
+                  <Switch />
+                </div>
+                <div className="flex items-center justify-between">
+                  <div className="space-y-0.5">
+                    <Label>Log System Events</Label>
+                    <p className="text-sm text-muted-foreground">Track system-level events</p>
+                  </div>
+                  <Switch />
+                </div>
+                <div className="flex items-center justify-between">
+                  <div className="space-y-0.5">
+                    <Label>Log API Calls</Label>
+                    <p className="text-sm text-muted-foreground">Track API requests and responses</p>
+                  </div>
+                  <Switch />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="log-retention">Log Retention (days)</Label>
+                  <Input id="log-retention" type="number" />
                 </div>
               </CardContent>
             </Card>
 
-            <div className="grid gap-6 md:grid-cols-2">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Audit Configuration</CardTitle>
-                  <CardDescription>Configure audit logging settings</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div className="space-y-0.5">
-                      <Label>Log User Actions</Label>
-                      <p className="text-sm text-muted-foreground">Track all user activities</p>
-                    </div>
-                    <Switch defaultChecked />
+            <Card>
+              <CardHeader>
+                <CardTitle>Security Monitoring</CardTitle>
+                <CardDescription>Monitor security-related events</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="space-y-0.5">
+                    <Label>Failed Login Attempts</Label>
+                    <p className="text-sm text-muted-foreground">Monitor failed login attempts</p>
                   </div>
-                  <div className="flex items-center justify-between">
-                    <div className="space-y-0.5">
-                      <Label>Log System Events</Label>
-                      <p className="text-sm text-muted-foreground">Track system-level events</p>
-                    </div>
-                    <Switch defaultChecked />
+                  <Switch />
+                </div>
+                <div className="flex items-center justify-between">
+                  <div className="space-y-0.5">
+                    <Label>Permission Changes</Label>
+                    <p className="text-sm text-muted-foreground">Track permission modifications</p>
                   </div>
-                  <div className="flex items-center justify-between">
-                    <div className="space-y-0.5">
-                      <Label>Log API Calls</Label>
-                      <p className="text-sm text-muted-foreground">Track API requests and responses</p>
-                    </div>
-                    <Switch />
+                  <Switch />
+                </div>
+                <div className="flex items-center justify-between">
+                  <div className="space-y-0.5">
+                    <Label>Data Access</Label>
+                    <p className="text-sm text-muted-foreground">Log sensitive data access</p>
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="log-retention">Log Retention (days)</Label>
-                    <Input id="log-retention" type="number" defaultValue="90" />
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle>Security Monitoring</CardTitle>
-                  <CardDescription>Monitor security-related events</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div className="space-y-0.5">
-                      <Label>Failed Login Attempts</Label>
-                      <p className="text-sm text-muted-foreground">Monitor failed login attempts</p>
-                    </div>
-                    <Switch defaultChecked />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div className="space-y-0.5">
-                      <Label>Permission Changes</Label>
-                      <p className="text-sm text-muted-foreground">Track permission modifications</p>
-                    </div>
-                    <Switch defaultChecked />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div className="space-y-0.5">
-                      <Label>Data Access</Label>
-                      <p className="text-sm text-muted-foreground">Log sensitive data access</p>
-                    </div>
-                    <Switch defaultChecked />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="alert-threshold">Alert Threshold</Label>
-                    <Input id="alert-threshold" type="number" defaultValue="5" />
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
+                  <Switch />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="alert-threshold">Alert Threshold</Label>
+                  <Input id="alert-threshold" type="number" />
+                </div>
+              </CardContent>
+            </Card>
           </TabsContent>
         </Tabs>
       </div>

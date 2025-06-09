@@ -71,10 +71,16 @@ export default function MemberDashboard() {
   const totalContributionsTrend = dashboardData.totalContributionsTrend !== undefined ? dashboardData.totalContributionsTrend : 0; // Use backend trend
 
   const activeLoanBalance = dashboardData.activeLoanBalance !== undefined ? dashboardData.activeLoanBalance : dashboardData.loans.filter(l => l.status === "approved" || l.status === "active").reduce((sum, l) => sum + (l.amount || 0), 0);
-  const activeLoanTrend = dashboardData.activeLoanTrend !== undefined ? dashboardData.activeLoanTrend : 0; // Use backend trend
-  const isLoanTrendPositive = dashboardData.isLoanTrendPositive !== undefined ? dashboardData.isLoanTrendPositive : false; // Use backend trend
 
-  const monthlyTargetAmount = dashboardData.monthlyTargetAmount !== undefined ? dashboardData.monthlyTargetAmount : 5000; // Use backend target
+  // Determine if the user has ever borrowed a loan
+  const hasLoanHistory = dashboardData.loans && dashboardData.loans.length > 0;
+  const hasActiveLoan = activeLoanBalance > 0;
+
+  // If no loan history, trend is 0
+  const activeLoanTrend = (!hasLoanHistory || !hasActiveLoan) ? 0 : (dashboardData.activeLoanTrend !== undefined ? dashboardData.activeLoanTrend : 0);
+  const isLoanTrendPositive = (!hasLoanHistory || !hasActiveLoan) ? true : (dashboardData.isLoanTrendPositive !== undefined ? dashboardData.isLoanTrendPositive : false);
+
+  const monthlyTargetAmount = dashboardData.monthlyTargetAmount !== undefined ? dashboardData.monthlyTargetAmount : 50000; // Use backend target
   const currentMonthContributed = dashboardData.currentMonthContributed !== undefined ? dashboardData.currentMonthContributed : dashboardData.contributions.filter(c => new Date(c.date).getMonth() === new Date().getMonth()).reduce((sum, c) => sum + (c.amount || 0), 0);
   const monthlyProgressPercentage = dashboardData.monthlyProgressPercentage !== undefined ? dashboardData.monthlyProgressPercentage : (monthlyTargetAmount === 0 ? 0 : (currentMonthContributed / monthlyTargetAmount) * 100);
 
@@ -124,7 +130,7 @@ export default function MemberDashboard() {
     {
       id: 1,
       title: "Contribution Confirmed",
-      message: "Your KES 5,000 contribution has been confirmed",
+      message: "Your KES 50,000 contribution has been confirmed",
       time: "2 hours ago",
       type: "success",
     },
