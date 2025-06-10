@@ -1040,7 +1040,7 @@ export default function LandingPage() {
               </div>
             </div>
 
-            {/* Product */}
+            
             <div>
               <h3 className="font-semibold mb-6">Product</h3>
               <ul className="space-y-3 text-gray-400">
