@@ -2,10 +2,11 @@ const User = require('../models/User');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const nodemailer = require('nodemailer');
+const { generateMemberCode } = require('../utils/memberCodeGenerator');
 
 // Member Registration
 exports.register = async (req, res) => {
-  const { name, email, password, phone, role, memberCode } = req.body;
+  const { name, email, password, phone, role } = req.body;
   if (email === 'admin@saccosmart.com') {
     return res.status(403).json({ message: 'Cannot register as admin' });
   }
@@ -15,6 +16,9 @@ exports.register = async (req, res) => {
     if (existingUser) {
       return res.status(409).json({ message: 'Account already exists.' });
     }
+
+    // Generate unique member code
+    const memberCode = await generateMemberCode();
 
     const hash = await bcrypt.hash(password, 10);
     const user = await User.create({
@@ -26,7 +30,7 @@ exports.register = async (req, res) => {
       memberCode,
       joinDate: new Date()
     });
-    res.json({ message: 'Registration successful. You can now log in.' });
+    res.json({ message: 'Registration successful. You can now log in.', memberCode });
   } catch (err) {
     res.status(400).json({ error: err.message });
   }

@@ -23,7 +23,6 @@ export default function RegisterPage() {
     password: "",
     confirmPassword: "",
     role: "",
-    memberCode: "",
   })
   const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
@@ -67,11 +66,10 @@ export default function RegisterPage() {
         password: formData.password,
         phone: formData.phone,
         role: formData.role,
-        memberCode: formData.memberCode,
       });
       toast({
         title: "Registration Successful",
-        description: response.data.message,
+        description: `Your member code is: ${response.data.memberCode}. Please save this code for future reference.`,
       });
       router.push("/auth/login");
     } catch (err: any) {
@@ -101,7 +99,7 @@ export default function RegisterPage() {
       {/* Dark Overlay */}
       <div className="absolute inset-0 bg-black/60 z-10" />
       {/* Form Content */}
-      <div className="relative z-20 w-full max-w-md mx-auto p-8 bg-white/90 rounded-xl shadow-xl backdrop-blur-md">
+      <div className="relative z-20 w-full max-w-md mx-auto p-4 bg-white/90 rounded-xl shadow-xl backdrop-blur-md">
         {/* Back to Home Button */}
         <div className="w-full max-w-md mb-4 flex justify-center">
           <Link href="/landing">
@@ -122,7 +120,7 @@ export default function RegisterPage() {
             <CardTitle className="text-2xl font-bold text-sacco-blue">Join SaccoSmart</CardTitle>
             <CardDescription>Create your SACCO account</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-2">
             <div className="space-y-2">
               <Label htmlFor="name">Full Name</Label>
               <Input
@@ -164,16 +162,6 @@ export default function RegisterPage() {
                   <SelectItem value="member">Member</SelectItem>
                 </SelectContent>
               </Select>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="memberCode">Member Code</Label>
-              <Input
-                id="memberCode"
-                placeholder="Enter your member code"
-                value={formData.memberCode}
-                onChange={(e) => handleInputChange("memberCode", e.target.value)}
-                required
-              />
             </div>
             <div className="space-y-2">
               <Label htmlFor="password">Password</Label>
@@ -239,6 +227,10 @@ export default function RegisterPage() {
             >
               {isLoading ? "Registering..." : "Register"}
             </Button>
+            <div className="text-center text-sm text-gray-600">
+              Already have an account?{' '}
+              <Link href="/auth/login" className="text-sacco-blue hover:underline font-semibold">Sign in</Link>
+            </div>
           </CardFooter>
         </Card>
       </div>

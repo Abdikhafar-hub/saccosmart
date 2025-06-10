@@ -4,7 +4,10 @@ const Report = require('../models/Report');
 const auth = require('../middleware/auth');
 const multer = require('multer');
 const path = require('path');
-const sendEmail = require('../utils/email');
+const sendEmail = require('../utils/sendEmail.js');
+
+
+
 
 // Configure multer for file uploads
 const storage = multer.diskStorage({

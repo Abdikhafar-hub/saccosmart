@@ -7,9 +7,34 @@ const http = require('http');
 const socketIo = require('socket.io');
 
 const app = express();
+
+// Middleware
 app.use(cors());
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
+// Detailed request logging middleware
+app.use((req, res, next) => {
+  console.log('\n=== Incoming Request ===');
+  console.log('Time:', new Date().toISOString());
+  console.log('Method:', req.method);
+  console.log('URL:', req.url);
+  console.log('Headers:', req.headers);
+  console.log('Body:', req.body);
+  console.log('Query:', req.query);
+  console.log('Params:', req.params);
+  next();
+});
+
+// Test route to verify server is running
+app.get('/', (req, res) => {
+  res.json({ message: 'SaccoSmart USSD server is running' });
+});
+
+// USSD route - register this first
+app.use('/ussd', require('./routes/ussd'));
+
+// MongoDB connection
 mongoose.connect(process.env.MONGODB_URI, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
@@ -21,7 +46,10 @@ mongoose.connect(process.env.MONGODB_URI, {
     process.exit(1);
 });
 
+// Static files
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
+// API routes
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/contribution', require('./routes/contribution'));
 app.use('/api/loan', require('./routes/loan'));
@@ -82,6 +110,26 @@ io.on('connection', (socket) => {
 
 // Attach the Socket.IO instance to the app
 app.set('io', io);
+
+// Error handling middleware
+app.use((err, req, res, next) => {
+  console.error('Global Error:', err);
+  if (req.path.startsWith('/ussd')) {
+    res.status(500).send('END An error occurred. Please try again later.');
+  } else {
+    res.status(500).json({ error: 'Something went wrong!' });
+  }
+});
+
+// 404 handler
+app.use((req, res) => {
+  console.log('404 Not Found:', req.method, req.url);
+  if (req.path.startsWith('/ussd')) {
+    res.status(404).send('END Invalid USSD request');
+  } else {
+    res.status(404).json({ error: 'Not found' });
+  }
+});
 
 const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => console.log(` 📡 Server running on port ${PORT}`));
