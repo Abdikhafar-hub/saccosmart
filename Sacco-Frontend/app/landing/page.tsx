@@ -35,7 +35,7 @@ import {
 } from "lucide-react"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import { ChatModal } from '../components/ChatModal'
+import { ChatModal } from '@/components/ChatModal'
 
 // Animated Counter Component
 function AnimatedCounter({
