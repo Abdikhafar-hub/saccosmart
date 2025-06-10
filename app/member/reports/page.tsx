@@ -22,6 +22,7 @@ import { Badge } from "@/components/ui/badge"
 import { Download, FileText, BarChart3, TrendingUp, Banknote, Eye, Mail } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { LoadingSpinner } from "@/components/ui/loading-spinner"
+import axios from "axios"
 
 // Function to fetch loan data
 const fetchLoanData = async () => {
@@ -60,12 +61,23 @@ export default function MemberReports() {
   const [contributionData, setContributionData] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
+  const [user, setUser] = useState<{ name: string; email: string; role: string } | null>(null)
 
-  const user = {
-    name: "John Doe",
-    email: "john.doe@example.com",
-    role: "Member",
-  }
+  // Fetch user info on mount (similar to dashboard)
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const token = localStorage.getItem("token")
+        const res = await axios.get("http://localhost:5000/api/dashboard/member", {
+          headers: { Authorization: `Bearer ${token}` }
+        })
+        setUser(res.data.user)
+      } catch (err) {
+        // fallback: do nothing, user stays null
+      }
+    }
+    fetchUser()
+  }, [])
 
   useEffect(() => {
     const fetchData = async () => {
@@ -88,7 +100,7 @@ export default function MemberReports() {
     fetchData()
   }, [])
 
-  if (loading) return <LoadingSpinner fullScreen />
+  if (loading || !user) return <LoadingSpinner fullScreen />
   if (error) return <div className="text-red-500">{error}</div>
 
   const handleGenerateReport = () => {

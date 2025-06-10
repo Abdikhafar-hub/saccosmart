@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { DashboardLayout } from "@/components/layout/dashboard-layout"
 import { StatsCard } from "@/components/ui/stats-card"
 import { ChartCard } from "@/components/ui/chart-card"
@@ -40,6 +40,8 @@ import {
 import { useToast } from "@/hooks/use-toast"
 import axios from "axios"
 import { LoadingSpinner } from "@/components/ui/loading-spinner"
+import jsPDF from "jspdf"
+import html2canvas from "html2canvas"
 
 interface Contribution {
   _id: string
@@ -86,6 +88,7 @@ export default function AdminContributions() {
   const [contributions, setContributions] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
+  const receiptRef = useRef<HTMLDivElement>(null)
 
   const user = {
     name: "Admin User",
@@ -167,7 +170,7 @@ export default function AdminContributions() {
     const method = c.method || "Other"
     methodCounts[method] = (methodCounts[method] || 0) + 1
   })
-  const memberCategories = Object.entries(methodCounts).map(([name, value]) => ({ name, value }))
+  const paymentMethods = Object.entries(methodCounts).map(([name, value]) => ({ name, value }))
 
   // Table columns (customize as needed)
   const columns = [
@@ -223,8 +226,8 @@ export default function AdminContributions() {
       sortable: true,
       render: (value: string, row: any) => (
         <div>
-          <p className="font-medium">{value}</p>
-          <p className="text-sm text-gray-500">{row.memberId}</p>
+          <p className="font-medium">{row.user?.name || "N/A"}</p>
+          <p className="text-sm text-gray-500">{row.user?.email || ""}</p>
         </div>
       ),
     },
@@ -266,13 +269,13 @@ export default function AdminContributions() {
       ),
     },
     {
-      key: "timestamp",
+      key: "date",
       label: "Date & Time",
       sortable: true,
-      render: (value: string) => (
+      render: (value: string, row: any) => (
         <div>
-          <p className="text-sm">{new Date(value).toLocaleDateString()}</p>
-          <p className="text-xs text-gray-500">{new Date(value).toLocaleTimeString()}</p>
+          <p className="text-sm">{row.date && !isNaN(Date.parse(row.date)) ? new Date(row.date).toLocaleDateString() : "N/A"}</p>
+          <p className="text-xs text-gray-500">{row.date && !isNaN(Date.parse(row.date)) ? new Date(row.date).toLocaleTimeString() : ""}</p>
         </div>
       ),
     },
@@ -323,8 +326,8 @@ export default function AdminContributions() {
       sortable: true,
       render: (value: string, row: any) => (
         <div>
-          <p className="font-medium">{value}</p>
-          <p className="text-sm text-gray-500">{row.memberId}</p>
+          <p className="font-medium">{row.user?.name || "N/A"}</p>
+          <p className="text-sm text-gray-500">{row.user?.email || ""}</p>
         </div>
       ),
     },
@@ -395,7 +398,7 @@ export default function AdminContributions() {
             <Eye className="h-3 w-3 mr-1" />
             View
           </Button>
-          <Button size="sm" variant="outline" onClick={() => downloadReceipt(row.id)}>
+          <Button size="sm" variant="outline" onClick={downloadReceipt}>
             <Download className="h-3 w-3" />
           </Button>
         </div>
@@ -522,11 +525,18 @@ export default function AdminContributions() {
     })
   }
 
-  const downloadReceipt = (contributionId: string) => {
-    toast({
-      title: "Download Started",
-      description: `Downloading receipt for contribution ${contributionId}`,
-    })
+  const downloadReceipt = async () => {
+    if (!selectedContribution) return;
+    const input = receiptRef.current;
+    if (!input) return;
+    const canvas = await html2canvas(input);
+    const imgData = canvas.toDataURL('image/png');
+    const pdf = new jsPDF({ orientation: 'portrait', unit: 'pt', format: 'a4' });
+    const imgProps = pdf.getImageProperties(imgData);
+    const pdfWidth = pdf.internal.pageSize.getWidth();
+    const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+    pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+    pdf.save(`receipt_${selectedContribution._id}.pdf`);
   }
 
   const viewMemberHistory = (memberId: string) => {
@@ -765,18 +775,18 @@ export default function AdminContributions() {
           </Card>
           <Card>
             <CardHeader>
-              <CardTitle>Member Categories</CardTitle>
+              <CardTitle>Payment Methods</CardTitle>
             </CardHeader>
             <CardContent>
-          <ChartCard
-            title="Member Categories"
-            description="Distribution by membership type"
-            type="pie"
-            data={memberCategories}
-            dataKey="value"
-            xAxisKey="name"
-          />
-              {memberCategories.length === 0 && (
+              <ChartCard
+                title="Payment Methods"
+                description="Distribution by payment method"
+                type="pie"
+                data={paymentMethods}
+                dataKey="value"
+                xAxisKey="name"
+              />
+              {paymentMethods.length === 0 && (
                 <div className="text-center text-gray-500 py-8">
                   No data available
                 </div>
@@ -819,11 +829,16 @@ export default function AdminContributions() {
 
         {/* Contribution Management Tabs */}
         <Tabs defaultValue="pending" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="pending">Pending Verification ({pendingContributions.length})</TabsTrigger>
-            <TabsTrigger value="verified">Verified ({verifiedContributions.length})</TabsTrigger>
-            <TabsTrigger value="rejected">Rejected ({rejectedContributions.length})</TabsTrigger>
-            <TabsTrigger value="members">Member Summary</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="pending" style={{ fontSize: 20, fontWeight: 700 }}>
+              Pending Verification ({pendingContributions.length})
+            </TabsTrigger>
+            <TabsTrigger value="verified" style={{ fontSize: 20, fontWeight: 700 }}>
+              Verified ({verifiedContributions.length})
+            </TabsTrigger>
+            <TabsTrigger value="rejected" style={{ fontSize: 20, fontWeight: 700 }}>
+              Rejected ({rejectedContributions.length})
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="pending" className="space-y-6">
@@ -909,29 +924,6 @@ export default function AdminContributions() {
               exportable={true}
             />
           </TabsContent>
-
-          <TabsContent value="members" className="space-y-6">
-            <div className="flex justify-between items-center">
-              <h3 className="text-lg font-semibold">Member Contribution Summary</h3>
-              <div className="flex space-x-2">
-                <Button onClick={sendReminders} variant="outline">
-                  <Mail className="h-4 w-4 mr-2" />
-                  Send Reminders
-                </Button>
-                <Button variant="outline">
-                  <Download className="h-4 w-4 mr-2" />
-                  Export Summary
-                </Button>
-              </div>
-            </div>
-            <DataTable
-              data={contributions}
-              columns={memberSummaryColumns}
-              searchable={true}
-              filterable={true}
-              exportable={true}
-            />
-          </TabsContent>
         </Tabs>
 
         {/* Contribution Details Dialog */}
@@ -942,89 +934,122 @@ export default function AdminContributions() {
               <DialogDescription>Complete contribution information and verification details</DialogDescription>
             </DialogHeader>
             {selectedContribution && (
-              <div className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div
+                ref={receiptRef}
+                style={{
+                  maxWidth: 500,
+                  margin: "0 auto",
+                  background: "#fff",
+                  border: "1px solid #e5e7eb",
+                  borderRadius: 8,
+                  padding: 32,
+                  fontFamily: "Poppins, Arial, sans-serif",
+                  boxSizing: "border-box",
+                  width: 500,
+                  minWidth: 320,
+                }}
+              >
+                <div style={{ textAlign: "center", marginBottom: 24 }}>
+                  <h2 style={{ color: "#2563eb", margin: 0, fontWeight: 700 }}>SaccoSmart Receipt</h2>
+                  <div style={{ color: "#64748b", fontSize: 14 }}>Contribution Confirmation</div>
+                      </div>
+                <table style={{ width: "100%", marginBottom: 24, borderCollapse: "collapse", tableLayout: "fixed" }}>
+                  <tbody>
+                    <tr>
+                      <td colSpan={2} style={{ background: "#f1f5f9", fontWeight: 600, padding: 8, color: "#2563eb", textAlign: "center" }}>
+                        Transaction Information
+                      </td>
+                      <td colSpan={2} style={{ background: "#f1f5f9", fontWeight: 600, padding: 8, color: "#2563eb", textAlign: "center" }}>
+                        Member Information
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style={{ fontWeight: 500, padding: 6, wordBreak: "break-all", overflowWrap: "break-word", width: 110 }}>Transaction ID:</td>
+                      <td style={{ padding: 6, wordBreak: "break-all", overflowWrap: "break-word" }}>{selectedContribution._id}</td>
+                      <td style={{ fontWeight: 500, padding: 6, width: 60 }}>Name:</td>
+                      <td style={{ padding: 6, wordBreak: "break-all", overflowWrap: "break-word" }}>{selectedContribution.user?.name}</td>
+                    </tr>
+                    <tr>
+                      <td style={{ fontWeight: 500, padding: 6 }}>Amount:</td>
+                      <td style={{ padding: 6, color: "#16a34a", fontWeight: 600 }}>
+                        KES {selectedContribution.amount?.toLocaleString()}
+                      </td>
+                      <td style={{ fontWeight: 500, padding: 6 }}>Email:</td>
+                      <td style={{ padding: 6, wordBreak: "break-all", overflowWrap: "break-word" }}>{selectedContribution.user?.email}</td>
+                    </tr>
+                    <tr>
+                      <td style={{ fontWeight: 500, padding: 6 }}>Method:</td>
+                      <td style={{ padding: 6 }}>{selectedContribution.method}</td>
+                      <td style={{ fontWeight: 500, padding: 6 }}>Date:</td>
+                      <td style={{ padding: 6 }}>{new Date(selectedContribution.date).toLocaleString()}</td>
+                    </tr>
+                    <tr>
+                      <td style={{ fontWeight: 500, padding: 6 }}>Reference:</td>
+                      <td style={{ padding: 6, wordBreak: "break-all", overflowWrap: "break-word" }}>{selectedContribution.mpesaCode || selectedContribution.bankRef}</td>
+                      <td style={{ fontWeight: 500, padding: 6 }}>Type:</td>
+                      <td style={{ padding: 6 }}>{selectedContribution.contributionType}</td>
+                    </tr>
+                  </tbody>
+                </table>
+                <div style={{ marginBottom: 16 }}>
+                  <div style={{ fontWeight: 600, color: "#2563eb", marginBottom: 4 }}>Reference Note</div>
+                  <div
+                    style={{
+                      background: "#f1f5f9",
+                      borderRadius: 4,
+                      padding: 10,
+                      color: "#334155",
+                      fontSize: 14,
+                      minHeight: 32,
+                      wordBreak: "break-all",
+                      overflowWrap: "break-word",
+                    }}
+                  >
+                    {selectedContribution.reference}
+                      </div>
+                      </div>
+                {selectedContribution.verifiedBy && (
+                  <div style={{ marginBottom: 16 }}>
+                    <div style={{ fontWeight: 600, color: "#16a34a", marginBottom: 4 }}>Verification Details</div>
+                    <div style={{ fontSize: 14 }}>
                   <div>
-                    <h4 className="font-semibold mb-3">Transaction Information</h4>
-                    <div className="space-y-2 text-sm">
-                      <div className="flex justify-between">
-                        <span>Transaction ID:</span>
-                        <span className="font-medium">{selectedContribution._id}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span>Amount:</span>
-                        <span className="font-medium">KES {selectedContribution.amount?.toLocaleString()}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span>Method:</span>
-                        <span className="font-medium">{selectedContribution.method}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span>Reference:</span>
-                        <span className="font-medium">
-                          {selectedContribution.mpesaCode || selectedContribution.bankRef}
-                        </span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span>Type:</span>
-                        <span className="font-medium">{selectedContribution.contributionType}</span>
-                      </div>
-                    </div>
-                  </div>
-                  <div>
-                    <h4 className="font-semibold mb-3">Member Information</h4>
-                    <div className="space-y-2 text-sm">
-                      <div className="flex justify-between">
-                        <span>Name:</span>
-                        <span className="font-medium">{selectedContribution.user?.name}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span>Email:</span>
-                        <span className="font-medium">{selectedContribution.user?.email}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span>Date:</span>
-                        <span className="font-medium">{new Date(selectedContribution.date).toLocaleString()}</span>
-                      </div>
-                    </div>
-                  </div>
+                        <span style={{ color: "#64748b" }}>Verified by:</span> {selectedContribution.verifiedBy}
                 </div>
                 <div>
-                  <h4 className="font-semibold mb-3">Reference Note</h4>
-                  <p className="text-sm text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-gray-800 p-3 rounded-lg">
-                    {selectedContribution.reference}
-                  </p>
-                </div>
-                {selectedContribution.verifiedBy && (
-                  <div>
-                    <h4 className="font-semibold mb-3">Verification Details</h4>
-                    <div className="text-sm space-y-1">
-                      <p>
-                        <span className="text-gray-600 dark:text-gray-400">Verified by:</span>{" "}
-                        {selectedContribution.verifiedBy}
-                      </p>
-                      <p>
-                        <span className="text-gray-600 dark:text-gray-400">Verified at:</span>{" "}
+                        <span style={{ color: "#64748b" }}>Verified at:</span>{" "}
                         {new Date(selectedContribution.verifiedAt).toLocaleString()}
-                      </p>
+                      </div>
                     </div>
                   </div>
                 )}
                 {selectedContribution.rejectionReason && (
-                  <div>
-                    <h4 className="font-semibold mb-3 text-red-600">Rejection Reason</h4>
-                    <p className="text-sm text-red-600 bg-red-50 dark:bg-red-900/20 p-3 rounded-lg">
+                  <div style={{ marginBottom: 16 }}>
+                    <div style={{ fontWeight: 600, color: "#dc2626", marginBottom: 4 }}>Rejection Reason</div>
+                    <div
+                      style={{
+                        background: "#fee2e2",
+                        borderRadius: 4,
+                        padding: 10,
+                        color: "#dc2626",
+                        fontSize: 14,
+                        wordBreak: "break-all",
+                        overflowWrap: "break-word",
+                      }}
+                    >
                       {selectedContribution.rejectionReason}
-                    </p>
+                    </div>
                   </div>
                 )}
+                <div style={{ textAlign: "center", marginTop: 32, color: "#64748b", fontSize: 13 }}>
+                  Thank you for your contribution!
+                </div>
               </div>
             )}
             <DialogFooter>
               <Button variant="outline" onClick={() => setIsDetailsOpen(false)}>
                 Close
               </Button>
-              <Button>
+              <Button onClick={downloadReceipt}>
                 <Download className="h-4 w-4 mr-2" />
                 Download Receipt
               </Button>

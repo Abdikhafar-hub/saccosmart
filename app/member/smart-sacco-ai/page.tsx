@@ -8,6 +8,7 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { cn } from "@/lib/utils"
 import { DashboardLayout } from "@/components/layout/dashboard-layout"
 import { LoadingSpinner } from "@/components/ui/loading-spinner"
+import axios from "axios"
 
 interface Message {
   id: string
@@ -28,13 +29,7 @@ export default function SmartSaccoAI() {
   const [error, setError] = useState("")
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
-
-  // Add user object for DashboardLayout
-  const user = {
-    name: "John Doe",
-    email: "john.doe@example.com",
-    role: "member",
-  }
+  const [user, setUser] = useState<{ name: string; email: string; role: string } | null>(null)
 
   // Load saved messages from localStorage
   useEffect(() => {
@@ -63,6 +58,22 @@ export default function SmartSaccoAI() {
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
   }, [messages])
+
+  // Fetch user info on mount (similar to dashboard)
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const token = localStorage.getItem("token")
+        const res = await axios.get("http://localhost:5000/api/dashboard/member", {
+          headers: { Authorization: `Bearer ${token}` }
+        })
+        setUser(res.data.user)
+      } catch (err) {
+        // fallback: do nothing, user stays null
+      }
+    }
+    fetchUser()
+  }, [])
 
   // Replace getAIResponse with backend fetch
   const getAIResponse = async (userInput: string) => {
@@ -152,7 +163,7 @@ export default function SmartSaccoAI() {
     }, 1500)
   }
 
-  if (loading) return <LoadingSpinner fullScreen />
+  if (loading || !user) return <LoadingSpinner fullScreen />
   if (error) return <div className="text-red-500">{error}</div>
 
   return (

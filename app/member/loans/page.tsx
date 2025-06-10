@@ -101,12 +101,23 @@ export default function MemberLoans() {
   const [isProcessing, setIsProcessing] = useState(false)
   const [paymentHistory, setPaymentHistory] = useState<Payment[]>([])
   const { toast } = useToast()
+  const [user, setUser] = useState<{ name: string; email: string; role: string } | null>(null)
 
-  const user = {
-    name: "John Doe",
-    email: "john.doe@example.com",
-    role: "Member",
-  }
+  // Fetch user info on mount (similar to dashboard)
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const token = localStorage.getItem("token")
+        const res = await axios.get("http://localhost:5000/api/dashboard/member", {
+          headers: { Authorization: `Bearer ${token}` }
+        })
+        setUser(res.data.user)
+      } catch (err) {
+        // fallback: do nothing, user stays null
+      }
+    }
+    fetchUser()
+  }, [])
 
   // Fetch all loan-related data from backend
   const fetchLoanData = async () => {
@@ -228,7 +239,7 @@ export default function MemberLoans() {
     return loanData.loanLimit
   }
 
-  if (loading) return <LoadingSpinner fullScreen />
+  if (loading || !user) return <LoadingSpinner fullScreen />
   if (error) return <div className="text-red-500">{error}</div>
 
   return (

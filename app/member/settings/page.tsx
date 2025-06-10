@@ -43,6 +43,7 @@ import {
 import { useToast } from "@/hooks/use-toast"
 import { useTheme } from "next-themes"
 import axios from "axios"
+import { LoadingSpinner } from "@/components/ui/loading-spinner"
 
 export default function MemberSettings() {
   const [profileData, setProfileData] = useState({
@@ -94,11 +95,26 @@ export default function MemberSettings() {
   const { toast } = useToast()
   const { theme, setTheme } = useTheme()
 
-  const user = {
-    name: "John Doe",
-    email: "john.doe@example.com",
-    role: "Member",
-  }
+  const [user, setUser] = useState<{ name: string; email: string; role: string } | null>(null)
+
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const token = localStorage.getItem("token")
+        const res = await axios.get("http://localhost:5000/api/dashboard/member", {
+          headers: { Authorization: `Bearer ${token}` }
+        })
+        setUser(res.data.user)
+      } catch (err) {
+        // fallback: do nothing, user stays null
+      } finally {
+        setLoading(false)
+      }
+    }
+    fetchUser()
+  }, [])
 
   const handleProfileUpdate = () => {
     toast({
@@ -230,6 +246,8 @@ export default function MemberSettings() {
   useEffect(() => {
     // Call updateSettings when needed, e.g., after form submission
   }, []);
+
+  if (loading || !user) return <LoadingSpinner fullScreen />
 
   return (
     <DashboardLayout role="member" user={user}>

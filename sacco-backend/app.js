@@ -44,6 +44,7 @@ const contactRoutes = require('./routes/contact');
 const aiRoutes = require('./routes/ai');
 const smsRoutes = require('./routes/sms');
 const emailRoutes = require('./routes/email');
+const reportRoutes = require('./routes/reports');
 
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/analytics', analyticsRoutes);
@@ -54,6 +55,7 @@ app.use('/api/contact', contactRoutes);
 app.use('/api/ai', aiRoutes);
 app.use('/api/sms', smsRoutes);
 app.use('/api', emailRoutes);
+app.use('/api/reports', reportRoutes);
 
 app.use('/api/payments', require('./routes/mpesaPayments'));
 app.use('/api/card', require('./routes/cardPayments'));

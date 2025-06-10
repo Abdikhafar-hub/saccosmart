@@ -14,6 +14,7 @@ import { Mail, Phone, Clock, Send, Ticket } from "lucide-react"
 import { useState, useEffect } from "react"
 import axios from "axios"
 import { LoadingSpinner } from "@/components/ui/loading-spinner"
+import { useToast } from "@/components/ui/use-toast"
 
 const supportTickets = [
   {
@@ -35,6 +36,7 @@ const supportTickets = [
 ]
 
 export default function MemberSupportPage() {
+  const { toast } = useToast()
   const [formData, setFormData] = useState({
     subject: "",
     category: "",
@@ -44,6 +46,7 @@ export default function MemberSupportPage() {
   const [tickets, setTickets] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
+  const [user, setUser] = useState<{ name: string; email: string; role: string } | null>(null)
 
   // Fetch member's own tickets
   useEffect(() => {
@@ -65,6 +68,22 @@ export default function MemberSupportPage() {
     fetchTickets()
   }, [])
 
+  // Fetch user info on mount (similar to dashboard)
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const token = localStorage.getItem("token")
+        const res = await axios.get("http://localhost:5000/api/dashboard/member", {
+          headers: { Authorization: `Bearer ${token}` }
+        })
+        setUser(res.data.user)
+      } catch (err) {
+        // fallback: do nothing, user stays null
+      }
+    }
+    fetchUser()
+  }, [])
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     try {
@@ -78,13 +97,29 @@ export default function MemberSupportPage() {
         },
         { headers: { Authorization: `Bearer ${token}` } }
       )
+      
+      // Show success notification
+      toast({
+        title: "Ticket Submitted Successfully",
+        description: "The admin has received your concern and will respond to you shortly.",
+        duration: 5000,
+      })
+
       setFormData({ subject: "", category: "", priority: "", description: "" })
+      
       // Refresh tickets
       const res = await axios.get("http://localhost:5000/api/support/my", {
         headers: { Authorization: `Bearer ${token}` }
       })
       setTickets(res.data)
     } catch (err) {
+      // Show error notification
+      toast({
+        title: "Error",
+        description: "Failed to submit ticket. Please try again.",
+        variant: "destructive",
+        duration: 5000,
+      })
       setError("Failed to submit ticket")
     }
   }
@@ -102,8 +137,10 @@ export default function MemberSupportPage() {
     }
   }
 
+  if (loading || !user) return <LoadingSpinner fullScreen />
+
   return (
-    <DashboardLayout role="member" user={{ name: "John Doe", email: "john@example.com", role: "member" }}>
+    <DashboardLayout role="member" user={user}>
       <div className="space-y-6">
         {/* Header */}
         <div>

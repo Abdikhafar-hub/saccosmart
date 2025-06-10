@@ -45,7 +45,7 @@ interface StatusData {
   value: number;
 }
 
-export const generatePDFReport = async () => {
+export const generatePDFReport = async (): Promise<Blob> => {
   const doc = new jsPDF();
 
   const token = localStorage.getItem("token");
@@ -113,7 +113,6 @@ export const generatePDFReport = async () => {
   autoTable(doc, {
     head: [["Name", "Email"]],
     body: (dashboardData.members as Member[]).map((m) => [m.name, m.email]),
-
     startY: getNextY(),
     theme: 'grid',
     headStyles: { fillColor: [155, 89, 182] },
@@ -166,6 +165,6 @@ export const generatePDFReport = async () => {
   doc.addImage(lineChartImage, "PNG", 10, chartY, 90, 50);
   doc.addImage(pieChartImage, "PNG", 110, chartY, 90, 50);
 
-  // Save the report
-  doc.save("SaccoSmart_Report_June_2025.pdf");
+  // Return the PDF as a blob
+  return doc.output('blob');
 };

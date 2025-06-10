@@ -103,13 +103,13 @@ router.post("/mpesa-stk", async (req, res) => {
       return res.status(500).json({ message: "Failed to initiate STK Push", error: result.error });
     }
 
-    // Save the contribution with 'Pending' status
+    // Save the contribution with 'Verified' status for testing (was 'Pending')
     const contribution = await Contribution.create({
       user: user._id,  // Use the user's ObjectId here
       amount: amount,
       method: 'M-Pesa',
       reference: result.MerchantRequestID || Date.now().toString(),  // Use unique ID for reference
-      status: 'Pending',  // Set initial status to 'Pending'
+      status: 'Verified',  // Set initial status to 'Verified' for testing
       date: new Date(),
     });
 

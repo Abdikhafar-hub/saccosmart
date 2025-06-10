@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import {
   FileText,
   Calendar,
@@ -60,6 +60,12 @@ export default function AdminReportsPage() {
   const [recentReports, setRecentReports] = useState<{ id: string; name: string; type: string; date: string; status: string; format: string; }[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [stats, setStats] = useState({
+    totalReports: 0,
+    monthlyReports: 0,
+    scheduledReports: 0,
+    downloads: 0
+  });
 
   // Mock user for layout
   const user = {
@@ -69,32 +75,238 @@ export default function AdminReportsPage() {
     avatar: "/placeholder.svg?height=32&width=32",
   }
 
+  // Fetch reports and stats on component mount
+  useEffect(() => {
+    const fetchReportsAndStats = async () => {
+      setLoading(true);
+      try {
+        const token = localStorage.getItem("token");
+        const [reportsRes, statsRes] = await Promise.all([
+          fetch("http://localhost:5000/api/reports", {
+            headers: { Authorization: `Bearer ${token}` }
+          }),
+          fetch("http://localhost:5000/api/reports/stats", {
+            headers: { Authorization: `Bearer ${token}` }
+          })
+        ]);
+
+        if (!reportsRes.ok || !statsRes.ok) {
+          throw new Error("Failed to fetch data");
+        }
+
+        const reports = await reportsRes.json();
+        const statsData = await statsRes.json();
+
+        setRecentReports(reports.map((report: any) => ({
+          id: report._id,
+          name: report.name,
+          type: report.type,
+          date: new Date(report.createdAt).toISOString().split('T')[0],
+          status: report.status,
+          format: report.format
+        })));
+
+        setStats(statsData);
+      } catch (err) {
+        setError("Failed to load reports");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchReportsAndStats();
+  }, []);
+
   const handleGenerateReport = async () => {
     setIsGenerating(true);
     setLoading(true);
     setError(null);
 
     try {
-      await generatePDFReport();
+      // Generate the PDF report
+      const pdfBlob = await generatePDFReport();
+      
+      // Create form data for file upload
+      const formData = new FormData();
+      formData.append('file', pdfBlob, 'report.pdf');
+      formData.append('name', 'Generated Report');
+      formData.append('type', selectedReportType);
+      formData.append('format', 'PDF');
+
+      // Save the report to the backend
+      const token = localStorage.getItem("token");
+      const response = await fetch("http://localhost:5000/api/reports", {
+        method: 'POST',
+        headers: { 
+          Authorization: `Bearer ${token}`
+        },
+        body: formData
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to save report");
+      }
+
+      const savedReport = await response.json();
+      
+      // Add the new report to the list
+      setRecentReports([{
+        id: savedReport._id,
+        name: savedReport.name,
+        type: savedReport.type,
+        date: new Date(savedReport.createdAt).toISOString().split('T')[0],
+        status: savedReport.status,
+        format: savedReport.format
+      }, ...recentReports]);
+
+      // Update stats
+      setStats(prev => ({
+        ...prev,
+        totalReports: prev.totalReports + 1,
+        monthlyReports: prev.monthlyReports + 1
+      }));
+
       setIsGenerating(false);
       setShowGenerateDialog(false);
-
-      // Add the new report to the recent reports
-      const newReport = {
-        id: `REP-${recentReports.length + 1}`.padStart(7, '0'),
-        name: "Generated Report",
-        type: selectedReportType,
-        date: new Date().toISOString().split('T')[0],
-        status: "Generated",
-        format: "PDF",
-      };
-      setRecentReports([...recentReports, newReport]);
     } catch (e) {
       setIsGenerating(false);
       setShowGenerateDialog(false);
       setError("An error occurred while generating the report.");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleDownload = async (reportId: string) => {
+    try {
+      const token = localStorage.getItem("token");
+      const response = await fetch(`http://localhost:5000/api/reports/${reportId}/download`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to download report");
+      }
+
+      // Get the filename from the Content-Disposition header or use a default
+      const contentDisposition = response.headers.get('Content-Disposition');
+      const filename = contentDisposition
+        ? contentDisposition.split('filename=')[1].replace(/"/g, '')
+        : 'report.pdf';
+
+      // Convert the response to a blob
+      const blob = await response.blob();
+      
+      // Create a download link and trigger it
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+
+      // Update download count in stats
+      setStats(prev => ({
+        ...prev,
+        downloads: prev.downloads + 1
+      }));
+    } catch (error) {
+      setError("Failed to download report");
+    }
+  };
+
+  const handlePrint = async (reportId: string) => {
+    try {
+      const token = localStorage.getItem("token");
+      const response = await fetch(`http://localhost:5000/api/reports/${reportId}/download`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to load report for printing");
+      }
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      
+      // Create an iframe for printing
+      const iframe = document.createElement('iframe');
+      iframe.style.display = 'none';
+      document.body.appendChild(iframe);
+      
+      iframe.onload = () => {
+        try {
+          iframe.contentWindow?.print();
+        } catch (error) {
+          console.error('Print failed:', error);
+        }
+        // Clean up
+        setTimeout(() => {
+          document.body.removeChild(iframe);
+          window.URL.revokeObjectURL(url);
+        }, 1000);
+      };
+      
+      iframe.src = url;
+    } catch (error) {
+      setError("Failed to print report");
+    }
+  };
+
+  const handleShare = async (reportId: string) => {
+    try {
+      const token = localStorage.getItem("token");
+      const response = await fetch(`http://localhost:5000/api/reports/${reportId}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to get report details");
+      }
+
+      const report = await response.json();
+      
+      // Use Web Share API if available
+      if (navigator.share) {
+        await navigator.share({
+          title: report.name,
+          text: `Check out this ${report.type} report from SaccoSmart`,
+          url: window.location.href
+        });
+      } else {
+        // Fallback: Copy link to clipboard
+        const shareUrl = `${window.location.origin}/admin/reports/${reportId}`;
+        await navigator.clipboard.writeText(shareUrl);
+        alert('Report link copied to clipboard!');
+      }
+    } catch (error) {
+      setError("Failed to share report");
+    }
+  };
+
+  const handleEmail = async (reportId: string) => {
+    try {
+      const token = localStorage.getItem("token");
+      const response = await fetch(`http://localhost:5000/api/reports/${reportId}/email`, {
+        method: 'POST',
+        headers: { 
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          recipients: prompt('Enter email addresses (comma-separated):')
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to send report via email");
+      }
+
+      alert('Report sent successfully!');
+    } catch (error) {
+      setError("Failed to send report via email");
     }
   };
 
@@ -115,22 +327,27 @@ export default function AdminReportsPage() {
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           <StatsCard
             title="Total Reports Generated"
-            value="0"
+            value={stats.totalReports.toString()}
             description="This month"
             icon={FileText}
-            trend={{ value: 0, isPositive: true }}
+            trend={{ value: stats.monthlyReports, isPositive: true }}
           />
           <StatsCard
             title="Scheduled Reports"
-            value="0"
+            value={stats.scheduledReports.toString()}
             description="Active schedules"
             icon={Calendar}
             trend={{ value: 0, isPositive: true }}
           />
-          <StatsCard title="Report Templates" value="0" description="Available templates" icon={FileBarChart} />
+          <StatsCard 
+            title="Report Templates" 
+            value="0" 
+            description="Available templates" 
+            icon={FileBarChart} 
+          />
           <StatsCard
             title="Downloads"
-            value="0"
+            value={stats.downloads.toString()}
             description="This month"
             icon={Download}
             trend={{ value: 0, isPositive: true }}
@@ -274,9 +491,13 @@ export default function AdminReportsPage() {
                 {
                   key: "actions",
                   label: "Actions",
-                  render: () => (
+                  render: (_, row) => (
                     <div className="flex space-x-2">
-                      <Button size="sm" variant="outline">
+                      <Button 
+                        size="sm" 
+                        variant="outline"
+                        onClick={() => handleDownload(row.id)}
+                      >
                         <Download className="h-4 w-4 mr-1" />
                         Download
                       </Button>
@@ -287,15 +508,15 @@ export default function AdminReportsPage() {
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent>
-                          <DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => handlePrint(row.id)}>
                             <Printer className="h-4 w-4 mr-2" />
                             Print
                           </DropdownMenuItem>
-                          <DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => handleEmail(row.id)}>
                             <Mail className="h-4 w-4 mr-2" />
                             Email
                           </DropdownMenuItem>
-                          <DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => handleShare(row.id)}>
                             <Share2 className="h-4 w-4 mr-2" />
                             Share
                           </DropdownMenuItem>

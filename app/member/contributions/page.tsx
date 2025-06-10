@@ -49,12 +49,7 @@ export default function MemberContributions() {
   const [isMpesaProcessing, setIsMpesaProcessing] = useState(false)
   const [mpesaError, setMpesaError] = useState("")
   const paystackScriptLoaded = useRef(false)
-
-  const user = {
-    name: "John Doe",
-    email: "john.doe@example.com",
-    role: "Member",
-  }
+  const [user, setUser] = useState<{ name: string; email: string; role: string } | null>(null)
 
   const fetchContributions = async () => {
     setLoading(true)
@@ -87,6 +82,21 @@ export default function MemberContributions() {
     }
   }, [])
   
+  // Fetch user info on mount (similar to dashboard)
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const token = localStorage.getItem("token")
+        const res = await axios.get("http://localhost:5000/api/dashboard/member", {
+          headers: { Authorization: `Bearer ${token}` }
+        })
+        setUser(res.data.user)
+      } catch (err) {
+        // fallback: do nothing, user stays null
+      }
+    }
+    fetchUser()
+  }, [])
 
   const columns = [
     {
@@ -328,20 +338,34 @@ export default function MemberContributions() {
   
   
 
-  if (loading) return <LoadingSpinner fullScreen />
+  if (loading || !user) return <LoadingSpinner fullScreen />
   if (error) return <div className="text-red-500">{error}</div>
 
-  const total = contributions.reduce((sum, c) => sum + (c.amount || 0), 0)
+  // Only include verified/success contributions in totals
+  const approvedStatuses = ["Verified", "success"];
+  const total = contributions
+    .filter(c => approvedStatuses.includes((c.status || '')))
+    .reduce((sum, c) => sum + (c.amount || 0), 0);
+
   const thisMonth = contributions
-    .filter((c) => new Date(c.date).getMonth() === new Date().getMonth())
-    .reduce((sum, c) => sum + (c.amount || 0), 0)
+    .filter(
+      c =>
+        approvedStatuses.includes((c.status || '')) &&
+        new Date(c.date).getMonth() === new Date().getMonth()
+    )
+    .reduce((sum, c) => sum + (c.amount || 0), 0);
+
+  const approvedContributions = contributions.filter(c => approvedStatuses.includes((c.status || '')));
   const avgMonthly =
-    contributions.length > 0
+    approvedContributions.length > 0
       ? Math.round(
-          contributions.reduce((sum, c) => sum + (c.amount || 0), 0) /
-            Math.max(1, new Set(contributions.map((c) => new Date(c.date).getMonth())).size)
+          approvedContributions.reduce((sum, c) => sum + (c.amount || 0), 0) /
+            Math.max(
+              1,
+              new Set(approvedContributions.map(c => new Date(c.date).getMonth())).size
+            )
         )
-      : 0
+      : 0;
 
   return (
     <DashboardLayout role="member" user={user}>
@@ -430,7 +454,7 @@ export default function MemberContributions() {
                       <span className="font-medium">Card Payment</span>
                     </div>
                     <p className="text-sm text-gray-600 dark:text-gray-400">
-                      Card payment coming soon. For now, this is a placeholder.
+                    Card payment is integrated using Paystack. For now, this is a sandbox test simulating a real scenario. Due to regulations, I couldn't simulate the real implementation, but the payment will go through successfully once the system is fully integrated, click pay with card and click the four lines at the top and proceed.
                     </p>
                   </div>
                 )}
@@ -478,10 +502,8 @@ export default function MemberContributions() {
                               setMpesaError("");
                               try {
                                 let formattedPhone = phone.replace(/\D/g, '');
-
-                                
                                 if (formattedPhone.startsWith("07") && formattedPhone.length === 10) {
-                                  formattedPhone = "254" + formattedPhone.substring(1); 
+                                  formattedPhone = "254" + formattedPhone.substring(1);
                                 } else if (formattedPhone.startsWith("254") && formattedPhone.length === 12) {
                                   // already valid
                                 } else {
@@ -489,7 +511,6 @@ export default function MemberContributions() {
                                   setIsMpesaProcessing(false);
                                   return;
                                 }
-
                                 const token = localStorage.getItem("token");
                                 const memberId = user.email;
                                 await axios.post(
@@ -508,6 +529,8 @@ export default function MemberContributions() {
                                 });
                                 setIsMpesaModalOpen(false);
                                 setPhone("");
+                                // Immediately refresh the table after payment initiation
+                                fetchContributions();
                               } catch (err: any) {
                                 setMpesaError(err.response?.data?.message || "Failed to initiate M-Pesa payment");
                               } finally {

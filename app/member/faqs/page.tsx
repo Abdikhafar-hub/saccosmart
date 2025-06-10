@@ -6,7 +6,9 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { Search, MessageSquare, DollarSign, CreditCard, User } from "lucide-react"
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import axios from "axios"
+import { LoadingSpinner } from "@/components/ui/loading-spinner"
 
 const faqData = [
   {
@@ -42,6 +44,8 @@ const faqData = [
 export default function MemberFAQsPage() {
   const [searchTerm, setSearchTerm] = useState("")
   const [selectedCategory, setSelectedCategory] = useState("All")
+  const [user, setUser] = useState<{ name: string; email: string; role: string } | null>(null)
+  const [loading, setLoading] = useState(true)
 
   const categories = ["All", "Contributions", "Loans", "Account", "General"]
 
@@ -66,8 +70,27 @@ export default function MemberFAQsPage() {
     }
   }
 
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const token = localStorage.getItem("token")
+        const res = await axios.get("http://localhost:5000/api/dashboard/member", {
+          headers: { Authorization: `Bearer ${token}` }
+        })
+        setUser(res.data.user)
+      } catch (err) {
+        // fallback: do nothing, user stays null
+      } finally {
+        setLoading(false)
+      }
+    }
+    fetchUser()
+  }, [])
+
+  if (loading || !user) return <LoadingSpinner fullScreen />
+
   return (
-    <DashboardLayout role="member" user={{ name: "John Doe", email: "john@example.com", role: "member" }}>
+    <DashboardLayout role="member" user={user}>
       <div className="space-y-6">
         {/* Header */}
         <div>

@@ -10,6 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Bell, CheckCircle, Clock, Mail, AlertCircle, Info } from "lucide-react"
 import { io } from 'socket.io-client'
 import { LoadingSpinner } from "@/components/ui/loading-spinner"
+import axios from 'axios'
 
 interface Notification {
   _id: string;
@@ -27,12 +28,7 @@ export default function MemberNotificationsPage() {
 
   const [activeTab, setActiveTab] = useState("all")
 
-  const user = {
-    name: "John Doe",
-    email: "john.doe@example.com",
-    role: "Member",
-    avatar: "/placeholder.svg?height=32&width=32",
-  }
+  const [user, setUser] = useState<{ name: string; email: string; role: string } | null>(null)
 
   useEffect(() => {
     const fetchNotifications = async () => {
@@ -66,6 +62,21 @@ export default function MemberNotificationsPage() {
       socket.disconnect();
     };
   }, []);
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const token = localStorage.getItem("token")
+        const res = await axios.get("http://localhost:5000/api/dashboard/member", {
+          headers: { Authorization: `Bearer ${token}` }
+        })
+        setUser(res.data.user)
+      } catch (err) {
+        // fallback: do nothing, user stays null
+      }
+    }
+    fetchUser()
+  }, [])
 
   const markAsRead = (id: string) => {}
   const markAllAsRead = () => {}
@@ -126,7 +137,7 @@ export default function MemberNotificationsPage() {
     },
   }
 
-  if (loading) return <LoadingSpinner fullScreen />
+  if (loading || !user) return <LoadingSpinner fullScreen />
   if (error) return <div className="text-red-500">{error}</div>
 
   return (

@@ -33,6 +33,7 @@ export default function MemberDocumentsPage() {
   const [error, setError] = useState("")
   const [search, setSearch] = useState("")
   const [typeFilter, setTypeFilter] = useState("")
+  const [user, setUser] = useState<{ name: string; email: string; role: string } | null>(null)
 
   useEffect(() => {
     const fetchDocs = async () => {
@@ -53,6 +54,21 @@ export default function MemberDocumentsPage() {
     fetchDocs()
   }, [])
 
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const token = localStorage.getItem("token")
+        const res = await axios.get("http://localhost:5000/api/dashboard/member", {
+          headers: { Authorization: `Bearer ${token}` }
+        })
+        setUser(res.data.user)
+      } catch (err) {
+        // fallback: do nothing, user stays null
+      }
+    }
+    fetchUser()
+  }, [])
+
   // Filter by search and type
   const filtered = documents.filter(doc =>
     (doc.title.toLowerCase().includes(search.toLowerCase()) ||
@@ -63,11 +79,11 @@ export default function MemberDocumentsPage() {
   // Get unique types for filter dropdown
   const types = Array.from(new Set(documents.map(doc => doc.type)))
 
-  if (loading) return <LoadingSpinner fullScreen />
+  if (loading || !user) return <LoadingSpinner fullScreen />
   if (error) return <div className="text-red-500">{error}</div>
 
   return (
-    <DashboardLayout role="member" user={{ name: "Member", email: "member@sacco.com", role: "member" }}>
+    <DashboardLayout role="member" user={user}>
       <div className="space-y-6">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>

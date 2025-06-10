@@ -234,14 +234,14 @@ export default function AdminSupportPage() {
                 <Phone className="h-5 w-5 text-sacco-blue" />
                 <div>
                   <p className="font-medium">Support Hotline</p>
-                  <p className="text-sm text-gray-600">+254 700 123 456</p>
+                  <p className="text-sm text-gray-600">+254 717 219 448</p>
                 </div>
               </div>
               <div className="flex items-center space-x-3">
                 <MapPin className="h-5 w-5 text-sacco-blue" />
                 <div>
                   <p className="font-medium">Office Address</p>
-                  <p className="text-sm text-gray-600">123 SACCO Plaza, Nairobi, Kenya</p>
+                  <p className="text-sm text-gray-600">The Arch Place, Nairobi, Kenya</p>
                 </div>
               </div>
               <div className="flex items-center space-x-3">

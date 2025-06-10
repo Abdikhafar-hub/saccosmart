@@ -55,7 +55,9 @@ exports.getAllContributions = async (req, res) => {
 exports.getMemberContributions = async (req, res) => {
   try {
     const userId = req.user.id;
-    const contributions = await Contribution.find({ user: userId }).sort({ date: -1 });
+    const contributions = await Contribution.find({ user: userId })
+      .populate("user", "name email")
+      .sort({ date: -1 });
     res.json(contributions);
   } catch (err) {
     res.status(500).json({ error: "Failed to fetch contributions" });
