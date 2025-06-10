@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "typeRoots": ["Sacco-Frontend/node_modules/@types", "Sacco-Frontend/app/types"],
+    "typeRoots": ["node_modules/@types", "app/types"],
     "types": [],
     "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
@@ -30,7 +30,7 @@
     "**/*.ts",
     "**/*.tsx",
     ".next/types/**/*.ts",
-    "Sacco-Frontend/app/types/**/*.d.ts"
+    "app/types/**/*.d.ts"
   ],
-  "exclude": ["Sacco-Frontend/node_modules"]
+  "exclude": ["node_modules"]
 }
