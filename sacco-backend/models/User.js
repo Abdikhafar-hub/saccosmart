@@ -20,6 +20,7 @@ const userSchema = new mongoose.Schema({
   lastOtpSentAt: Date,
   firstName: { type: String },
   lastName: { type: String },
+  avatar: { type: String },
 });
 
 module.exports = mongoose.model('User', userSchema);

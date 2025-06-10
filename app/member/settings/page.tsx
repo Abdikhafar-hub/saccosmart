@@ -57,6 +57,7 @@ export default function MemberSettings() {
     nextOfKin: "",
     nextOfKinPhone: "",
     bio: "",
+    avatar: "",
   })
 
   const [notifications, setNotifications] = useState({
@@ -107,6 +108,13 @@ export default function MemberSettings() {
           headers: { Authorization: `Bearer ${token}` }
         })
         setUser(res.data.user)
+        setProfileData(prev => ({
+          ...prev,
+          firstName: res.data.user.firstName || "",
+          lastName: res.data.user.lastName || "",
+          email: res.data.user.email || "",
+          avatar: res.data.user.avatar || "",
+        }))
       } catch (err) {
         // fallback: do nothing, user stays null
       } finally {
@@ -174,12 +182,18 @@ export default function MemberSettings() {
 
       try {
         const token = localStorage.getItem('token');
-        const response = await axios.post('/api/member/avatar', formData, {
+        const response = await axios.post('http://localhost:5000/api/member/avatar', formData, {
           headers: {
             'Content-Type': 'multipart/form-data',
             Authorization: `Bearer ${token}`,
           },
         });
+        
+        setProfileData(prev => ({
+          ...prev,
+          avatar: response.data.avatar
+        }));
+
         toast({
           title: "Success",
           description: response.data.message,
@@ -187,9 +201,17 @@ export default function MemberSettings() {
       } catch (error: any) {
         toast({
           title: "Error",
-          description: error.response ? error.response.data : "An error occurred",
+          description: error.response?.data?.message || "An error occurred while uploading the avatar",
+          variant: "destructive",
         });
       }
+    }
+  };
+
+  const handleAvatarButtonClick = () => {
+    const fileInput = document.getElementById('avatar-upload') as HTMLInputElement;
+    if (fileInput) {
+      fileInput.click();
     }
   };
 
@@ -280,19 +302,28 @@ export default function MemberSettings() {
                 {/* Avatar Section */}
                 <div className="flex items-center space-x-6">
                   <Avatar className="h-24 w-24">
-                    <AvatarImage src="/placeholder.svg" alt="Profile" />
+                    <AvatarImage src={profileData.avatar || "/placeholder.svg"} alt="Profile" />
                     <AvatarFallback className="text-lg">
                       {profileData.firstName[0]}
                       {profileData.lastName[0]}
                     </AvatarFallback>
                   </Avatar>
                   <div>
-                    <Button className="mb-2">
+                    <Button 
+                      onClick={handleAvatarButtonClick}
+                      className="mb-2 relative"
+                    >
                       <Camera className="h-4 w-4 mr-2" />
-                      <input type="file" onChange={handleAvatarUpload} accept="image/*" />
                       Change Avatar
                     </Button>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">JPG, PNG or GIF. Max size 2MB.</p>
+                    <input 
+                      type="file" 
+                      onChange={handleAvatarUpload} 
+                      accept="image/*" 
+                      className="hidden"
+                      id="avatar-upload"
+                    />
+                    <p className="text-sm text-gray-600 dark:text-gray-400">JPG, PNG or GIF. Max size 5MB.</p>
                   </div>
                 </div>
 

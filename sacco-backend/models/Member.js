@@ -12,6 +12,7 @@ const memberSchema = new mongoose.Schema({
   bio: { type: String },
   nextOfKin: { type: String },
   nextOfKinPhone: { type: String },
+  avatar: { type: String },
   role: { 
     type: String, 
     enum: ['member', 'treasurer', 'admin'],

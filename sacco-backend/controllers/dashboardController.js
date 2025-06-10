@@ -4,8 +4,8 @@ const User = require('../models/User');
 
 exports.memberDashboard = async (req, res) => {
   try {
-  const userId = req.user.id;
-    const user = await User.findById(userId).select('name email role');
+    const userId = req.user.id;
+    const user = await User.findById(userId).select('name email role avatar');
     if (!user) {
       return res.status(400).json({ error: "User not found" });
     }
