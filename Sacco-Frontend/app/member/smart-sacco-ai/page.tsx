@@ -163,7 +163,7 @@ export default function SmartSaccoAI() {
     }, 1500)
   }
 
-  if (loading || !user) return <LoadingSpinner fullScreen />
+  if (!user) return <LoadingSpinner fullScreen />
   if (error) return <div className="text-red-500">{error}</div>
 
   return (
