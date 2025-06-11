@@ -369,15 +369,15 @@ export default function MemberContributions() {
 
   return (
     <DashboardLayout role="member" user={user}>
-      <div className="space-y-6">
-        <div className="flex justify-between items-center">
+      <div className="space-y-6 px-2 sm:px-4 md:px-8">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Contributions</h1>
-            <p className="text-gray-600 dark:text-gray-400">Manage your SACCO contributions and view history</p>
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">Contributions</h1>
+            <p className="text-gray-600 dark:text-gray-400 text-sm sm:text-base">Manage your SACCO contributions and view history</p>
           </div>
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
-              <Button className="bg-sacco-blue hover:bg-sacco-blue/90">
+              <Button className="bg-sacco-blue hover:bg-sacco-blue/90 w-full sm:w-auto">
                 <CreditCard className="h-4 w-4 mr-2" />
                 Make Contribution
               </Button>
@@ -609,14 +609,18 @@ export default function MemberContributions() {
           </Card>
         </div>
 
-        <DataTable
-          data={contributions}
-          columns={columns}
-          title="Contribution History"
-          searchable={true}
-          filterable={true}
-          exportable={true}
-        />
+        <div className="overflow-x-auto rounded-lg">
+          <div className="min-w-[350px]">
+            <DataTable
+              data={contributions}
+              columns={columns}
+              title="Contribution History"
+              searchable={true}
+              filterable={true}
+              exportable={true}
+            />
+          </div>
+        </div>
       </div>
     </DashboardLayout>
   )
