@@ -80,8 +80,8 @@ export default function AdminNotificationsPage() {
       try {
         const token = localStorage.getItem("token")
         const [summaryRes, notificationsRes] = await Promise.all([
-          axios.get("http://localhost:5000/api/notifications/summary", { headers: { Authorization: `Bearer ${token}` } }),
-          axios.get("http://localhost:5000/api/notifications", { headers: { Authorization: `Bearer ${token}` } }),
+          axios.get("https://saccosmart.onrender.com/api/notifications/summary", { headers: { Authorization: `Bearer ${token}` } }),
+          axios.get("https://saccosmart.onrender.com/api/notifications", { headers: { Authorization: `Bearer ${token}` } }),
         ])
         setSummary(summaryRes.data)
         setNotifications(notificationsRes.data)
@@ -99,7 +99,7 @@ export default function AdminNotificationsPage() {
     const fetchMembers = async () => {
       try {
         const token = localStorage.getItem("token")
-        const res = await axios.get("http://localhost:5000/api/member/all", { headers: { Authorization: `Bearer ${token}` } })
+        const res = await axios.get("https://saccosmart.onrender.com/api/member/all", { headers: { Authorization: `Bearer ${token}` } })
         setMembers(res.data)
       } catch (err) {
         // ignore for now
@@ -130,12 +130,12 @@ export default function AdminNotificationsPage() {
         payload.target = "member"
         payload.targetMemberId = notificationForm.targetMemberId
       }
-      await axios.post("http://localhost:5000/api/notifications", payload, { headers: { Authorization: `Bearer ${token}` } })
+      await axios.post("https://saccosmart.onrender.com/api/notifications", payload, { headers: { Authorization: `Bearer ${token}` } })
       setNotificationForm({ title: "", message: "", target: "all", targetMemberId: "" })
       // Refresh data
       const [summaryRes, notificationsRes] = await Promise.all([
-        axios.get("http://localhost:5000/api/notifications/summary", { headers: { Authorization: `Bearer ${token}` } }),
-        axios.get("http://localhost:5000/api/notifications", { headers: { Authorization: `Bearer ${token}` } }),
+        axios.get("https://saccosmart.onrender.com/api/notifications/summary", { headers: { Authorization: `Bearer ${token}` } }),
+        axios.get("https://saccosmart.onrender.com/api/notifications", { headers: { Authorization: `Bearer ${token}` } }),
       ])
       setSummary(summaryRes.data)
       setNotifications(notificationsRes.data)
@@ -274,11 +274,11 @@ export default function AdminNotificationsPage() {
   const handleDeleteNotification = async (id: string) => {
     try {
       const token = localStorage.getItem("token")
-      await axios.delete(`http://localhost:5000/api/notifications/${id}`, { headers: { Authorization: `Bearer ${token}` } })
+      await axios.delete(`https://saccosmart.onrender.com/api/notifications/${id}`, { headers: { Authorization: `Bearer ${token}` } })
       // Refresh data
       const [summaryRes, notificationsRes] = await Promise.all([
-        axios.get("http://localhost:5000/api/notifications/summary", { headers: { Authorization: `Bearer ${token}` } }),
-        axios.get("http://localhost:5000/api/notifications", { headers: { Authorization: `Bearer ${token}` } }),
+        axios.get("https://saccosmart.onrender.com/api/notifications/summary", { headers: { Authorization: `Bearer ${token}` } }),
+        axios.get("https://saccosmart.onrender.com/api/notifications", { headers: { Authorization: `Bearer ${token}` } }),
       ])
       setSummary(summaryRes.data)
       setNotifications(notificationsRes.data)
@@ -296,13 +296,13 @@ export default function AdminNotificationsPage() {
     if (!editNotification) return
     try {
       const token = localStorage.getItem("token")
-      await axios.put(`http://localhost:5000/api/notifications/${editNotification._id}`, editNotification, { headers: { Authorization: `Bearer ${token}` } })
+      await axios.put(`https://saccosmart.onrender.com/api/notifications/${editNotification._id}`, editNotification, { headers: { Authorization: `Bearer ${token}` } })
       setEditDialogOpen(false)
       setEditNotification(null)
       // Refresh data
       const [summaryRes, notificationsRes] = await Promise.all([
-        axios.get("http://localhost:5000/api/notifications/summary", { headers: { Authorization: `Bearer ${token}` } }),
-        axios.get("http://localhost:5000/api/notifications", { headers: { Authorization: `Bearer ${token}` } }),
+        axios.get("https://saccosmart.onrender.com/api/notifications/summary", { headers: { Authorization: `Bearer ${token}` } }),
+        axios.get("https://saccosmart.onrender.com/api/notifications", { headers: { Authorization: `Bearer ${token}` } }),
       ])
       setSummary(summaryRes.data)
       setNotifications(notificationsRes.data)
@@ -312,7 +312,7 @@ export default function AdminNotificationsPage() {
   }
 
   useEffect(() => {
-    const socket = io('http://localhost:5000');
+    const socket = io('https://saccosmart.onrender.com');
 
     socket.on('notification', (newNotification) => {
       setNotifications((prevNotifications) => [newNotification, ...prevNotifications]);

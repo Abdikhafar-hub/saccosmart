@@ -108,7 +108,7 @@ export default function MemberLoans() {
     const fetchUser = async () => {
       try {
         const token = localStorage.getItem("token")
-        const res = await axios.get("http://localhost:5000/api/dashboard/member", {
+        const res = await axios.get("https://saccosmart.onrender.com/api/dashboard/member", {
           headers: { Authorization: `Bearer ${token}` }
         })
         setUser(res.data.user)
@@ -126,13 +126,13 @@ export default function MemberLoans() {
       try {
         const token = localStorage.getItem("token")
       // Fetch loans and loan limit data
-      const loansRes = await axios.get("http://localhost:5000/api/loan", {
+      const loansRes = await axios.get("https://saccosmart.onrender.com/api/loan", {
         headers: { Authorization: `Bearer ${token}` }
       })
       setLoanData(loansRes.data)
 
       // Fetch payment history
-      const paymentHistoryRes = await axios.get("http://localhost:5000/api/loan/payments", {
+      const paymentHistoryRes = await axios.get("https://saccosmart.onrender.com/api/loan/payments", {
           headers: { Authorization: `Bearer ${token}` }
         })
       setPaymentHistory(paymentHistoryRes.data)
@@ -172,7 +172,7 @@ export default function MemberLoans() {
     try {
       const token = localStorage.getItem("token")
       await axios.post(
-        "http://localhost:5000/api/loan/request",
+        "https://saccosmart.onrender.com/api/loan/request",
         {
           amount: Number(loanAmount),
           reason: loanReason,

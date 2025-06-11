@@ -56,7 +56,7 @@ export default function MemberContributions() {
     setError("")
     try {
       const token = localStorage.getItem("token")
-      const res = await axios.get("http://localhost:5000/api/contribution", {
+      const res = await axios.get("https://saccosmart.onrender.com/api/contribution", {
         headers: { Authorization: `Bearer ${token}` }
       })
       setContributions(res.data)
@@ -87,7 +87,7 @@ export default function MemberContributions() {
     const fetchUser = async () => {
       try {
         const token = localStorage.getItem("token")
-        const res = await axios.get("http://localhost:5000/api/dashboard/member", {
+        const res = await axios.get("https://saccosmart.onrender.com/api/dashboard/member", {
           headers: { Authorization: `Bearer ${token}` }
         })
         setUser(res.data.user)
@@ -160,7 +160,7 @@ export default function MemberContributions() {
       if (paymentDate) payload.date = paymentDate
 
       await axios.post(
-        "http://localhost:5000/api/contribution",
+        "https://saccosmart.onrender.com/api/contribution",
         payload,
         { headers: { Authorization: `Bearer ${token}` } }
       )
@@ -201,7 +201,7 @@ export default function MemberContributions() {
     try {
       // Step 1: Call backend to initiate Paystack transaction
       const res = await axios.post(
-        "http://localhost:5000/api/card/initiate",
+        "https://saccosmart.onrender.com/api/card/initiate",
         { amount: Number(amount) },
         {
           headers: { Authorization: `Bearer ${token}` },
@@ -225,7 +225,7 @@ export default function MemberContributions() {
           ;(async () => {
             try {
               await axios.get(
-                `http://localhost:5000/api/card/verify/${response.reference}`,
+                `https://saccosmart.onrender.com/api/card/verify/${response.reference}`,
                 {
                   headers: { Authorization: `Bearer ${token}` },
                 }
@@ -307,7 +307,7 @@ export default function MemberContributions() {
     try {
       // Call backend to initiate M-Pesa payment (STK Push)
       const res = await axios.post(
-        "http://localhost:5000/api/mpesa-stk",
+        "https://saccosmart.onrender.com/api/mpesa-stk",
         {
           amount: Number(amount),
           phone: phone,
@@ -514,7 +514,7 @@ export default function MemberContributions() {
                                 const token = localStorage.getItem("token");
                                 const memberId = user.email;
                                 await axios.post(
-                                  "http://localhost:5000/api/payments/mpesa-stk",
+                                  "https://saccosmart.onrender.com/api/payments/mpesa-stk",
                                   {
                                     amount: Number(amount),
                                     phone: formattedPhone,

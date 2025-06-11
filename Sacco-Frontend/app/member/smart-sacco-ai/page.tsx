@@ -64,7 +64,7 @@ export default function SmartSaccoAI() {
     const fetchUser = async () => {
       try {
         const token = localStorage.getItem("token")
-        const res = await axios.get("http://localhost:5000/api/dashboard/member", {
+        const res = await axios.get("https://saccosmart.onrender.com/api/dashboard/member", {
           headers: { Authorization: `Bearer ${token}` }
         })
         setUser(res.data.user)
@@ -78,7 +78,7 @@ export default function SmartSaccoAI() {
   // Replace getAIResponse with backend fetch
   const getAIResponse = async (userInput: string) => {
     try {
-      const res = await fetch("http://localhost:5000/api/ai/response", {
+      const res = await fetch("https://saccosmart.onrender.com/api/ai/response", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ message: userInput }),

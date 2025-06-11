@@ -47,7 +47,7 @@ export default function LoansPage() {
     setError("")
     try {
       const token = localStorage.getItem("token")
-      const loansRes = await axios.get("http://localhost:5000/api/admin/loans", {
+      const loansRes = await axios.get("https://saccosmart.onrender.com/api/admin/loans", {
         headers: { Authorization: `Bearer ${token}` }
       })
       setLoans(loansRes.data.loans || [])
@@ -88,7 +88,7 @@ export default function LoansPage() {
     try {
       const token = localStorage.getItem("token")
       await axios.post(
-        `http://localhost:5000/api/loan/admin/${loanId}/approve`,
+        `https://saccosmart.onrender.com/api/loan/admin/${loanId}/approve`,
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       )
@@ -127,7 +127,7 @@ export default function LoansPage() {
     try {
       const token = localStorage.getItem("token")
       await axios.post(
-        `http://localhost:5000/api/loan/admin/${selectedLoan._id}/reject`,
+        `https://saccosmart.onrender.com/api/loan/admin/${selectedLoan._id}/reject`,
         { reason: rejectionReason },
         { headers: { Authorization: `Bearer ${token}` } }
       )

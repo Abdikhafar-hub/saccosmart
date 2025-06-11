@@ -36,7 +36,7 @@ export default function MemberNotificationsPage() {
       setError("")
       try {
         const token = localStorage.getItem("token")
-        const res = await fetch("http://localhost:5000/api/notifications/member", {
+        const res = await fetch("https://saccosmart.onrender.com/api/notifications/member", {
           headers: { Authorization: `Bearer ${token}` },
         })
         if (!res.ok) throw new Error("Failed to fetch notifications")
@@ -52,7 +52,7 @@ export default function MemberNotificationsPage() {
   }, [])
 
   useEffect(() => {
-    const socket = io('http://localhost:5000');
+    const socket = io('https://saccosmart.onrender.com');
 
     socket.on('notification', (newNotification: Notification) => {
       setNotifications((prevNotifications) => [newNotification, ...prevNotifications]);
@@ -67,7 +67,7 @@ export default function MemberNotificationsPage() {
     const fetchUser = async () => {
       try {
         const token = localStorage.getItem("token")
-        const res = await axios.get("http://localhost:5000/api/dashboard/member", {
+        const res = await axios.get("https://saccosmart.onrender.com/api/dashboard/member", {
           headers: { Authorization: `Bearer ${token}` }
         })
         setUser(res.data.user)

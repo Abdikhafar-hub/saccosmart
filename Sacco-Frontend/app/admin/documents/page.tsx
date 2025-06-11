@@ -62,7 +62,7 @@ export default function AdminDocumentsPage() {
       setError("")
       try {
         const token = localStorage.getItem("token")
-        const res = await axios.get("http://localhost:5000/api/documents", {
+        const res = await axios.get("https://saccosmart.onrender.com/api/documents", {
           headers: { Authorization: `Bearer ${token}` }
         })
         setDocuments(res.data)
@@ -78,7 +78,7 @@ export default function AdminDocumentsPage() {
   useEffect(() => {
     const fetchTypes = async () => {
       const token = localStorage.getItem("token")
-      const res = await axios.get("http://localhost:5000/api/documents/types", {
+      const res = await axios.get("https://saccosmart.onrender.com/api/documents/types", {
         headers: { Authorization: `Bearer ${token}` }
       })
       setDocTypes(res.data)
@@ -102,7 +102,7 @@ export default function AdminDocumentsPage() {
       formData.append("title", title)
       formData.append("type", type)
       formData.append("status", status)
-      await axios.post("http://localhost:5000/api/documents", formData, {
+      await axios.post("https://saccosmart.onrender.com/api/documents", formData, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "multipart/form-data"
@@ -114,7 +114,7 @@ export default function AdminDocumentsPage() {
       setSelectedFile(null)
       if (fileInputRef.current) fileInputRef.current.value = ""
       // Refresh documents
-      const res = await axios.get("http://localhost:5000/api/documents", {
+      const res = await axios.get("https://saccosmart.onrender.com/api/documents", {
         headers: { Authorization: `Bearer ${token}` }
       })
       setDocuments(res.data)
@@ -130,7 +130,7 @@ export default function AdminDocumentsPage() {
     if (!window.confirm("Are you sure you want to delete this document?")) return
     try {
       const token = localStorage.getItem("token")
-      await axios.delete(`http://localhost:5000/api/documents/${id}`, {
+      await axios.delete(`https://saccosmart.onrender.com/api/documents/${id}`, {
         headers: { Authorization: `Bearer ${token}` }
       })
       setDocuments(docs => docs.filter(doc => doc._id !== id))

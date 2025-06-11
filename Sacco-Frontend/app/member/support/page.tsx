@@ -55,7 +55,7 @@ export default function MemberSupportPage() {
       setError("")
       try {
         const token = localStorage.getItem("token")
-        const res = await axios.get("http://localhost:5000/api/support/my", {
+        const res = await axios.get("https://saccosmart.onrender.com/api/support/my", {
           headers: { Authorization: `Bearer ${token}` }
         })
         setTickets(res.data)
@@ -73,7 +73,7 @@ export default function MemberSupportPage() {
     const fetchUser = async () => {
       try {
         const token = localStorage.getItem("token")
-        const res = await axios.get("http://localhost:5000/api/dashboard/member", {
+        const res = await axios.get("https://saccosmart.onrender.com/api/dashboard/member", {
           headers: { Authorization: `Bearer ${token}` }
         })
         setUser(res.data.user)
@@ -89,7 +89,7 @@ export default function MemberSupportPage() {
     try {
       const token = localStorage.getItem("token")
       await axios.post(
-        "http://localhost:5000/api/support",
+        "https://saccosmart.onrender.com/api/support",
         {
           ...formData,
           category: formData.category.toLowerCase(),
@@ -108,7 +108,7 @@ export default function MemberSupportPage() {
       setFormData({ subject: "", category: "", priority: "", description: "" })
       
       // Refresh tickets
-      const res = await axios.get("http://localhost:5000/api/support/my", {
+      const res = await axios.get("https://saccosmart.onrender.com/api/support/my", {
         headers: { Authorization: `Bearer ${token}` }
       })
       setTickets(res.data)

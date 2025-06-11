@@ -41,7 +41,7 @@ export default function MemberDocumentsPage() {
       setError("")
       try {
         const token = localStorage.getItem("token")
-        const res = await axios.get("http://localhost:5000/api/documents/member", {
+        const res = await axios.get("https://saccosmart.onrender.com/api/documents/member", {
           headers: { Authorization: `Bearer ${token}` }
         })
         setDocuments(res.data)
@@ -58,7 +58,7 @@ export default function MemberDocumentsPage() {
     const fetchUser = async () => {
       try {
         const token = localStorage.getItem("token")
-        const res = await axios.get("http://localhost:5000/api/dashboard/member", {
+        const res = await axios.get("https://saccosmart.onrender.com/api/dashboard/member", {
           headers: { Authorization: `Bearer ${token}` }
         })
         setUser(res.data.user)

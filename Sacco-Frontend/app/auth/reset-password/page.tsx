@@ -24,7 +24,7 @@ function ResetPasswordContent() {
     setLoading(true);
     setMsg('');
     try {
-      await axios.post('http://localhost:5000/api/auth/reset-password', { token, password });
+      await axios.post('https://saccosmart.onrender.com/api/auth/reset-password', { token, password });
       setMsg('Password reset successful! You can now log in.');
       setTimeout(() => router.push('/auth/login'), 2000);
     } catch (err: any) {

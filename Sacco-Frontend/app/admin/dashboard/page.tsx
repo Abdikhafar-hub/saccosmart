@@ -114,23 +114,23 @@ const LoanDetailsModal = ({ loan, isOpen, onClose }: { loan: Loan | null, isOpen
 export default function AdminDashboard() {
   // Top summary cards
   const { data: dashboardData, isLoading: loadingDashboard, error: errorDashboard } = useSWR(
-    "http://localhost:5000/api/dashboard/admin", fetcher
+    "https://saccosmart.onrender.com/api/dashboard/admin", fetcher
   )
   // Contributions trend
   const { data: contributionsTrend, isLoading: loadingTrend } = useSWR(
-    "http://localhost:5000/api/analytics/contributions-trend", fetcher
+    "https://saccosmart.onrender.com/api/analytics/contributions-trend", fetcher
   )
   // Loan status distribution
   const { data: loanStatusData, isLoading: loadingLoanStatus } = useSWR(
-    "http://localhost:5000/api/analytics/loan-status-distribution", fetcher
+    "https://saccosmart.onrender.com/api/analytics/loan-status-distribution", fetcher
   )
   // System alerts
   const { data: alerts, isLoading: loadingAlerts } = useSWR(
-    "http://localhost:5000/api/system/alerts", fetcher
+    "https://saccosmart.onrender.com/api/system/alerts", fetcher
   )
   // Recent activity
   const { data: recentActivities, isLoading: loadingActivity } = useSWR(
-    "http://localhost:5000/api/system/activity", fetcher
+    "https://saccosmart.onrender.com/api/system/activity", fetcher
   )
 
   const [stats, setStats] = useState<DashboardStats>({
@@ -158,10 +158,10 @@ export default function AdminDashboard() {
     try {
       const token = localStorage.getItem("token")
       const [statsRes, loansRes] = await Promise.all([
-        axios.get("http://localhost:5000/api/admin/stats", {
+        axios.get("https://saccosmart.onrender.com/api/admin/stats", {
           headers: { Authorization: `Bearer ${token}` }
         }),
-        axios.get("http://localhost:5000/api/admin/loans", {
+        axios.get("https://saccosmart.onrender.com/api/admin/loans", {
           headers: { Authorization: `Bearer ${token}` }
         })
       ])

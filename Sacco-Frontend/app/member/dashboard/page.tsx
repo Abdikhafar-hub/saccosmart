@@ -46,7 +46,7 @@ export default function MemberDashboard() {
       try {
         const token = localStorage.getItem("token")
         // Updated endpoint to fetch more stats
-        const res = await axios.get("http://localhost:5000/api/dashboard/member", {
+        const res = await axios.get("https://saccosmart.onrender.com/api/dashboard/member", {
           headers: { Authorization: `Bearer ${token}` }
         })
         setDashboardData(res.data)

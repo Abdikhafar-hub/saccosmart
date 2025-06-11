@@ -30,7 +30,7 @@ export default function LoginPage() {
     setIsLoading(true)
     setError("")
     try {
-      const res = await axios.post("http://localhost:5000/api/auth/login", {
+      const res = await axios.post("https://saccosmart.onrender.com/api/auth/login", {
         email,
         password,
       })
@@ -62,7 +62,7 @@ export default function LoginPage() {
     setForgotLoading(true)
     setForgotMsg("")
     try {
-      await axios.post("http://localhost:5000/api/auth/forgot-password", { email: forgotEmail })
+      await axios.post("https://saccosmart.onrender.com/api/auth/forgot-password", { email: forgotEmail })
       setForgotMsg("If this email exists, a reset link has been sent.")
     } catch (err: any) {
       setForgotMsg(err.response?.data?.message || "Error sending reset email")

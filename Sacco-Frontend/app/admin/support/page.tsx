@@ -39,7 +39,7 @@ export default function AdminSupportPage() {
       setError("")
       try {
         const token = localStorage.getItem("token")
-        const res = await axios.get("http://localhost:5000/api/support", {
+        const res = await axios.get("https://saccosmart.onrender.com/api/support", {
           headers: { Authorization: `Bearer ${token}` }
         })
         setTickets(res.data)
@@ -57,14 +57,14 @@ export default function AdminSupportPage() {
     try {
       const token = localStorage.getItem("token")
       await axios.post(
-        `http://localhost:5000/api/support/${ticketId}/respond`,
+        `https://saccosmart.onrender.com/api/support/${ticketId}/respond`,
         { message: reply },
         { headers: { Authorization: `Bearer ${token}` } }
       )
       setReply("")
       setReplyingTicketId(null)
       // Refresh tickets
-      const res = await axios.get("http://localhost:5000/api/support", {
+      const res = await axios.get("https://saccosmart.onrender.com/api/support", {
         headers: { Authorization: `Bearer ${token}` }
       })
       setTickets(res.data)

@@ -105,7 +105,7 @@ export default function MemberSettings() {
     const fetchUser = async () => {
       try {
         const token = localStorage.getItem("token")
-        const res = await axios.get("http://localhost:5000/api/dashboard/member", {
+        const res = await axios.get("https://saccosmart.onrender.com/api/dashboard/member", {
           headers: { Authorization: `Bearer ${token}` }
         })
         setUser(res.data.user)
@@ -183,7 +183,7 @@ export default function MemberSettings() {
 
       try {
         const token = localStorage.getItem('token');
-        const response = await axios.post('http://localhost:5000/api/member/avatar', formData, {
+        const response = await axios.post('https://saccosmart.onrender.com/api/member/avatar', formData, {
           headers: {
             'Content-Type': 'multipart/form-data',
             Authorization: `Bearer ${token}`,
@@ -238,7 +238,7 @@ export default function MemberSettings() {
   const updateSettings = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.put('/api/member/settings', {
+      const response = await axios.put('https://saccosmart.onrender.com/api/member/settings', {
         firstName: profileData.firstName,
         lastName: profileData.lastName,
         email: profileData.email,

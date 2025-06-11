@@ -82,10 +82,10 @@ export default function AdminReportsPage() {
       try {
         const token = localStorage.getItem("token");
         const [reportsRes, statsRes] = await Promise.all([
-          fetch("http://localhost:5000/api/reports", {
+          fetch("https://saccosmart.onrender.com/api/reports", {
             headers: { Authorization: `Bearer ${token}` }
           }),
-          fetch("http://localhost:5000/api/reports/stats", {
+          fetch("https://saccosmart.onrender.com/api/reports/stats", {
             headers: { Authorization: `Bearer ${token}` }
           })
         ]);
@@ -135,7 +135,7 @@ export default function AdminReportsPage() {
 
       // Save the report to the backend
       const token = localStorage.getItem("token");
-      const response = await fetch("http://localhost:5000/api/reports", {
+      const response = await fetch("https://saccosmart.onrender.com/api/reports", {
         method: 'POST',
         headers: { 
           Authorization: `Bearer ${token}`
@@ -180,7 +180,7 @@ export default function AdminReportsPage() {
   const handleDownload = async (reportId: string) => {
     try {
       const token = localStorage.getItem("token");
-      const response = await fetch(`http://localhost:5000/api/reports/${reportId}/download`, {
+      const response = await fetch(`https://saccosmart.onrender.com/api/reports/${reportId}/download`, {
         headers: { Authorization: `Bearer ${token}` }
       });
 
@@ -220,7 +220,7 @@ export default function AdminReportsPage() {
   const handlePrint = async (reportId: string) => {
     try {
       const token = localStorage.getItem("token");
-      const response = await fetch(`http://localhost:5000/api/reports/${reportId}/download`, {
+      const response = await fetch(`https://saccosmart.onrender.com/api/reports/${reportId}/download`, {
         headers: { Authorization: `Bearer ${token}` }
       });
 
@@ -258,7 +258,7 @@ export default function AdminReportsPage() {
   const handleShare = async (reportId: string) => {
     try {
       const token = localStorage.getItem("token");
-      const response = await fetch(`http://localhost:5000/api/reports/${reportId}`, {
+      const response = await fetch(`https://saccosmart.onrender.com/api/reports/${reportId}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
 
@@ -289,7 +289,7 @@ export default function AdminReportsPage() {
   const handleEmail = async (reportId: string) => {
     try {
       const token = localStorage.getItem("token");
-      const response = await fetch(`http://localhost:5000/api/reports/${reportId}/email`, {
+      const response = await fetch(`https://saccosmart.onrender.com/api/reports/${reportId}/email`, {
         method: 'POST',
         headers: { 
           Authorization: `Bearer ${token}`,

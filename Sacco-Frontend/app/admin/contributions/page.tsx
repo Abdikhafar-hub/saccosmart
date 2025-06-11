@@ -102,7 +102,7 @@ export default function AdminContributions() {
     setError("")
     try {
       const token = localStorage.getItem("token")
-      const res = await axios.get("http://localhost:5000/api/contribution/all", {
+      const res = await axios.get("https://saccosmart.onrender.com/api/contribution/all", {
         headers: { Authorization: `Bearer ${token}` }
       })
       setContributions(res.data)
@@ -125,13 +125,13 @@ export default function AdminContributions() {
         const token = localStorage.getItem("token");
         if (action === "approve") {
           await axios.put(
-            `http://localhost:5000/api/contribution/approve/${id}`,
+            `https://saccosmart.onrender.com/api/contribution/approve/${id}`,
             {},
             { headers: { Authorization: `Bearer ${token}` } }
           );
         } else if (action === "reject") {
           await axios.put(
-            `http://localhost:5000/api/contribution/reject/${id}`,
+            `https://saccosmart.onrender.com/api/contribution/reject/${id}`,
             { rejectionReason: "Rejected by admin" },
             { headers: { Authorization: `Bearer ${token}` } }
           );

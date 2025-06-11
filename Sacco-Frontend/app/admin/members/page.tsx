@@ -137,7 +137,7 @@ export default function AdminMembers() {
       setError("")
       try {
         const token = localStorage.getItem("token")
-        const res = await axios.get("http://localhost:5000/api/dashboard/members/full-summary", {
+        const res = await axios.get("https://saccosmart.onrender.com/api/dashboard/members/full-summary", {
           headers: { Authorization: `Bearer ${token}` }
         })
         setDashboard(res.data)
@@ -259,7 +259,7 @@ export default function AdminMembers() {
 
     try {
       const token = localStorage.getItem("token");
-      await axios.put(`http://localhost:5000/api/members/${selectedMember._id}`, editData, {
+      await axios.put(`https://saccosmart.onrender.com/api/members/${selectedMember._id}`, editData, {
         headers: { Authorization: `Bearer ${token}` }
       });
       toast({ title: "Success", description: "Member details updated successfully." });
@@ -281,7 +281,7 @@ export default function AdminMembers() {
     setError("");
     try {
       const token = localStorage.getItem("token");
-      const res = await axios.get("http://localhost:5000/api/dashboard/members/full-summary", {
+      const res = await axios.get("https://saccosmart.onrender.com/api/dashboard/members/full-summary", {
         headers: { Authorization: `Bearer ${token}` }
       });
       setDashboard(res.data);
@@ -303,7 +303,7 @@ export default function AdminMembers() {
 
       const token = localStorage.getItem("token");
       const response = await axios.post(
-        "http://localhost:5000/api/send-email",
+        "https://saccosmart.onrender.com/api/send-email",
         {
           to: bulkMessage.emailAddress,
           subject: "SACCO Message",
@@ -364,7 +364,7 @@ export default function AdminMembers() {
       }
 
       const response = await axios.post(
-        "http://localhost:5000/api/sms/send-bulk-sms",
+        "https://saccosmart.onrender.com/api/sms/send-bulk-sms",
         {
           message: bulkMessage.message,
           recipients: recipients

@@ -97,7 +97,7 @@ interface TransactionResponse {
 const fetchLoanData = async (): Promise<LoanResponse> => {
   try {
     const token = localStorage.getItem('token');
-    const response = await axios.get("http://localhost:5000/api/loan", {
+    const response = await axios.get("https://saccosmart.onrender.com/api/loan", {
       headers: {
         "Authorization": `Bearer ${token}`
       }
@@ -146,7 +146,7 @@ const fetchLoanData = async (): Promise<LoanResponse> => {
 const fetchContributionData = async (): Promise<ContributionResponse> => {
   try {
     const token = localStorage.getItem('token');
-    const response = await axios.get("http://localhost:5000/api/contribution", {
+    const response = await axios.get("https://saccosmart.onrender.com/api/contribution", {
       headers: {
         "Authorization": `Bearer ${token}`
       }
@@ -197,7 +197,7 @@ const fetchContributionData = async (): Promise<ContributionResponse> => {
 const fetchTransactionData = async (): Promise<TransactionResponse> => {
   try {
     const token = localStorage.getItem('token');
-    const response = await axios.get("http://localhost:5000/api/reports/stats", {
+    const response = await axios.get("https://saccosmart.onrender.com/api/reports/stats", {
       headers: {
         "Authorization": `Bearer ${token}`
       }
@@ -236,7 +236,7 @@ export default function MemberReports() {
     const fetchUser = async () => {
       try {
         const token = localStorage.getItem("token")
-        const res = await axios.get("http://localhost:5000/api/dashboard/member", {
+        const res = await axios.get("https://saccosmart.onrender.com/api/dashboard/member", {
           headers: { Authorization: `Bearer ${token}` }
         })
         setUser(res.data.user)
@@ -343,7 +343,7 @@ export default function MemberReports() {
       setLoading(true);
       const token = localStorage.getItem('token');
       const response = await axios.post(
-        "http://localhost:5000/api/reports",
+        "https://saccosmart.onrender.com/api/reports",
         {
           name: `${reportType} Report`,
           type: reportType,
