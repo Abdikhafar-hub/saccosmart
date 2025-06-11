@@ -244,14 +244,14 @@ export default function MemberLoans() {
 
   return (
     <DashboardLayout role="member" user={user}>
-      <div className="space-y-6">
+      <div className="space-y-6 px-2 sm:px-4 md:px-8">
         {/* Header */}
-        <div className="flex justify-between items-center">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Loans</h1>
-            <p className="text-gray-600 dark:text-gray-400">Manage your loan applications and track repayments</p>
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">Loans</h1>
+            <p className="text-gray-600 dark:text-gray-400 text-sm sm:text-base">Manage your loan applications and track repayments</p>
           </div>
-          <div className="flex space-x-3">
+          <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 w-full sm:w-auto">
             <Dialog open={isCalculatorOpen} onOpenChange={setIsCalculatorOpen}>
               <DialogTrigger asChild>
                 <Button variant="outline">
@@ -498,12 +498,14 @@ export default function MemberLoans() {
 
         {/* Loan Tabs */}
         <Tabs defaultValue="active" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="active">Active Loans ({activeLoans.length})</TabsTrigger>
-            <TabsTrigger value="applications">Applications ({loanApplications.length})</TabsTrigger>
-            <TabsTrigger value="history">Loan History ({loanHistory.length})</TabsTrigger>
-            <TabsTrigger value="payments">Payment History ({paymentHistory.length})</TabsTrigger>
-          </TabsList>
+          <div className="overflow-x-auto">
+            <TabsList className="grid w-full min-w-[350px] grid-cols-4">
+              <TabsTrigger value="active">Active Loans ({activeLoans.length})</TabsTrigger>
+              <TabsTrigger value="applications">Applications ({loanApplications.length})</TabsTrigger>
+              <TabsTrigger value="history">Loan History ({loanHistory.length})</TabsTrigger>
+              <TabsTrigger value="payments">Payment History ({paymentHistory.length})</TabsTrigger>
+            </TabsList>
+          </div>
 
           <TabsContent value="active" className="space-y-6">
             {activeLoans.length > 0 ? (
@@ -551,83 +553,86 @@ export default function MemberLoans() {
                     </CardContent>
                   </Card>
                 </div>
-
-                <DataTable
-                  data={activeLoans}
-                  columns={[
-                    {
-                      key: "_id",
-                      label: "Loan ID",
-                      sortable: true,
-                    },
-                    {
-                      key: "amount",
-                      label: "Amount",
-                      sortable: true,
-                      render: (value: number) => `KES ${value.toLocaleString()}`,
-                    },
-                    {
-                      key: "balance",
-                      label: "Balance",
-                      sortable: true,
-                      render: (value: number | undefined) => `KES ${(value || 0).toLocaleString()}`,
-                    },
-                    {
-                      key: "monthlyPayment",
-                      label: "Monthly Payment",
-                      render: (value: number | undefined) => `KES ${(value || 0).toLocaleString()}`,
-                    },
-                    {
-                      key: "nextDueDate",
-                      label: "Next Due",
-                      sortable: true,
-                      render: (value: string | undefined) =>
-                        value ? new Date(value).toLocaleDateString() : "N/A",
-                    },
-                    {
-                      key: "status",
-                      label: "Status",
-                      render: (value: string) => {
-                        const statusConfig = {
-                          active: { color: "bg-green-100 text-green-800", icon: CheckCircle },
-                          approved: { color: "bg-green-100 text-green-800", icon: CheckCircle },
-                          pending: { color: "bg-yellow-100 text-yellow-800", icon: Clock },
-                          completed: { color: "bg-blue-100 text-blue-800", icon: CheckCircle },
-                          rejected: { color: "bg-red-100 text-red-800", icon: XCircle },
-                        }
-                        const config = statusConfig[value as keyof typeof statusConfig] || statusConfig.pending
-                        const Icon = config.icon
-                        return (
-                          <Badge className={config.color} variant="secondary">
-                            <Icon className="h-3 w-3 mr-1" />
-                            {value}
-                          </Badge>
-                        )
-                      },
-                    },
-                    {
-                      key: "actions",
-                      label: "Actions",
-                      render: (value: any, row: any) => (
-                        <div className="flex space-x-2">
-                          <Button size="sm" variant="outline" onClick={() => viewLoanDetails(row._id)}>
-                            <Eye className="h-3 w-3 mr-1" />
-                            View
-                          </Button>
-                          {(row.status === "approved" || row.status === "active" || row.status === "completed") && (
-                            <Button size="sm" variant="outline" onClick={() => downloadStatement(row._id)}>
-                              <Download className="h-3 w-3" />
-                            </Button>
-                          )}
-                        </div>
-                      ),
-                    },
-                  ]}
-                  title="Active Loans"
-                  searchable={true}
-                  filterable={false}
-                  exportable={true}
-                />
+                <div className="overflow-x-auto rounded-lg">
+                  <div className="min-w-[350px]">
+                    <DataTable
+                      data={activeLoans}
+                      columns={[
+                        {
+                          key: "_id",
+                          label: "Loan ID",
+                          sortable: true,
+                        },
+                        {
+                          key: "amount",
+                          label: "Amount",
+                          sortable: true,
+                          render: (value: number) => `KES ${value.toLocaleString()}`,
+                        },
+                        {
+                          key: "balance",
+                          label: "Balance",
+                          sortable: true,
+                          render: (value: number | undefined) => `KES ${(value || 0).toLocaleString()}`,
+                        },
+                        {
+                          key: "monthlyPayment",
+                          label: "Monthly Payment",
+                          render: (value: number | undefined) => `KES ${(value || 0).toLocaleString()}`,
+                        },
+                        {
+                          key: "nextDueDate",
+                          label: "Next Due",
+                          sortable: true,
+                          render: (value: string | undefined) =>
+                            value ? new Date(value).toLocaleDateString() : "N/A",
+                        },
+                        {
+                          key: "status",
+                          label: "Status",
+                          render: (value: string) => {
+                            const statusConfig = {
+                              active: { color: "bg-green-100 text-green-800", icon: CheckCircle },
+                              approved: { color: "bg-green-100 text-green-800", icon: CheckCircle },
+                              pending: { color: "bg-yellow-100 text-yellow-800", icon: Clock },
+                              completed: { color: "bg-blue-100 text-blue-800", icon: CheckCircle },
+                              rejected: { color: "bg-red-100 text-red-800", icon: XCircle },
+                            }
+                            const config = statusConfig[value as keyof typeof statusConfig] || statusConfig.pending
+                            const Icon = config.icon
+                            return (
+                              <Badge className={config.color} variant="secondary">
+                                <Icon className="h-3 w-3 mr-1" />
+                                {value}
+                              </Badge>
+                            )
+                          },
+                        },
+                        {
+                          key: "actions",
+                          label: "Actions",
+                          render: (value: any, row: any) => (
+                            <div className="flex space-x-2">
+                              <Button size="sm" variant="outline" onClick={() => viewLoanDetails(row._id)}>
+                                <Eye className="h-3 w-3 mr-1" />
+                                View
+                              </Button>
+                              {(row.status === "approved" || row.status === "active" || row.status === "completed") && (
+                                <Button size="sm" variant="outline" onClick={() => downloadStatement(row._id)}>
+                                  <Download className="h-3 w-3" />
+                                </Button>
+                              )}
+                            </div>
+                          ),
+                        },
+                      ]}
+                      title="Active Loans"
+                      searchable={true}
+                      filterable={true}
+                      exportable={true}
+                    />
+                  </div>
+                </div>
               </>
             ) : (
               <Card>
@@ -656,94 +661,98 @@ export default function MemberLoans() {
 
           <TabsContent value="applications">
             {loanApplications.length > 0 ? (
-              <DataTable
-                data={loanApplications}
-                columns={[
-                  {
-                    key: "_id",
-                    label: "Application ID",
-                    sortable: true,
-                  },
-                  {
-                    key: "amount",
-                    label: "Amount",
-                    sortable: true,
-                    render: (value: number) => `KES ${value.toLocaleString()}`,
-                  },
-                  {
-                    key: "term",
-                    label: "Term",
-                  },
-                  {
-                    key: "date",
-                    label: "Applied Date",
-                    sortable: true,
-                    render: (value: string | undefined) =>
-                      value ? new Date(value).toLocaleDateString() : "N/A",
-                  },
-                  {
-                    key: "status",
-                    label: "Status",
-                    render: (value: string) => {
-                      const statusConfig = {
-                        pending: { color: "bg-yellow-100 text-yellow-800", icon: Clock },
-                        approved: { color: "bg-green-100 text-green-800", icon: CheckCircle },
-                        rejected: { color: "bg-red-100 text-red-800", icon: XCircle },
-                      }
-                      const config = statusConfig[value as keyof typeof statusConfig] || statusConfig.pending
-                      const Icon = config.icon
-                      return (
-                        <Badge className={config.color} variant="secondary">
-                          <Icon className="h-3 w-3 mr-1" />
-                          {value}
+              <div className="overflow-x-auto rounded-lg">
+                <div className="min-w-[350px]">
+                  <DataTable
+                    data={loanApplications}
+                    columns={[
+                      {
+                        key: "_id",
+                        label: "Application ID",
+                        sortable: true,
+                      },
+                      {
+                        key: "amount",
+                        label: "Amount",
+                        sortable: true,
+                        render: (value: number) => `KES ${value.toLocaleString()}`,
+                      },
+                      {
+                        key: "term",
+                        label: "Term",
+                      },
+                      {
+                        key: "date",
+                        label: "Applied Date",
+                        sortable: true,
+                        render: (value: string | undefined) =>
+                          value ? new Date(value).toLocaleDateString() : "N/A",
+                      },
+                      {
+                        key: "status",
+                        label: "Status",
+                        render: (value: string) => {
+                          const statusConfig = {
+                            pending: { color: "bg-yellow-100 text-yellow-800", icon: Clock },
+                            approved: { color: "bg-green-100 text-green-800", icon: CheckCircle },
+                            rejected: { color: "bg-red-100 text-red-800", icon: XCircle },
+                          }
+                          const config = statusConfig[value as keyof typeof statusConfig] || statusConfig.pending
+                          const Icon = config.icon
+                          return (
+                            <Badge className={config.color} variant="secondary">
+                              <Icon className="h-3 w-3 mr-1" />
+                              {value}
                             </Badge>
-                      )
-                    },
-                  },
-                  {
-                    key: "actions",
-                    label: "Actions",
-                    render: (value: any, row: any) => (
-                        <div className="flex space-x-2">
-                        <Button size="sm" variant="outline" onClick={() => viewLoanDetails(row._id)}>
-                            <Eye className="h-3 w-3 mr-1" />
-                            View
-                          </Button>
-                        {row.status === "pending" && (
-                          <AlertDialog>
-                            <AlertDialogTrigger asChild>
-                              <Button size="sm" variant="destructive">
-                                Cancel
-                              </Button>
-                            </AlertDialogTrigger>
-                            <AlertDialogContent>
-                              <AlertDialogHeader>
-                                <AlertDialogTitle>Cancel Loan Application</AlertDialogTitle>
-                                <AlertDialogDescription>
-                                  Are you sure you want to cancel this loan application? This action cannot be undone.
-                                </AlertDialogDescription>
-                              </AlertDialogHeader>
-                              <AlertDialogFooter>
-                                <AlertDialogCancel>No, Keep Application</AlertDialogCancel>
-                                <AlertDialogAction
-                                  onClick={() => toast({ title: "Cancelled", description: `Application ${row._id} cancelled` })}
-                                  className="bg-red-600 hover:bg-red-700"
-                                >
-                                  Yes, Cancel Application
-                                </AlertDialogAction>
-                              </AlertDialogFooter>
-                            </AlertDialogContent>
-                          </AlertDialog>
-                        )}
-                      </div>
-                    ),
-                  },
-                ]}
-                title="Pending Loan Applications"
-                searchable={true}
-                filterable={false}
-                exportable={true}
-              />
+                          )
+                        },
+                      },
+                      {
+                        key: "actions",
+                        label: "Actions",
+                        render: (value: any, row: any) => (
+                          <div className="flex space-x-2">
+                            <Button size="sm" variant="outline" onClick={() => viewLoanDetails(row._id)}>
+                              <Eye className="h-3 w-3 mr-1" />
+                              View
+                            </Button>
+                            {row.status === "pending" && (
+                              <AlertDialog>
+                                <AlertDialogTrigger asChild>
+                                  <Button size="sm" variant="destructive">
+                                    Cancel
+                                  </Button>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent>
+                                  <AlertDialogHeader>
+                                    <AlertDialogTitle>Cancel Loan Application</AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                      Are you sure you want to cancel this loan application? This action cannot be undone.
+                                    </AlertDialogDescription>
+                                  </AlertDialogHeader>
+                                  <AlertDialogFooter>
+                                    <AlertDialogCancel>No, Keep Application</AlertDialogCancel>
+                                    <AlertDialogAction
+                                      onClick={() => toast({ title: "Cancelled", description: `Application ${row._id} cancelled` })}
+                                      className="bg-red-600 hover:bg-red-700"
+                                    >
+                                      Yes, Cancel Application
+                                    </AlertDialogAction>
+                                  </AlertDialogFooter>
+                                </AlertDialogContent>
+                              </AlertDialog>
+                            )}
+                          </div>
+                        ),
+                      },
+                    ]}
+                    title="Pending Loan Applications"
+                    searchable={true}
+                    filterable={true}
+                    exportable={true}
+                  />
+                </div>
+              </div>
             ) : (
               <Card>
                 <CardContent className="text-center py-12">
@@ -757,93 +766,97 @@ export default function MemberLoans() {
 
           <TabsContent value="history">
             {loanHistory.length > 0 ? (
-            <DataTable
-              data={loanHistory}
-              columns={[
-                  {
-                    key: "_id",
-                    label: "Loan ID",
-                    sortable: true,
-                  },
-                  {
-                    key: "amount",
-                    label: "Amount",
-                    sortable: true,
-                    render: (value: number) => `KES ${value.toLocaleString()}`,
-                  },
-                  {
-                    key: "term",
-                    label: "Term",
-                  },
-                  {
-                    key: "date",
-                    label: "Applied Date",
-                    sortable: true,
-                    render: (value: string | undefined) =>
-                      value ? new Date(value).toLocaleDateString() : "N/A",
-                  },
-                  {
-                    key: "completedDate",
-                    label: "Completed/Rejected Date",
-                    sortable: true,
-                    render: (value: string | undefined, row: any) => {
-                      if (row.status === "completed" && row.completedDate)
-                        return new Date(row.completedDate).toLocaleDateString()
-                      if (row.status === "rejected" && row.rejectedDate)
-                        return new Date(row.rejectedDate).toLocaleDateString()
-                      return "N/A"
+            <div className="overflow-x-auto rounded-lg">
+              <div className="min-w-[350px]">
+                <DataTable
+                  data={loanHistory}
+                  columns={[
+                    {
+                      key: "_id",
+                      label: "Loan ID",
+                      sortable: true,
                     },
-                  },
-                  {
-                    key: "status",
-                    label: "Status",
-                    render: (value: string) => {
-                      const statusConfig = {
-                        completed: { color: "bg-blue-100 text-blue-800", icon: CheckCircle },
-                        rejected: { color: "bg-red-100 text-red-800", icon: XCircle },
-                      }
-                      const config = statusConfig[value as keyof typeof statusConfig] || {
-                        color: "bg-gray-100 text-gray-800",
-                        icon: Eye,
-                      }
-                      const Icon = config.icon
-                      return (
-                        <Badge className={config.color} variant="secondary">
-                          <Icon className="h-3 w-3 mr-1" />
-                          {value}
-                        </Badge>
-                      )
+                    {
+                      key: "amount",
+                      label: "Amount",
+                      sortable: true,
+                      render: (value: number) => `KES ${value.toLocaleString()}`,
                     },
-                  },
-                  {
-                    key: "rejectionReason",
-                    label: "Reason",
-                    render: (value: string | undefined, row: any) =>
-                      row.status === "rejected" ? value || "No reason provided" : row.purpose || "N/A",
-                  },
-                  {
-                    key: "actions",
-                    label: "Actions",
-                    render: (value: any, row: any) => (
-                      <div className="flex space-x-2">
-                        <Button size="sm" variant="outline" onClick={() => viewLoanDetails(row._id)}>
-                          <Eye className="h-3 w-3 mr-1" />
-                          View
-                        </Button>
-                        {row.status === "completed" && (
-                          <Button size="sm" variant="outline" onClick={() => downloadStatement(row._id)}>
-                            <Download className="h-3 w-3" />
+                    {
+                      key: "term",
+                      label: "Term",
+                    },
+                    {
+                      key: "date",
+                      label: "Applied Date",
+                      sortable: true,
+                      render: (value: string | undefined) =>
+                        value ? new Date(value).toLocaleDateString() : "N/A",
+                    },
+                    {
+                      key: "completedDate",
+                      label: "Completed/Rejected Date",
+                      sortable: true,
+                      render: (value: string | undefined, row: any) => {
+                        if (row.status === "completed" && row.completedDate)
+                          return new Date(row.completedDate).toLocaleDateString()
+                        if (row.status === "rejected" && row.rejectedDate)
+                          return new Date(row.rejectedDate).toLocaleDateString()
+                        return "N/A"
+                      },
+                    },
+                    {
+                      key: "status",
+                      label: "Status",
+                      render: (value: string) => {
+                        const statusConfig = {
+                          completed: { color: "bg-blue-100 text-blue-800", icon: CheckCircle },
+                          rejected: { color: "bg-red-100 text-red-800", icon: XCircle },
+                        }
+                        const config = statusConfig[value as keyof typeof statusConfig] || {
+                          color: "bg-gray-100 text-gray-800",
+                          icon: Eye,
+                        }
+                        const Icon = config.icon
+                        return (
+                          <Badge className={config.color} variant="secondary">
+                            <Icon className="h-3 w-3 mr-1" />
+                            {value}
+                          </Badge>
+                        )
+                      },
+                    },
+                    {
+                      key: "rejectionReason",
+                      label: "Reason",
+                      render: (value: string | undefined, row: any) =>
+                        row.status === "rejected" ? value || "No reason provided" : row.purpose || "N/A",
+                    },
+                    {
+                      key: "actions",
+                      label: "Actions",
+                      render: (value: any, row: any) => (
+                        <div className="flex space-x-2">
+                          <Button size="sm" variant="outline" onClick={() => viewLoanDetails(row._id)}>
+                            <Eye className="h-3 w-3 mr-1" />
+                            View
                           </Button>
-                        )}
-                      </div>
-                    ),
-                  },
-              ]}
-              title="Loan History"
-              searchable={true}
-                filterable={false}
-              exportable={true}
-            />
+                          {row.status === "completed" && (
+                            <Button size="sm" variant="outline" onClick={() => downloadStatement(row._id)}>
+                              <Download className="h-3 w-3" />
+                            </Button>
+                          )}
+                        </div>
+                      ),
+                    },
+                  ]}
+                  title="Loan History"
+                  searchable={true}
+                  filterable={true}
+                  exportable={true}
+                />
+              </div>
+            </div>
             ) : (
               <Card>
                 <CardContent className="text-center py-12">
@@ -857,59 +870,63 @@ export default function MemberLoans() {
 
           <TabsContent value="payments">
             {paymentHistory.length > 0 ? (
-            <DataTable
-              data={paymentHistory}
-                columns={[
-                  {
-                    key: "date",
-                    label: "Date",
-                    sortable: true,
-                    render: (value: string | undefined) =>
-                      value ? new Date(value).toLocaleDateString() : "N/A",
-                  },
-                  {
-                    key: "loanId",
-                    label: "Loan ID",
-                  },
-                  {
-                    key: "amount",
-                    label: "Amount",
-                    sortable: true,
-                    render: (value: number) => `KES ${value.toLocaleString()}`,
-                  },
-                  {
-                    key: "type",
-                    label: "Type",
-                  },
-                  {
-                    key: "status",
-                    label: "Status",
-                    render: (value: string) => {
-                      const colors = {
-                        Success: "bg-green-100 text-green-800",
-                        Pending: "bg-yellow-100 text-yellow-800",
-                        Failed: "bg-red-100 text-red-800",
-                      }
-                      return (
-                        <Badge
-                          className={colors[value as keyof typeof colors] || "bg-gray-100 text-gray-800"}
-                          variant="secondary"
-                        >
-                          {value}
-                        </Badge>
-                      )
+            <div className="overflow-x-auto rounded-lg">
+              <div className="min-w-[350px]">
+                <DataTable
+                  data={paymentHistory}
+                  columns={[
+                    {
+                      key: "date",
+                      label: "Date",
+                      sortable: true,
+                      render: (value: string | undefined) =>
+                        value ? new Date(value).toLocaleDateString() : "N/A",
                     },
-                  },
-                  {
-                    key: "method",
-                    label: "Method",
-                  },
-                ]}
-              title="Payment History"
-              searchable={true}
-              filterable={true}
-              exportable={true}
-            />
+                    {
+                      key: "loanId",
+                      label: "Loan ID",
+                    },
+                    {
+                      key: "amount",
+                      label: "Amount",
+                      sortable: true,
+                      render: (value: number) => `KES ${value.toLocaleString()}`,
+                    },
+                    {
+                      key: "type",
+                      label: "Type",
+                    },
+                    {
+                      key: "status",
+                      label: "Status",
+                      render: (value: string) => {
+                        const colors = {
+                          Success: "bg-green-100 text-green-800",
+                          Pending: "bg-yellow-100 text-yellow-800",
+                          Failed: "bg-red-100 text-red-800",
+                        }
+                        return (
+                          <Badge
+                            className={colors[value as keyof typeof colors] || "bg-gray-100 text-gray-800"}
+                            variant="secondary"
+                          >
+                            {value}
+                          </Badge>
+                        )
+                      },
+                    },
+                    {
+                      key: "method",
+                      label: "Method",
+                    },
+                  ]}
+                  title="Payment History"
+                  searchable={true}
+                  filterable={true}
+                  exportable={true}
+                />
+              </div>
+            </div>
             ) : (
               <Card>
                 <CardContent className="text-center py-12">
