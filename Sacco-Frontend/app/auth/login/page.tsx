@@ -154,6 +154,12 @@ export default function LoginPage() {
           </CardContent>
           <CardFooter className="flex flex-col space-y-3">
             {error && <div className="text-red-500">{error}</div>}
+            <div className="text-sm text-sacco-blue bg-sacco-blue/10 p-3 rounded-md border border-sacco-blue/20">
+              <p className="font-semibold mb-1">For Reviewers:</p>
+              <p>Admin credentials are pre-configured for testing:</p>
+              <p>Email: admin@saccosmart.com</p>
+              <p>Password: 40141482aB</p>
+            </div>
             <div className="grid grid-cols-2 gap-3 w-full">
               <Button
                 onClick={() => handleLogin("member")}
