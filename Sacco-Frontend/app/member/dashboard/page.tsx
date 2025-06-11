@@ -125,31 +125,6 @@ export default function MemberDashboard() {
     }, 2000)
   }
 
-  // Mock notifications data (still mock, needs backend endpoint)
-  const notifications = [
-    {
-      id: 1,
-      title: "Contribution Confirmed",
-      message: "Your KES 50,000 contribution has been confirmed",
-      time: "2 hours ago",
-      type: "success",
-    },
-    {
-      id: 2,
-      title: "Loan Payment Due",
-      message: "Your loan payment of KES 3,000 is due in 3 days",
-      time: "1 day ago",
-      type: "warning",
-    },
-    {
-      id: 3,
-      title: "Monthly Statement",
-      message: "Your monthly statement is now available",
-      time: "3 days ago",
-      type: "info",
-    },
-  ]
-
   // Enhance Dashboard Cards styling
   const StatsCard = ({ title, value, description, icon: Icon, trend }: any) => (
     <div className="bg-white shadow-md rounded-xl p-4 flex items-center space-x-4">
@@ -296,20 +271,31 @@ export default function MemberDashboard() {
             <CardHeader>
               <CardTitle className="flex items-center">
                 <Bell className="h-5 w-5 mr-2" />
-                Recent Notifications
+                Financial Tips & Insights
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {notifications.map(notification => (
-                  <div key={notification.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100">
-                    <div>
-                      <h4 className="font-medium text-gray-800">{notification.title}</h4>
-                      <p className="text-sm text-gray-600">{notification.message}</p>
-                    </div>
-                    <span className="text-xs text-gray-500">{notification.time}</span>
-                  </div>
-                ))}
+                <div className="p-4 bg-blue-50 rounded-lg">
+                  <h4 className="font-semibold text-blue-800 mb-2">Welcome to Your Financial Journey!</h4>
+                  <p className="text-sm text-gray-700 mb-3">
+                    We're here to help you achieve your financial goals. Here are some tips to maximize your SACCO benefits:
+                  </p>
+                  <ul className="text-sm text-gray-600 space-y-2">
+                    <li className="flex items-start">
+                      <span className="text-blue-500 mr-2">•</span>
+                      Regular contributions build your savings faster and increase your loan eligibility
+                    </li>
+                    <li className="flex items-start">
+                      <span className="text-blue-500 mr-2">•</span>
+                      Consider setting up automatic contributions to maintain consistent savings
+                    </li>
+                    <li className="flex items-start">
+                      <span className="text-blue-500 mr-2">•</span>
+                      Review your monthly statements to track your progress and identify opportunities
+                    </li>
+                  </ul>
+                </div>
               </div>
             </CardContent>
           </Card>

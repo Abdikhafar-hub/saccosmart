@@ -33,6 +33,11 @@ interface Loan {
   balance?: number;
   term?: number;
   reason?: string;
+  paymentHistory?: {
+    date: string;
+    amount: number;
+    status: string;
+  }[];
 }
 
 interface Contribution {
@@ -40,6 +45,17 @@ interface Contribution {
   amount: number;
   date: string;
   type: string;
+  status: string;
+  paymentMethod?: string;
+}
+
+interface Transaction {
+  _id: string;
+  type: 'contribution' | 'loan_payment' | 'loan_disbursement';
+  amount: number;
+  date: string;
+  status: string;
+  description: string;
 }
 
 interface LoanResponse {
@@ -50,36 +66,154 @@ interface LoanResponse {
     used: number;
     basedOn: string;
   };
+  summary: {
+    totalBorrowed: number;
+    totalRepaid: number;
+    activeLoans: number;
+    defaultedLoans: number;
+  };
 }
 
 interface ContributionResponse {
   contributions: Contribution[];
+  summary: {
+    totalContributed: number;
+    monthlyAverage: number;
+    lastContribution: string;
+    contributionStreak: number;
+  };
+}
+
+interface TransactionResponse {
+  transactions: Transaction[];
+  summary: {
+    totalTransactions: number;
+    monthlyTransactions: number;
+    lastTransaction: string;
+  };
 }
 
 // Function to fetch loan data
 const fetchLoanData = async (): Promise<LoanResponse> => {
-  const response = await fetch("http://localhost:5000/api/loan", {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-      "Authorization": `Bearer ${localStorage.getItem('token')}` // Assuming token is stored in localStorage
-    }
-  })
-  const data = await response.json()
-  return data
+  try {
+    const token = localStorage.getItem('token');
+    const response = await axios.get("http://localhost:5000/api/loan", {
+      headers: {
+        "Authorization": `Bearer ${token}`
+      }
+    });
+    
+    // Ensure we have an array of loans
+    const loans = Array.isArray(response.data) ? response.data : response.data.loans || [];
+    
+    // Calculate summary data from loans array
+    const totalBorrowed = loans.reduce((sum: number, loan: Loan) => sum + loan.amount, 0);
+    const totalRepaid = loans.reduce((sum: number, loan: Loan) => {
+      if (loan.paymentHistory) {
+        return sum + loan.paymentHistory.reduce((paymentSum: number, payment) => 
+          paymentSum + (payment.status === 'completed' ? payment.amount : 0), 0);
+      }
+      return sum;
+    }, 0);
+    const activeLoans = loans.filter((loan: Loan) => loan.status === 'active').length;
+    const defaultedLoans = loans.filter((loan: Loan) => loan.status === 'defaulted').length;
+
+    // Calculate loan limit based on contributions (this should come from backend)
+    const loanLimit = {
+      maximumLimit: 1000000, // This should come from backend
+      available: 1000000 - totalBorrowed,
+      used: totalBorrowed,
+      basedOn: "Contributions"
+    };
+
+    return {
+      loans,
+      loanLimit,
+      summary: {
+        totalBorrowed,
+        totalRepaid,
+        activeLoans,
+        defaultedLoans
+      }
+    };
+  } catch (error) {
+    console.error('Error fetching loan data:', error);
+    throw error;
+  }
 }
 
 // Function to fetch contribution data
 const fetchContributionData = async (): Promise<ContributionResponse> => {
-  const response = await fetch("http://localhost:5000/api/contribution", {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-      "Authorization": `Bearer ${localStorage.getItem('token')}` // Assuming token is stored in localStorage
+  try {
+    const token = localStorage.getItem('token');
+    const response = await axios.get("http://localhost:5000/api/contribution", {
+      headers: {
+        "Authorization": `Bearer ${token}`
+      }
+    });
+    
+    // Calculate summary data from contributions array
+    const contributions = response.data;
+    const totalContributed = contributions.reduce((sum: number, c: Contribution) => sum + c.amount, 0);
+    const monthlyAverage = totalContributed / (contributions.length || 1);
+    const lastContribution = contributions[0]?.date || new Date().toISOString();
+    
+    // Calculate contribution streak
+    let streak = 0;
+    const today = new Date();
+    const currentMonth = today.getMonth();
+    const currentYear = today.getFullYear();
+    
+    for (let i = 0; i < 12; i++) {
+      const month = (currentMonth - i + 12) % 12;
+      const year = currentYear - Math.floor((currentMonth - i) / 12);
+      const hasContribution = contributions.some((c: Contribution) => {
+        const date = new Date(c.date);
+        return date.getMonth() === month && date.getFullYear() === year;
+      });
+      if (hasContribution) {
+        streak++;
+      } else {
+        break;
+      }
     }
-  })
-  const data = await response.json()
-  return data
+
+    return {
+      contributions,
+      summary: {
+        totalContributed,
+        monthlyAverage,
+        lastContribution,
+        contributionStreak: streak
+      }
+    };
+  } catch (error) {
+    console.error('Error fetching contribution data:', error);
+    throw error;
+  }
+}
+
+// Function to fetch transaction data
+const fetchTransactionData = async (): Promise<TransactionResponse> => {
+  try {
+    const token = localStorage.getItem('token');
+    const response = await axios.get("http://localhost:5000/api/reports/stats", {
+      headers: {
+        "Authorization": `Bearer ${token}`
+      }
+    });
+    return {
+      transactions: [], // This will be populated from the reports stats
+      summary: {
+        totalTransactions: response.data.totalReports,
+        monthlyTransactions: response.data.monthlyReports,
+        lastTransaction: new Date().toISOString() // This will be updated when we have the actual data
+      }
+    };
+  } catch (error) {
+    console.error('Error fetching transaction data:', error);
+    throw error;
+  }
 }
 
 export default function MemberReports() {
@@ -89,13 +223,15 @@ export default function MemberReports() {
   const [isGenerateOpen, setIsGenerateOpen] = useState(false)
   const [selectedPeriod, setSelectedPeriod] = useState("6months")
   const { toast } = useToast()
-  const [loanData, setLoanData] = useState<Array<{ name: string; value: number }>>([])
-  const [contributionData, setContributionData] = useState<Array<{ name: string; value: number }>>([])
+  const [loanData, setLoanData] = useState<LoanResponse | null>(null)
+  const [contributionData, setContributionData] = useState<ContributionResponse | null>(null)
+  const [transactionData, setTransactionData] = useState<TransactionResponse | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
   const [user, setUser] = useState<{ name: string; email: string; role: string } | null>(null)
+  const [activeTab, setActiveTab] = useState("overview")
 
-  // Fetch user info on mount (similar to dashboard)
+  // Fetch user info on mount
   useEffect(() => {
     const fetchUser = async () => {
       try {
@@ -105,48 +241,95 @@ export default function MemberReports() {
         })
         setUser(res.data.user)
       } catch (err) {
-        // fallback: do nothing, user stays null
+        console.error('Error fetching user data:', err);
+        setError("Failed to load user data");
       }
     }
     fetchUser()
   }, [])
 
+  // Fetch all report data
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchAllData = async () => {
       setLoading(true)
       setError("")
       try {
-        // Fetch loan data
-        const loanRes = await fetchLoanData()
-        // Transform loan data for charts
-        const transformedLoanData = loanRes.loans.map((loan: Loan) => ({
-          name: new Date(loan.date).toLocaleDateString(),
-          value: loan.amount
-        }))
-        setLoanData(transformedLoanData)
+        const [loanRes, contributionRes, transactionRes] = await Promise.all([
+          fetchLoanData(),
+          fetchContributionData(),
+          fetchTransactionData()
+        ]);
 
-        // Fetch contribution data
-        const contributionRes = await fetchContributionData()
-        // Transform contribution data for charts
-        const transformedContributionData = contributionRes.contributions?.map((contribution: Contribution) => ({
-          name: new Date(contribution.date).toLocaleDateString(),
-          value: contribution.amount
-        })) || []
-        setContributionData(transformedContributionData)
+        setLoanData(loanRes);
+        setContributionData(contributionRes);
+        setTransactionData(transactionRes);
       } catch (err) {
-        console.error('Error fetching data:', err)
-        setError("Failed to load report data")
+        console.error('Error fetching report data:', err);
+        setError("Failed to load report data. Please try again later.");
+        toast({
+          title: "Error",
+          description: "Failed to load report data. Please try again later.",
+          variant: "destructive",
+        });
       } finally {
         setLoading(false)
       }
     }
-    fetchData()
+    fetchAllData()
   }, [])
 
   if (loading || !user) return <LoadingSpinner fullScreen />
-  if (error) return <div className="text-red-500">{error}</div>
+  if (error) return <div className="text-red-500 p-4">{error}</div>
 
-  const handleGenerateReport = () => {
+  // Transform data for charts
+  const getChartData = (type: 'loan' | 'contribution' | 'transaction') => {
+    const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    const currentDate = new Date();
+    const sixMonthsAgo = new Date();
+    sixMonthsAgo.setMonth(currentDate.getMonth() - 5);
+
+    let data: { name: string; value: number }[] = [];
+
+    switch (type) {
+      case 'loan':
+        if (loanData?.loans) {
+          data = Array.from({ length: 6 }, (_, i) => {
+            const monthIdx = (currentDate.getMonth() - 5 + i + 12) % 12;
+            const value = loanData.loans
+              .filter(loan => new Date(loan.date).getMonth() === monthIdx)
+              .reduce((sum, loan) => sum + loan.amount, 0);
+            return { name: months[monthIdx], value };
+          });
+        }
+        break;
+      case 'contribution':
+        if (contributionData?.contributions) {
+          data = Array.from({ length: 6 }, (_, i) => {
+            const monthIdx = (currentDate.getMonth() - 5 + i + 12) % 12;
+            const value = contributionData.contributions
+              .filter(cont => new Date(cont.date).getMonth() === monthIdx)
+              .reduce((sum, cont) => sum + cont.amount, 0);
+            return { name: months[monthIdx], value };
+          });
+        }
+        break;
+      case 'transaction':
+        if (transactionData?.transactions) {
+          data = Array.from({ length: 6 }, (_, i) => {
+            const monthIdx = (currentDate.getMonth() - 5 + i + 12) % 12;
+            const value = transactionData.transactions
+              .filter(trans => new Date(trans.date).getMonth() === monthIdx)
+              .reduce((sum, trans) => sum + trans.amount, 0);
+            return { name: months[monthIdx], value };
+          });
+        }
+        break;
+    }
+
+    return data;
+  };
+
+  const handleGenerateReport = async () => {
     if (!reportType || !startDate || !endDate) {
       toast({
         title: "Missing Information",
@@ -156,14 +339,61 @@ export default function MemberReports() {
       return
     }
 
-    // Simulate report generation
-    setTimeout(() => {
-      setIsGenerateOpen(false)
+    try {
+      setLoading(true);
+      const token = localStorage.getItem('token');
+      const response = await axios.post(
+        "http://localhost:5000/api/reports",
+        {
+          name: `${reportType} Report`,
+          type: reportType,
+          format: 'pdf',
+          startDate,
+          endDate,
+          parameters: {
+            startDate,
+            endDate
+          }
+        },
+        {
+          headers: {
+            "Authorization": `Bearer ${token}`,
+            "Content-Type": "application/json"
+          },
+          responseType: 'blob' // Important for handling PDF download
+        }
+      );
+
+      setIsGenerateOpen(false);
       toast({
         title: "Report Generated",
-        description: "Your report has been generated and will be available for download shortly",
-      })
-    }, 2000)
+        description: "Your report has been generated successfully",
+      });
+
+      // Create a blob from the PDF data
+      const blob = new Blob([response.data], { type: 'application/pdf' });
+      const url = window.URL.createObjectURL(blob);
+      
+      // Create a temporary link and trigger download
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `${reportType}-report-${new Date().toISOString().split('T')[0]}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      
+      // Cleanup
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Error generating report:', error);
+      toast({
+        title: "Error",
+        description: "Failed to generate report. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
   }
 
   const handleQuickReport = (type: string) => {
@@ -251,22 +481,19 @@ export default function MemberReports() {
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="end-date">End Date</Label>
-                    <Input id="end-date" type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
+                    <Input
+                      id="end-date"
+                      type="date"
+                      value={endDate}
+                      onChange={(e) => setEndDate(e.target.value)}
+                    />
                   </div>
-                </div>
-                <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg">
-                  <p className="text-sm text-blue-800 dark:text-blue-200">
-                    <strong>Note:</strong> Reports may take a few minutes to generate depending on the date range
-                    selected.
-                  </p>
                 </div>
               </div>
               <DialogFooter>
-                <Button variant="outline" onClick={() => setIsGenerateOpen(false)}>
-                  Cancel
-                </Button>
-                <Button onClick={handleGenerateReport} className="bg-sacco-green hover:bg-sacco-green/90">
-                  Generate Report
+                <Button variant="outline" onClick={() => setIsGenerateOpen(false)}>Cancel</Button>
+                <Button onClick={handleGenerateReport} disabled={loading}>
+                  {loading ? "Generating..." : "Generate Report"}
                 </Button>
               </DialogFooter>
             </DialogContent>
@@ -301,156 +528,160 @@ export default function MemberReports() {
           </CardContent>
         </Card>
 
-        {/* Analytics Dashboard */}
-        <Tabs defaultValue="overview" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4">
+        {/* Main Content */}
+        <Tabs defaultValue="overview" className="space-y-4" onValueChange={setActiveTab}>
+          <TabsList>
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="contributions">Contributions</TabsTrigger>
             <TabsTrigger value="loans">Loans</TabsTrigger>
-            <TabsTrigger value="history">Report History</TabsTrigger>
+            <TabsTrigger value="transactions">Transactions</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="overview" className="space-y-6">
-            {/* Period Selector */}
-            <div className="flex items-center space-x-4">
-              <Label>Period:</Label>
-              <Select value={selectedPeriod} onValueChange={setSelectedPeriod}>
-                <SelectTrigger className="w-48">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="3months">Last 3 Months</SelectItem>
-                  <SelectItem value="6months">Last 6 Months</SelectItem>
-                  <SelectItem value="1year">Last Year</SelectItem>
-                  <SelectItem value="2years">Last 2 Years</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <ChartCard
-                title="Account Balance Breakdown"
-                description="Distribution of your SACCO account"
-                type="pie"
-                data={loanData}
-                dataKey="value"
-                xAxisKey="name"
-              />
-              <ChartCard
-                title="Monthly Contributions"
-                description="Your contribution trends over time"
-                type="bar"
-                data={contributionData}
-                dataKey="value"
-                xAxisKey="name"
-              />
-            </div>
-          </TabsContent>
-
-          <TabsContent value="contributions" className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <ChartCard
-                title="Contribution Trends"
-                description="Monthly contribution patterns"
-                type="line"
-                data={contributionData}
-                dataKey="value"
-                xAxisKey="name"
-              />
+          <TabsContent value="overview" className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {/* Summary Cards */}
               <Card>
                 <CardHeader>
-                  <CardTitle>Contribution Summary</CardTitle>
+                  <CardTitle className="text-lg">Contribution Summary</CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex justify-between items-center">
-                    <span>Total Contributions</span>
-                    <span className="font-bold text-sacco-blue">KES 45,000</span>
+                <CardContent>
+                  <div className="space-y-2">
+                    <p className="text-2xl font-bold">KES {contributionData?.summary.totalContributed.toLocaleString()}</p>
+                    <p className="text-sm text-gray-500">Total Contributions</p>
+                    <p className="text-sm text-gray-500">Monthly Average: KES {contributionData?.summary.monthlyAverage.toLocaleString()}</p>
                   </div>
-                  <div className="flex justify-between items-center">
-                    <span>Average Monthly</span>
-                    <span className="font-bold">KES 7,500</span>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg">Loan Summary</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2">
+                    <p className="text-2xl font-bold">KES {loanData?.summary.totalBorrowed.toLocaleString()}</p>
+                    <p className="text-sm text-gray-500">Total Borrowed</p>
+                    <p className="text-sm text-gray-500">Active Loans: {loanData?.summary.activeLoans}</p>
                   </div>
-                  <div className="flex justify-between items-center">
-                    <span>Highest Month</span>
-                    <span className="font-bold text-green-600">KES 9,000</span>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg">Transaction Summary</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2">
+                    <p className="text-2xl font-bold">{transactionData?.summary.totalTransactions}</p>
+                    <p className="text-sm text-gray-500">Total Transactions</p>
+                    <p className="text-sm text-gray-500">This Month: {transactionData?.summary.monthlyTransactions}</p>
                   </div>
-                  <div className="flex justify-between items-center">
-                    <span>Growth Rate</span>
-                    <Badge className="bg-green-100 text-green-800" variant="secondary">
-                      <TrendingUp className="h-3 w-3 mr-1" />
-                      +15%
-                    </Badge>
-                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Charts */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Contribution Trends</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ChartCard
+                    title="Monthly Contributions"
+                    type="bar"
+                    data={getChartData('contribution')}
+                    dataKey="value"
+                    xAxisKey="name"
+                  />
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>Loan Trends</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ChartCard
+                    title="Monthly Loans"
+                    type="bar"
+                    data={getChartData('loan')}
+                    dataKey="value"
+                    xAxisKey="name"
+                  />
                 </CardContent>
               </Card>
             </div>
           </TabsContent>
 
-          <TabsContent value="loans" className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <ChartCard
-                title="Loan Repayment History"
-                description="Monthly loan payments over time"
-                type="bar"
-                data={loanData}
-                dataKey="value"
-                xAxisKey="name"
-              />
-              <ChartCard
-                title="Loan Status Distribution"
-                description="Current status of all your loans"
-                type="pie"
-                data={loanData}
-                dataKey="value"
-                xAxisKey="name"
-              />
-            </div>
-          </TabsContent>
-
-          <TabsContent value="history">
+          <TabsContent value="contributions" className="space-y-4">
             <Card>
               <CardHeader>
-                <CardTitle>Report History</CardTitle>
+                <CardTitle>Contribution History</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {[] /* reportHistory.map((report) => (
-                    <div
-                      key={report.id}
-                      className="flex items-center justify-between p-4 border border-gray-200 dark:border-gray-700 rounded-lg"
-                    >
-                      <div className="flex items-center space-x-4">
-                        <div className="p-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-                          <FileText className="h-5 w-5 text-blue-600" />
-                        </div>
-                        <div>
-                          <h3 className="font-semibold">{report.type}</h3>
-                          <p className="text-sm text-gray-600 dark:text-gray-400">{report.period}</p>
-                          <div className="flex items-center space-x-4 text-xs text-gray-500 mt-1">
-                            <span>Generated: {new Date(report.generatedDate).toLocaleDateString()}</span>
-                            <span>Size: {report.size}</span>
-                          </div>
-                        </div>
+                  {contributionData?.contributions.map((contribution) => (
+                    <div key={contribution._id} className="flex items-center justify-between p-4 border rounded-lg">
+                      <div>
+                        <p className="font-medium">KES {contribution.amount.toLocaleString()}</p>
+                        <p className="text-sm text-gray-500">{new Date(contribution.date).toLocaleDateString()}</p>
                       </div>
-                      <div className="flex items-center space-x-2">
-                        <Badge className="bg-green-100 text-green-800" variant="secondary">
-                          {report.status}
-                        </Badge>
-                        <Button size="sm" variant="outline" onClick={() => viewReport(report.id)}>
-                          <Eye className="h-3 w-3 mr-1" />
-                          View
-                        </Button>
-                        <Button size="sm" variant="outline" onClick={() => emailReport(report.id)}>
-                          <Mail className="h-3 w-3 mr-1" />
-                          Email
-                        </Button>
-                        <Button size="sm" onClick={() => downloadReport(report.id)}>
-                          <Download className="h-3 w-3 mr-1" />
-                          Download
-                        </Button>
-                      </div>
+                      <Badge variant={contribution.status === 'completed' ? 'default' : 'destructive'}>
+                        {contribution.status}
+                      </Badge>
                     </div>
-                  )) */}
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="loans" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle>Loan History</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {loanData?.loans.map((loan) => (
+                    <div key={loan._id} className="flex items-center justify-between p-4 border rounded-lg">
+                      <div>
+                        <p className="font-medium">KES {loan.amount.toLocaleString()}</p>
+                        <p className="text-sm text-gray-500">{new Date(loan.date).toLocaleDateString()}</p>
+                        {loan.balance && (
+                          <p className="text-sm text-gray-500">Balance: KES {loan.balance.toLocaleString()}</p>
+                        )}
+                      </div>
+                      <Badge variant={loan.status === 'active' ? 'default' : 'destructive'}>
+                        {loan.status}
+                      </Badge>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="transactions" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle>Transaction History</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {transactionData?.transactions.map((transaction) => (
+                    <div key={transaction._id} className="flex items-center justify-between p-4 border rounded-lg">
+                      <div>
+                        <p className="font-medium">{transaction.description}</p>
+                        <p className="text-sm text-gray-500">{new Date(transaction.date).toLocaleDateString()}</p>
+                        <p className="text-sm text-gray-500">KES {transaction.amount.toLocaleString()}</p>
+                      </div>
+                      <Badge variant={transaction.status === 'completed' ? 'default' : 'destructive'}>
+                        {transaction.status}
+                      </Badge>
+                    </div>
+                  ))}
                 </div>
               </CardContent>
             </Card>

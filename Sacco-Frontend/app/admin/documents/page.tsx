@@ -166,58 +166,6 @@ export default function AdminDocumentsPage() {
             <h1 className="text-3xl font-bold text-gray-900">Documents</h1>
             <p className="text-gray-600">Manage SACCO legal documents and policies</p>
           </div>
-          <Dialog>
-            <DialogTrigger asChild>
-              <Button className="bg-sacco-blue hover:bg-sacco-blue/90">
-                <Upload className="h-4 w-4 mr-2" />
-                Upload Document
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-md">
-              <DialogHeader>
-                <DialogTitle>Upload New Document</DialogTitle>
-                <DialogDescription>Upload SACCO constitution, by-laws, or policy documents</DialogDescription>
-              </DialogHeader>
-              <div className="space-y-4">
-                <div>
-                  <Label htmlFor="document-type">Document Type</Label>
-                  <Select value={type} onValueChange={setType}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select document type" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {docTypes.map(dt => (
-                        <SelectItem key={dt.value} value={dt.value}>{dt.label}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <Label htmlFor="file-upload">Choose File</Label>
-                  <Input
-                    id="file-upload"
-                    type="file"
-                    accept=".pdf,.doc,.docx"
-                    onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
-                  />
-                  <p className="text-sm text-gray-500 mt-1">Supported formats: PDF, DOC, DOCX (Max 10MB)</p>
-                </div>
-                {selectedFile && (
-                  <div className="p-3 bg-gray-50 rounded-lg">
-                    <p className="text-sm font-medium">{selectedFile.name}</p>
-                    <p className="text-xs text-gray-500">{(selectedFile.size / 1024 / 1024).toFixed(2)} MB</p>
-                  </div>
-                )}
-                <Button
-                  onClick={handleUpload}
-                  disabled={!selectedFile || !type || isUploading}
-                  className="w-full"
-                >
-                  {isUploading ? "Uploading..." : "Upload Document"}
-                </Button>
-              </div>
-            </DialogContent>
-          </Dialog>
         </div>
 
         {/* Document Statistics */}

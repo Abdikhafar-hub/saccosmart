@@ -15,6 +15,8 @@ import {
 import { Bell, Moon, Sun, User, Settings, LogOut } from "lucide-react"
 import { useTheme } from "next-themes"
 
+
+
 interface TopNavbarProps {
   user: {
     name: string
@@ -25,7 +27,7 @@ interface TopNavbarProps {
 }
 
 export function TopNavbar({ user }: TopNavbarProps) {
-  const [notifications] = useState(3) // Mock notification count
+ 
   const { theme, setTheme } = useTheme()
 
   const getRoleColor = (role: string) => {
@@ -59,14 +61,9 @@ export function TopNavbar({ user }: TopNavbarProps) {
           {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
         </Button>
 
-        {/* Notifications */}
-        <Button variant="ghost" size="sm" className="relative">
-          <Bell className="h-4 w-4" />
-          {notifications > 0 && (
-            <Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs bg-red-500">
-              {notifications}
-            </Badge>
-          )}
+        {/* Notification Bell */}
+        <Button variant="ghost" size="sm" aria-label="Notifications">
+          <Bell className="h-5 w-5" />
         </Button>
 
         {/* User Menu */}

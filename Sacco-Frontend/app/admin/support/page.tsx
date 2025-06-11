@@ -15,6 +15,7 @@ import { DataTable } from "@/components/ui/data-table"
 import { Mail, Phone, MapPin, MessageSquare, Clock, User } from "lucide-react"
 import axios from "axios"
 import { LoadingSpinner } from "@/components/ui/loading-spinner"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
 
 export default function AdminSupportPage() {
   const [feedbackForm, setFeedbackForm] = useState({
@@ -28,6 +29,8 @@ export default function AdminSupportPage() {
   const [error, setError] = useState("")
   const [reply, setReply] = useState("")
   const [replyingTicketId, setReplyingTicketId] = useState<string | null>(null)
+  const [isReplyModalOpen, setIsReplyModalOpen] = useState(false)
+  const [activeReplyTicket, setActiveReplyTicket] = useState<any>(null)
 
   // Fetch all tickets
   useEffect(() => {
@@ -168,84 +171,86 @@ export default function AdminSupportPage() {
     >
       <div className="space-y-6">
         {/* Header */}
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">Support Center</h1>
-          <p className="text-gray-600">Manage user support and system feedback</p>
+        <div className="flex flex-col gap-2">
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Support Center</h1>
+          <Card className="bg-blue-50 border-blue-200 shadow-sm max-w-xl">
+            <CardContent className="py-4">
+              <p className="text-gray-700 text-lg font-medium">Track and manage user support requests and issues</p>
+            </CardContent>
+          </Card>
         </div>
 
         {/* Support Statistics */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-gray-600">Open Tickets</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-red-600">
-                {tickets.filter((ticket) => ticket.status === "Open").length}
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-gray-600">In Progress</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-yellow-600">
-                {tickets.filter((ticket) => ticket.status === "In Progress").length}
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-gray-600">Resolved</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-green-600">
-                {tickets.filter((ticket) => ticket.status === "Resolved").length}
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-gray-600">Total Tickets</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-sacco-blue">{tickets.length}</div>
-            </CardContent>
-          </Card>
+          <div className="bg-white shadow-md rounded-xl p-4 flex items-center space-x-4">
+            <div className="flex-shrink-0 bg-red-100 p-2 rounded-full">
+              <Mail className="h-6 w-6 text-red-500" />
+            </div>
+            <div>
+              <h3 className="text-sm font-medium text-gray-600">Open Tickets</h3>
+              <p className="text-2xl font-bold text-red-600">{tickets.filter((ticket) => ticket.status === "Open").length}</p>
+            </div>
+          </div>
+          <div className="bg-white shadow-md rounded-xl p-4 flex items-center space-x-4">
+            <div className="flex-shrink-0 bg-yellow-100 p-2 rounded-full">
+              <Clock className="h-6 w-6 text-yellow-500" />
+            </div>
+            <div>
+              <h3 className="text-sm font-medium text-gray-600">In Progress</h3>
+              <p className="text-2xl font-bold text-yellow-600">{tickets.filter((ticket) => ticket.status === "In Progress").length}</p>
+            </div>
+          </div>
+          <div className="bg-white shadow-md rounded-xl p-4 flex items-center space-x-4">
+            <div className="flex-shrink-0 bg-green-100 p-2 rounded-full">
+              <User className="h-6 w-6 text-green-500" />
+            </div>
+            <div>
+              <h3 className="text-sm font-medium text-gray-600">Resolved</h3>
+              <p className="text-2xl font-bold text-green-600">{tickets.filter((ticket) => ticket.status === "Resolved").length}</p>
+            </div>
+          </div>
+          <div className="bg-white shadow-md rounded-xl p-4 flex items-center space-x-4">
+            <div className="flex-shrink-0 bg-blue-100 p-2 rounded-full">
+              <MessageSquare className="h-6 w-6 text-blue-500" />
+            </div>
+            <div>
+              <h3 className="text-sm font-medium text-gray-600">Total Tickets</h3>
+              <p className="text-2xl font-bold text-blue-600">{tickets.length}</p>
+            </div>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Admin Contact Information */}
-          <Card>
+          <Card className="bg-white shadow-md">
             <CardHeader>
               <CardTitle>Admin Contact Information</CardTitle>
               <CardDescription>Contact details for system administration and support</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex items-center space-x-3">
-                <Mail className="h-5 w-5 text-sacco-blue" />
+                <Mail className="h-5 w-5 text-blue-500" />
                 <div>
                   <p className="font-medium">System Support Email</p>
                   <p className="text-sm text-gray-600">support@saccosmart.com</p>
                 </div>
               </div>
               <div className="flex items-center space-x-3">
-                <Phone className="h-5 w-5 text-sacco-blue" />
+                <Phone className="h-5 w-5 text-blue-500" />
                 <div>
                   <p className="font-medium">Support Hotline</p>
                   <p className="text-sm text-gray-600">+254 717 219 448</p>
                 </div>
               </div>
               <div className="flex items-center space-x-3">
-                <MapPin className="h-5 w-5 text-sacco-blue" />
+                <MapPin className="h-5 w-5 text-blue-500" />
                 <div>
                   <p className="font-medium">Office Address</p>
                   <p className="text-sm text-gray-600">The Arch Place, Nairobi, Kenya</p>
                 </div>
               </div>
               <div className="flex items-center space-x-3">
-                <Clock className="h-5 w-5 text-sacco-blue" />
+                <Clock className="h-5 w-5 text-blue-500" />
                 <div>
                   <p className="font-medium">Support Hours</p>
                   <p className="text-sm text-gray-600">Monday - Friday: 8:00 AM - 6:00 PM</p>
@@ -255,7 +260,7 @@ export default function AdminSupportPage() {
           </Card>
 
           {/* Feedback Form */}
-          <Card>
+          <Card className="bg-white shadow-md">
             <CardHeader>
               <CardTitle>Submit System Feedback</CardTitle>
               <CardDescription>Report issues or provide feedback about the system</CardDescription>
@@ -329,7 +334,7 @@ export default function AdminSupportPage() {
         </div>
 
         {/* Support Tickets Table */}
-        <Card>
+        <Card className="bg-white shadow-md">
           <CardHeader>
             <CardTitle>Support Tickets</CardTitle>
             <CardDescription>Track and manage user support requests and issues</CardDescription>
@@ -337,77 +342,93 @@ export default function AdminSupportPage() {
           <CardContent>
             <div className="space-y-4">
               {tickets.map((ticket) => (
-                <div key={ticket._id} className="border rounded-lg p-4 mb-2">
-                  <div className="flex justify-between items-center">
-                    <div>
-                      <div className="font-bold">{ticket.title || ticket.subject}</div>
-                      <div className="text-sm text-gray-600">{ticket.user?.name} ({ticket.user?.email})</div>
-                      <div className="text-xs text-gray-500">ID: {ticket._id} | {new Date(ticket.createdAt).toLocaleDateString()}</div>
+                <Card key={ticket._id} className="shadow border border-gray-100">
+                  <CardContent className="p-4">
+                    <div className="flex justify-between items-center">
                       <div>
-                        <Badge variant="outline">{ticket.category}</Badge>{" "}
-                        <Badge variant="outline">{ticket.priority}</Badge>{" "}
-                        <Badge variant="outline">{ticket.status}</Badge>
-                      </div>
-                      <div className="mt-2">{ticket.description}</div>
-                      {ticket.responses && ticket.responses.length > 0 && (
-                        <div className="mt-2">
-                          <span className="font-semibold">Responses:</span>
-                          <ul className="ml-4 list-disc">
-                            {ticket.responses.map((resp: any, idx: number) => (
-                              <li key={idx}>
-                                <span className="text-xs text-gray-600">{new Date(resp.date).toLocaleString()}:</span>{" "}
-                                {resp.message}
-                              </li>
-                            ))}
-                          </ul>
+                        <div className="font-bold text-lg text-gray-900">{ticket.title || ticket.subject}</div>
+                        <div className="text-sm text-gray-600">{ticket.user?.name} ({ticket.user?.email})</div>
+                        <div className="text-xs text-gray-500">ID: {ticket._id} | {new Date(ticket.createdAt).toLocaleDateString()}</div>
+                        <div className="mt-2 space-x-2">
+                          <Badge variant="outline">{ticket.category}</Badge>
+                          <Badge variant="outline">{ticket.priority}</Badge>
+                          <Badge variant="outline">{ticket.status}</Badge>
                         </div>
-                      )}
-                    </div>
-                    <div>
-                      {replyingTicketId === ticket._id ? (
-                        <div>
-                          <textarea
-                            className="border rounded p-1 w-48"
-                            value={reply}
-                            onChange={e => setReply(e.target.value)}
-                            placeholder="Type your reply..."
-                          />
-                          <div className="flex gap-2 mt-1">
-                            <Button
-                              size="sm"
-                              onClick={() => handleReply(ticket._id)}
-                              disabled={!reply.trim()}
-                            >
-                              Send
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => {
-                                setReply("")
-                                setReplyingTicketId(null)
-                              }}
-                            >
-                              Cancel
-                            </Button>
+                        <div className="mt-2 text-gray-800">{ticket.description}</div>
+                        {ticket.responses && ticket.responses.length > 0 && (
+                          <div className="mt-2">
+                            <span className="font-semibold">Responses:</span>
+                            <ul className="ml-4 list-disc">
+                              {ticket.responses.map((resp: any, idx: number) => (
+                                <li key={idx}>
+                                  <span className="text-xs text-gray-600">{new Date(resp.date).toLocaleString()}:</span>{" "}
+                                  {resp.message}
+                                </li>
+                              ))}
+                            </ul>
                           </div>
-                        </div>
-                      ) : (
+                        )}
+                      </div>
+                      <div>
                         <Button
                           size="sm"
                           variant="outline"
-                          onClick={() => setReplyingTicketId(ticket._id)}
+                          onClick={() => {
+                            setActiveReplyTicket(ticket)
+                            setIsReplyModalOpen(true)
+                          }}
                         >
                           Reply
                         </Button>
-                      )}
+                      </div>
                     </div>
-                  </div>
-                </div>
+                  </CardContent>
+                </Card>
               ))}
             </div>
           </CardContent>
         </Card>
+
+        {/* Reply Modal */}
+        <Dialog open={isReplyModalOpen} onOpenChange={setIsReplyModalOpen}>
+          <DialogContent className="max-w-md mx-auto">
+            <DialogHeader>
+              <DialogTitle>Reply to Ticket</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="text-gray-700 font-medium">
+                {activeReplyTicket?.title || activeReplyTicket?.subject}
+              </div>
+              <Textarea
+                className="w-full"
+                value={reply}
+                onChange={e => setReply(e.target.value)}
+                placeholder="Type your reply..."
+                rows={4}
+              />
+            </div>
+            <DialogFooter>
+              <Button
+                onClick={() => {
+                  if (activeReplyTicket) handleReply(activeReplyTicket._id)
+                }}
+                disabled={!reply.trim()}
+              >
+                Send
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setReply("")
+                  setIsReplyModalOpen(false)
+                  setActiveReplyTicket(null)
+                }}
+              >
+                Cancel
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </DashboardLayout>
   )

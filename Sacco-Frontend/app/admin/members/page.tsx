@@ -6,7 +6,7 @@ import { StatsCard } from "@/components/ui/stats-card"
 import { ChartCard } from "@/components/ui/chart-card"
 import { DataTable } from "@/components/ui/data-table"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
@@ -340,6 +340,12 @@ export default function AdminMembers() {
     }
   };
 
+  // Add phone number validation for +254 format
+  const isValidPhoneNumber = (phone: string) => {
+    // Accepts only numbers starting with +254 followed by 9 digits
+    return /^\+254\d{9}$/.test(phone.trim());
+  };
+
   // Update the SMS sending function to handle phone numbers
   const handleSendBulkMessage = async () => {
     try {
@@ -358,7 +364,7 @@ export default function AdminMembers() {
       }
 
       const response = await axios.post(
-        "http://localhost:5000/api/send-bulk-sms",
+        "http://localhost:5000/api/sms/send-bulk-sms",
         {
           message: bulkMessage.message,
           recipients: recipients
@@ -396,11 +402,6 @@ export default function AdminMembers() {
 
   return (
     <DashboardLayout role="admin" user={user}>
-      <style jsx global>{`
-        th {
-          font-weight: bold;
-        }
-      `}</style>
       <div className="space-y-6">
         {/* Header */}
         <div className="flex justify-between items-center">
@@ -409,11 +410,11 @@ export default function AdminMembers() {
             <p className="text-gray-600 dark:text-gray-400">Manage SACCO members, applications, and membership data</p>
           </div>
           <div className="flex space-x-3">
-            <Button variant="outline" onClick={() => setIsBulkMessageOpen(true)}>
+            <Button variant="outline" onClick={() => setIsBulkMessageOpen(true)} className="bg-white hover:bg-gray-50">
               <Send className="h-4 w-4 mr-2" />
               Bulk Message
             </Button>
-            <Button variant="outline" onClick={() => setIsRegistrationOpen(true)}>
+            <Button onClick={() => setIsRegistrationOpen(true)} className="bg-blue-500 text-white hover:bg-blue-600">
               <UserPlus className="h-4 w-4 mr-2" />
               Add Member
             </Button>
@@ -422,44 +423,80 @@ export default function AdminMembers() {
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <StatsCard title="Total Members" value={dashboard.stats.totalMembers} description="All registered members" icon={Users} />
-          <StatsCard title="Active Members" value={activeMembersCount} description={`${dashboard.stats.totalMembers > 0 ? Math.round((activeMembersCount / dashboard.stats.totalMembers) * 100) : 0}% of total`} icon={UserCheck} />
-          <StatsCard title="Pending Approval" value={dashboard.stats.pendingApproval} description="Awaiting verification" icon={Clock} />
-          <StatsCard title="New This Month" value={dashboard.stats.newThisMonth} description="Recent registrations" icon={TrendingUp} />
+          <div className="bg-white shadow-md rounded-xl p-4 flex items-center space-x-4">
+            <div className="flex-shrink-0 bg-blue-100 p-2 rounded-full">
+              <Users className="h-6 w-6 text-blue-500" />
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900">Total Members</h3>
+              <p className="text-2xl font-bold text-gray-800">{dashboard.stats.totalMembers}</p>
+              <p className="text-sm text-gray-500">All registered members</p>
+            </div>
+          </div>
+          <div className="bg-white shadow-md rounded-xl p-4 flex items-center space-x-4">
+            <div className="flex-shrink-0 bg-green-100 p-2 rounded-full">
+              <UserCheck className="h-6 w-6 text-green-500" />
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900">Active Members</h3>
+              <p className="text-2xl font-bold text-gray-800">{activeMembersCount}</p>
+              <p className="text-sm text-gray-500">{`${dashboard.stats.totalMembers > 0 ? Math.round((activeMembersCount / dashboard.stats.totalMembers) * 100) : 0}% of total`}</p>
+            </div>
+          </div>
+          <div className="bg-white shadow-md rounded-xl p-4 flex items-center space-x-4">
+            <div className="flex-shrink-0 bg-yellow-100 p-2 rounded-full">
+              <Clock className="h-6 w-6 text-yellow-500" />
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900">Pending Approval</h3>
+              <p className="text-2xl font-bold text-gray-800">{dashboard.stats.pendingApproval}</p>
+              <p className="text-sm text-gray-500">Awaiting verification</p>
+            </div>
+          </div>
+          <div className="bg-white shadow-md rounded-xl p-4 flex items-center space-x-4">
+            <div className="flex-shrink-0 bg-purple-100 p-2 rounded-full">
+              <TrendingUp className="h-6 w-6 text-purple-500" />
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900">New This Month</h3>
+              <p className="text-2xl font-bold text-gray-800">{dashboard.stats.newThisMonth}</p>
+              <p className="text-sm text-gray-500">Recent registrations</p>
+            </div>
+          </div>
         </div>
 
         {/* Additional Stats */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <Card>
+          <Card className="bg-white shadow-md">
             <CardHeader>
-              <CardTitle className="text-lg">Average Contribution</CardTitle>
+              <CardTitle className="text-lg font-semibold text-gray-900">Average Contribution</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-sacco-blue">
+              <div className="text-2xl font-bold text-blue-600">
                 KES {dashboard.stats.averageContribution.toLocaleString()}
               </div>
-              <p className="text-sm text-gray-600 dark:text-gray-400">Per member per month</p>
+              <p className="text-sm text-gray-500">Per member per month</p>
             </CardContent>
           </Card>
-          <Card>
+          <Card className="bg-white shadow-md">
             <CardHeader>
-              <CardTitle className="text-lg">Retention Rate</CardTitle>
+              <CardTitle className="text-lg font-semibold text-gray-900">Retention Rate</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-sacco-green">{dashboard.stats.retentionRate}%</div>
-              <p className="text-sm text-gray-600 dark:text-gray-400">12-month retention</p>
+              <div className="text-2xl font-bold text-green-600">{dashboard.stats.retentionRate}%</div>
+              <p className="text-sm text-gray-500">12-month retention</p>
             </CardContent>
           </Card>
-          <Card>
+          <Card className="bg-white shadow-md">
             <CardHeader>
-              <CardTitle className="text-lg">Inactive Members</CardTitle>
+              <CardTitle className="text-lg font-semibold text-gray-900">Inactive Members</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-orange-600">{dashboard.stats.inactiveMembers}</div>
-              <p className="text-sm text-gray-600 dark:text-gray-400">
+              <p className="text-sm text-gray-500">
                 {dashboard.stats.totalMembers > 0 ? Math.round((dashboard.stats.inactiveMembers / dashboard.stats.totalMembers) * 100) : 0}% of total
               </p>
-              <Button size="sm" className="mt-2" variant="outline">
+              <Button size="sm" className="mt-2 bg-orange-100 text-orange-600 hover:bg-orange-200">
                 <Mail className="h-3 w-3 mr-1" />
                 Send Reactivation
               </Button>
@@ -469,9 +506,9 @@ export default function AdminMembers() {
 
         {/* Charts */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <Card>
+          <Card className="bg-white shadow-md">
             <CardHeader>
-              <CardTitle>Member Growth Trends</CardTitle>
+              <CardTitle className="text-lg font-semibold text-gray-900">Member Growth Trends</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="h-80">
@@ -485,50 +522,46 @@ export default function AdminMembers() {
               </div>
             </CardContent>
           </Card>
-          <ChartCard
-            title="Membership Types"
-            description="Distribution by membership category"
-            type="pie"
-            data={dashboard.membershipTypes}
-            dataKey="value"
-            xAxisKey="name"
-          />
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <ChartCard
-            title="Age Distribution"
-            description="Members by age group"
-            type="bar"
-            data={dashboard.ageDistribution}
-            dataKey="value"
-            xAxisKey="name"
-          />
-          <ChartCard
-            title="Member Status"
-            description="Current member status breakdown"
-            type="pie"
-            data={dashboard.memberStatusDistribution}
-            dataKey="value"
-            xAxisKey="name"
-          />
+          <Card className="bg-white shadow-md">
+            <CardHeader>
+              <CardTitle className="text-lg font-semibold text-gray-900">Member Status</CardTitle>
+              <CardDescription>Current member status breakdown</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <ChartCard
+                title=""
+                type="pie"
+                data={dashboard.memberStatusDistribution}
+                dataKey="value"
+                xAxisKey="name"
+              />
+            </CardContent>
+          </Card>
         </div>
 
         {/* Member Management Tabs */}
-        <Tabs defaultValue="all" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-1">
-            <TabsTrigger value="all">All Members ({dashboard.stats.totalMembers})</TabsTrigger>
-          </TabsList>
-          <TabsContent value="all" className="space-y-6">
-            <DataTable
-              data={dashboard.activeMembers}
-              columns={allColumns}
-              searchable={true}
-              filterable={true}
-              exportable={true}
-            />
-          </TabsContent>
-        </Tabs>
+        <Card className="bg-white shadow-md">
+          <CardHeader>
+            <CardTitle className="text-lg font-semibold text-gray-900">Member List</CardTitle>
+            <CardDescription>View and manage all SACCO members</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Tabs defaultValue="all" className="space-y-6">
+              <TabsList className="grid w-full grid-cols-1">
+                <TabsTrigger value="all" className="text-gray-700">All Members ({dashboard.stats.totalMembers})</TabsTrigger>
+              </TabsList>
+              <TabsContent value="all" className="space-y-6">
+                <DataTable
+                  data={dashboard.activeMembers}
+                  columns={allColumns}
+                  searchable={true}
+                  filterable={true}
+                  exportable={true}
+                />
+              </TabsContent>
+            </Tabs>
+          </CardContent>
+        </Card>
 
         {/* Member Details Dialog */}
         <Dialog open={isDetailsOpen} onOpenChange={setIsDetailsOpen}>
@@ -859,19 +892,23 @@ export default function AdminMembers() {
                         id="phoneNumbers"
                         value={bulkMessage.phoneNumbers}
                         onChange={(e) => setBulkMessage({ ...bulkMessage, phoneNumbers: e.target.value })}
-                        placeholder="Enter phone number (e.g., 0712345678)"
+                        placeholder="Enter phone number (e.g., +254712345678)"
                       />
                       <div className="space-y-1">
                         <p className="text-sm text-gray-500">
-                          Enter a Kenyan phone number in any of these formats:
+                          Enter a Kenyan phone number in this format:
                         </p>
                         <ul className="text-sm text-gray-500 list-disc list-inside">
-                          <li>0712345678 (starting with 0)</li>
-                          <li>+254712345678 (with country code)</li>
-                          <li>254712345678 (without +)</li>
+                          <li>+254712345678 (with country code, required)</li>
                         </ul>
                         <p className="text-sm text-gray-500 mt-2">
-                          Number will be automatically formatted to the required format.
+                          Only numbers starting with <span className="font-semibold">+254</span> are accepted.
+                        </p>
+                        {bulkMessage.phoneNumbers && !bulkMessage.phoneNumbers.split(',').every(num => isValidPhoneNumber(num)) && (
+                          <p className="text-sm text-red-600">Invalid phone number format. Use +254 followed by 9 digits.</p>
+                        )}
+                        <p className="text-xs text-blue-600 mt-2">
+                          Note: SMS is sent using Africa's Talking <span className="font-semibold">(Sandbox mode)</span>. Only test numbers will receive SMS. Production sending will be enabled soon.
                         </p>
                       </div>
                     </div>
@@ -901,7 +938,7 @@ export default function AdminMembers() {
               <Button 
                 onClick={() => bulkMessage.messageType === "sms" ? handleSendBulkMessage() : handleSendBulkEmail()} 
                 className="bg-sacco-blue hover:bg-sacco-blue/90"
-                disabled={isSending}
+                disabled={isSending || (bulkMessage.messageType === 'sms' && bulkMessage.recipients === 'custom' && (!bulkMessage.phoneNumbers || !bulkMessage.phoneNumbers.split(',').every(num => isValidPhoneNumber(num))))}
               >
                 <Send className="h-4 w-4 mr-2" />
                 {isSending ? "Sending..." : `Send ${bulkMessage.messageType === "sms" ? "SMS" : "Email"}`}
