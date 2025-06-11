@@ -434,12 +434,12 @@ export default function MemberReports() {
 
   return (
     <DashboardLayout role="member" user={user}>
-      <div className="space-y-6">
+      <div className="space-y-6 px-2 sm:px-4 md:px-8">
         {/* Header */}
-        <div className="flex justify-between items-center">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Reports & Analytics</h1>
-            <p className="text-gray-600 dark:text-gray-400">View your financial reports and download statements</p>
+            <h1 className="text-2xl sm:text-3xl font-bold">Reports & Statements</h1>
+            <p className="text-gray-600 text-sm sm:text-base">View, download, and analyze your SACCO financial activity</p>
           </div>
           <Dialog open={isGenerateOpen} onOpenChange={setIsGenerateOpen}>
             <DialogTrigger asChild>
@@ -500,42 +500,92 @@ export default function MemberReports() {
           </Dialog>
         </div>
 
-        {/* Quick Reports */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Quick Reports</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              {/* quickReports.map((report, index) => (
-                <div
-                  key={index}
-                  className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:shadow-md transition-shadow cursor-pointer"
-                  onClick={() => handleQuickReport(report.type)}
-                >
-                  <div className="flex items-center space-x-3 mb-3">
-                    <div className="p-2 bg-sacco-blue/10 rounded-lg">
-                      <report.icon className="h-5 w-5 text-sacco-blue" />
-                    </div>
-                    <div>
-                      <h3 className="font-semibold">{report.title}</h3>
-                    </div>
-                  </div>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">{report.description}</p>
-                </div>
-              )) */}
-            </div>
-          </CardContent>
-        </Card>
+        {/* Cards/Charts Section */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {/* Summary Cards */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Contribution Summary</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-2">
+                <p className="text-2xl font-bold">KES {contributionData?.summary.totalContributed.toLocaleString()}</p>
+                <p className="text-sm text-gray-500">Total Contributions</p>
+                <p className="text-sm text-gray-500">Monthly Average: KES {contributionData?.summary.monthlyAverage.toLocaleString()}</p>
+              </div>
+            </CardContent>
+          </Card>
 
-        {/* Main Content */}
-        <Tabs defaultValue="overview" className="space-y-4" onValueChange={setActiveTab}>
-          <TabsList>
-            <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="contributions">Contributions</TabsTrigger>
-            <TabsTrigger value="loans">Loans</TabsTrigger>
-            <TabsTrigger value="transactions">Transactions</TabsTrigger>
-          </TabsList>
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Loan Summary</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-2">
+                <p className="text-2xl font-bold">KES {loanData?.summary.totalBorrowed.toLocaleString()}</p>
+                <p className="text-sm text-gray-500">Total Borrowed</p>
+                <p className="text-sm text-gray-500">Active Loans: {loanData?.summary.activeLoans}</p>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Transaction Summary</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-2">
+                <p className="text-2xl font-bold">{transactionData?.summary.totalTransactions}</p>
+                <p className="text-sm text-gray-500">Total Transactions</p>
+                <p className="text-sm text-gray-500">This Month: {transactionData?.summary.monthlyTransactions}</p>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Charts */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Contribution Trends</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ChartCard
+                title="Monthly Contributions"
+                type="bar"
+                data={getChartData('contribution')}
+                dataKey="value"
+                xAxisKey="name"
+              />
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Loan Trends</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ChartCard
+                title="Monthly Loans"
+                type="bar"
+                data={getChartData('loan')}
+                dataKey="value"
+                xAxisKey="name"
+              />
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Tabs Section */}
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+          <div className="overflow-x-auto">
+            <TabsList className="grid w-full min-w-[350px] grid-cols-4">
+              <TabsTrigger value="overview">Overview</TabsTrigger>
+              <TabsTrigger value="contributions">Contributions</TabsTrigger>
+              <TabsTrigger value="loans">Loans</TabsTrigger>
+              <TabsTrigger value="transactions">Transactions</TabsTrigger>
+            </TabsList>
+          </div>
 
           <TabsContent value="overview" className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
