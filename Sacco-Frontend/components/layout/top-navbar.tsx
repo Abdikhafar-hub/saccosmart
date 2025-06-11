@@ -24,9 +24,10 @@ interface TopNavbarProps {
     role: string
     avatar?: string
   }
+  onOpenMobileSidebar?: () => void
 }
 
-export function TopNavbar({ user }: TopNavbarProps) {
+export function TopNavbar({ user, onOpenMobileSidebar }: TopNavbarProps) {
  
   const { theme, setTheme } = useTheme()
 
@@ -50,6 +51,12 @@ export function TopNavbar({ user }: TopNavbarProps) {
   return (
     <header className="flex items-center justify-between h-16 px-6 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700">
       <div className="flex items-center space-x-4">
+        {/* Hamburger for mobile */}
+        {onOpenMobileSidebar && (
+          <Button variant="ghost" size="icon" className="block sm:hidden mr-2" onClick={onOpenMobileSidebar}>
+            <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-menu"><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="18" x2="20" y2="18"/></svg>
+          </Button>
+        )}
         <h1 className="text-xl font-semibold text-gray-900 dark:text-white">
           Welcome back, {user.name.split(" ")[0]}!
         </h1>

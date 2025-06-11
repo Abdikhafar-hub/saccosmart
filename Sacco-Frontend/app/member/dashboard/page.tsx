@@ -146,17 +146,17 @@ export default function MemberDashboard() {
 
   return (
     <DashboardLayout role="member" user={dashboardData.user}>
-      <div className="space-y-6">
+      <div className="space-y-6 px-2 sm:px-4 md:px-8">
         {/* Welcome Section */}
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">
             Welcome back, {dashboardData.user.name}!
           </h1>
-          <p className="text-gray-600 dark:text-gray-400">Here's an overview of your SACCO account</p>
+          <p className="text-gray-600 dark:text-gray-400 text-sm sm:text-base">Here's an overview of your SACCO account</p>
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <StatsCard
             title="Total Savings"
             value={`KES ${totalContributions.toLocaleString()}`}
@@ -185,10 +185,10 @@ export default function MemberDashboard() {
           />
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
           {/* Monthly Contributions Chart */}
-          <div className="lg:col-span-2">
-            <div className="border border-[#E0EFFF] rounded-lg p-4">
+          <div className="lg:col-span-2 overflow-x-auto rounded-lg">
+            <div className="border border-[#E0EFFF] rounded-lg p-2 sm:p-4 min-w-[320px]">
               <ChartCard
                 title="Monthly Contributions"
                 description="Your contribution history over the last 6 months"

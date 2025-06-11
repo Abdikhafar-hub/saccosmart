@@ -282,7 +282,7 @@ export default function AdminDashboard() {
 
   return (
     <DashboardLayout role="admin" user={{ name: "Admin", email: "", role: "Admin" }}>
-      <div className="space-y-6">
+      <div className="space-y-6 px-2 sm:px-4 md:px-8">
         {/* Welcome Section */}
         <div className="flex justify-between items-center">
           <div>
@@ -295,7 +295,7 @@ export default function AdminDashboard() {
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <StatsCard
             title="Total Users"
             value={totalUsers.toLocaleString()}
@@ -326,150 +326,167 @@ export default function AdminDashboard() {
           />
         </div>
 
-        {/* Charts */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <ChartCard
-            title="Contributions Over Time"
-            description="Monthly contribution trends"
-            type="line"
-            data={contributionsTrend}
-            dataKey="value"
-            xAxisKey="name"
-          />
-          <ChartCard
-            title="Loan Status Distribution"
-            description="Current loan portfolio breakdown"
-            type="pie"
-            data={loanStatusData}
-            dataKey="value"
-            xAxisKey="name"
-          />
-        </div>
-
-        {/* System Alerts */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center text-2xl font-bold text-gray-800">
-              <AlertTriangle className="h-5 w-5 mr-2 text-red-500 animate-pulse" />
-              System Alerts
-            </CardTitle>
-            <CardDescription>Important notifications requiring attention</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              <div className="flex items-center justify-between p-3 bg-red-50 rounded-lg border border-red-200">
-                <div>
-                  <h4 className="font-medium text-red-800">{overdue.count} Overdue Loan Payments</h4>
-                  <p className="text-sm text-red-600">Total amount: KES {overdue.totalAmount.toLocaleString()}</p>
-                </div>
-                <Badge className="bg-red-100 text-red-800 animate-pulse" variant="destructive">High Priority</Badge>
-              </div>
-              <div className="flex items-center justify-between p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-200 dark:border-yellow-800">
-                <div>
-                  <h4 className="font-medium text-yellow-800 dark:text-yellow-200">{pending.count} Pending Loan Applications</h4>
-                  <p className="text-sm text-yellow-600 dark:text-yellow-300">Awaiting approval</p>
-                </div>
-                <Badge className="bg-yellow-100 text-yellow-800" variant="secondary">
-                  Medium Priority
-                </Badge>
-              </div>
-              <div className="flex items-center justify-between p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
-                <div>
-                  <h4 className="font-medium text-blue-800 dark:text-blue-200">System Backup Completed</h4>
-                  <p className="text-sm text-blue-600 dark:text-blue-300">Last backup: {lastBackup ? new Date(lastBackup).toLocaleString() : "N/A"}</p>
-                </div>
-                <Badge className="bg-blue-100 text-blue-800" variant="secondary">
-                  Info
-                </Badge>
-              </div>
+        {/* Charts and Tables Section */}
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+          {/* Charts */}
+          <div className="lg:col-span-2 overflow-x-auto rounded-lg">
+            <div className="border border-[#E0EFFF] rounded-lg p-2 sm:p-4 min-w-[320px]">
+              <ChartCard
+                title="Contributions Over Time"
+                description="Monthly contribution trends"
+                type="line"
+                data={contributionsTrend}
+                dataKey="value"
+                xAxisKey="name"
+              />
             </div>
-          </CardContent>
-        </Card>
+          </div>
+          <div className="lg:col-span-1 overflow-x-auto rounded-lg">
+            <div className="border border-[#E0EFFF] rounded-lg p-2 sm:p-4 min-w-[320px]">
+              <ChartCard
+                title="Loan Status Distribution"
+                description="Current loan portfolio breakdown"
+                type="pie"
+                data={loanStatusData}
+                dataKey="value"
+                xAxisKey="name"
+              />
+            </div>
+          </div>
 
-        {/* Recent Activity */}
-        <div className="border border-blue-500 rounded-lg">
-          <DataTable
-            data={recentActivities}
-            columns={activityColumns}
-            title="Recent System Activity"
-            searchable={true}
-            filterable={true}
-            exportable={true}
-            pageSize={5}
-          />
-        </div>
-
-        {/* Loan Applications */}
-        <div className="border border-blue-500 rounded-lg p-4 bg-white">
-          <h2 className="text-2xl font-bold text-gray-800">Loan Applications</h2>
-          <DataTable
-            data={loans}
-            columns={[
-              {
-                key: "_id",
-                label: "Loan ID",
-                sortable: true,
-              },
-              {
-                key: "userName",
-                label: "Member",
-                sortable: true,
-              },
-              {
-                key: "amount",
-                label: "Amount",
-                sortable: true,
-                render: (value: number) => `KES ${value.toLocaleString()}`,
-              },
-              {
-                key: "term",
-                label: "Term",
-              },
-              {
-                key: "date",
-                label: "Applied Date",
-                sortable: true,
-                render: (value: string | undefined) =>
-                  value ? new Date(value).toLocaleDateString() : "N/A",
-              },
-              {
-                key: "status",
-                label: "Status",
-                render: (value: string) => {
-                  const statusConfig = {
-                    pending: { color: "bg-yellow-100 text-yellow-800", icon: Clock },
-                    approved: { color: "bg-green-100 text-green-800", icon: CheckCircle },
-                    rejected: { color: "bg-red-100 text-red-800", icon: XCircle },
-                    active: { color: "bg-blue-100 text-blue-800", icon: CheckCircle },
-                    completed: { color: "bg-gray-100 text-gray-800", icon: CheckCircle },
-                  }
-                  const config = statusConfig[value as keyof typeof statusConfig] || statusConfig.pending
-                  const Icon = config.icon
-                  return (
-                    <Badge className={`${config.color} rounded-full`} variant="secondary">
-                      <Icon className="h-3 w-3 mr-1" />
-                      {value}
-                    </Badge>
-                  )
-                },
-              },
-              {
-                key: "actions",
-                label: "Actions",
-                render: (value: any, row: any) => (
-                  <div className="flex space-x-2">
-                    <Button size="sm" variant="outline" onClick={() => handleViewLoanDetails(row._id)}>
-                      <Eye className="h-3 w-3 mr-1" />
-                      View
-                    </Button>
+          {/* System Alerts */}
+          <div className="lg:col-span-3 overflow-x-auto rounded-lg">
+            <div className="border border-[#E0EFFF] rounded-lg p-2 sm:p-4 min-w-[320px]">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center text-2xl font-bold text-gray-800">
+                    <AlertTriangle className="h-5 w-5 mr-2 text-red-500 animate-pulse" />
+                    System Alerts
+                  </CardTitle>
+                  <CardDescription>Important notifications requiring attention</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between p-3 bg-red-50 rounded-lg border border-red-200">
+                      <div>
+                        <h4 className="font-medium text-red-800">{overdue.count} Overdue Loan Payments</h4>
+                        <p className="text-sm text-red-600">Total amount: KES {overdue.totalAmount.toLocaleString()}</p>
+                      </div>
+                      <Badge className="bg-red-100 text-red-800 animate-pulse" variant="destructive">High Priority</Badge>
+                    </div>
+                    <div className="flex items-center justify-between p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-200 dark:border-yellow-800">
+                      <div>
+                        <h4 className="font-medium text-yellow-800 dark:text-yellow-200">{pending.count} Pending Loan Applications</h4>
+                        <p className="text-sm text-yellow-600 dark:text-yellow-300">Awaiting approval</p>
+                      </div>
+                      <Badge className="bg-yellow-100 text-yellow-800" variant="secondary">
+                        Medium Priority
+                      </Badge>
+                    </div>
+                    <div className="flex items-center justify-between p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                      <div>
+                        <h4 className="font-medium text-blue-800 dark:text-blue-200">System Backup Completed</h4>
+                        <p className="text-sm text-blue-600 dark:text-blue-300">Last backup: {lastBackup ? new Date(lastBackup).toLocaleString() : "N/A"}</p>
+                      </div>
+                      <Badge className="bg-blue-100 text-blue-800" variant="secondary">
+                        Info
+                      </Badge>
+                    </div>
                   </div>
-                ),
-              },
-            ]}
-            searchable={true}
-            filterable={true}
-            exportable={true}
-          />
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+
+          {/* Recent Activity */}
+          <div className="lg:col-span-3 overflow-x-auto rounded-lg">
+            <div className="border border-[#E0EFFF] rounded-lg p-2 sm:p-4 min-w-[320px]">
+              <DataTable
+                data={recentActivities}
+                columns={activityColumns}
+                title="Recent System Activity"
+                searchable={true}
+                filterable={true}
+                exportable={true}
+                pageSize={5}
+              />
+            </div>
+          </div>
+
+          {/* Loan Applications */}
+          <div className="lg:col-span-3 overflow-x-auto rounded-lg">
+            <div className="border border-[#E0EFFF] rounded-lg p-2 sm:p-4 min-w-[320px]">
+              <h2 className="text-2xl font-bold text-gray-800">Loan Applications</h2>
+              <DataTable
+                data={loans}
+                columns={[
+                  {
+                    key: "_id",
+                    label: "Loan ID",
+                    sortable: true,
+                  },
+                  {
+                    key: "userName",
+                    label: "Member",
+                    sortable: true,
+                  },
+                  {
+                    key: "amount",
+                    label: "Amount",
+                    sortable: true,
+                    render: (value: number) => `KES ${value.toLocaleString()}`,
+                  },
+                  {
+                    key: "term",
+                    label: "Term",
+                  },
+                  {
+                    key: "date",
+                    label: "Applied Date",
+                    sortable: true,
+                    render: (value: string | undefined) =>
+                      value ? new Date(value).toLocaleDateString() : "N/A",
+                  },
+                  {
+                    key: "status",
+                    label: "Status",
+                    render: (value: string) => {
+                      const statusConfig = {
+                        pending: { color: "bg-yellow-100 text-yellow-800", icon: Clock },
+                        approved: { color: "bg-green-100 text-green-800", icon: CheckCircle },
+                        rejected: { color: "bg-red-100 text-red-800", icon: XCircle },
+                        active: { color: "bg-blue-100 text-blue-800", icon: CheckCircle },
+                        completed: { color: "bg-gray-100 text-gray-800", icon: CheckCircle },
+                      }
+                      const config = statusConfig[value as keyof typeof statusConfig] || statusConfig.pending
+                      const Icon = config.icon
+                      return (
+                        <Badge className={`${config.color} rounded-full`} variant="secondary">
+                          <Icon className="h-3 w-3 mr-1" />
+                          {value}
+                        </Badge>
+                      )
+                    },
+                  },
+                  {
+                    key: "actions",
+                    label: "Actions",
+                    render: (value: any, row: any) => (
+                      <div className="flex space-x-2">
+                        <Button size="sm" variant="outline" onClick={() => handleViewLoanDetails(row._id)}>
+                          <Eye className="h-3 w-3 mr-1" />
+                          View
+                        </Button>
+                      </div>
+                    ),
+                  },
+                ]}
+                searchable={true}
+                filterable={true}
+                exportable={true}
+              />
+            </div>
+          </div>
         </div>
 
         {/* Loan Details Modal */}

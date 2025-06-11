@@ -308,4 +308,48 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 - All contributors who have helped shape this project
 - The open-source community for their invaluable tools and libraries
 - Africa's Talking for SMS and USSD services
-- Safaricom for M-Pesa integration 
+- Safaricom for M-Pesa integration
+
+## Project Structure
+
+```
+.
+├── Sacco-Frontend/
+│   ├── app/
+│   │   ├── admin/
+│   │   ├── auth/
+│   │   ├── landing/
+│   │   ├── member/
+│   │   ├── treasurer/
+│   │   ├── types/
+│   │   └── ...
+│   ├── components/
+│   │   ├── layout/
+│   │   └── ui/
+│   ├── controllers/
+│   ├── hooks/
+│   ├── lib/
+│   ├── public/
+│   ├── routes/
+│   ├── styles/
+│   ├── utils/
+│   ├── node_modules/
+│   ├── package.json
+│   └── ...
+├── sacco-backend/
+│   ├── config/
+│   ├── controllers/
+│   ├── middleware/
+│   ├── models/
+│   ├── routes/
+│   ├── scripts/
+│   ├── uploads/
+│   ├── utils/
+│   ├── node_modules/
+│   ├── app.js
+│   ├── package.json
+│   └── ...
+└── README.md
+```
+
+*This structure reflects the main directories and files. Some folders (like `node_modules`) are omitted for brevity in detailed listings. Each main folder contains relevant code, configuration, or assets for the frontend and backend applications.* 
