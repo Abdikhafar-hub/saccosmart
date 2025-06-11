@@ -91,11 +91,11 @@ export default function MemberFAQsPage() {
 
   return (
     <DashboardLayout role="member" user={user}>
-      <div className="space-y-6">
+      <div className="space-y-6 px-2 sm:px-4 md:px-8">
         {/* Header */}
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Frequently Asked Questions</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Frequently Asked Questions</h1>
+          <p className="text-muted-foreground text-sm sm:text-base">
             Find answers to common questions about your SACCO account and services.
           </p>
         </div>
@@ -122,7 +122,7 @@ export default function MemberFAQsPage() {
                 <Badge
                   key={category}
                   variant={selectedCategory === category ? "default" : "outline"}
-                  className="cursor-pointer"
+                  className="cursor-pointer text-xs sm:text-sm px-2 py-1"
                   onClick={() => setSelectedCategory(category)}
                 >
                   {category}
@@ -135,23 +135,23 @@ export default function MemberFAQsPage() {
         {/* FAQs */}
         <Card>
           <CardHeader>
-            <CardTitle>Questions & Answers</CardTitle>
-            <CardDescription>{filteredFAQs.length} question(s) found</CardDescription>
+            <CardTitle className="text-base sm:text-lg">Questions & Answers</CardTitle>
+            <CardDescription className="text-xs sm:text-base">{filteredFAQs.length} question(s) found</CardDescription>
           </CardHeader>
           <CardContent>
             <Accordion type="single" collapsible className="w-full">
               {filteredFAQs.map((faq) => (
                 <AccordionItem key={faq.id} value={faq.id}>
-                  <AccordionTrigger className="text-left">
+                  <AccordionTrigger className="text-left text-sm sm:text-base">
                     <div className="flex items-center gap-2">
                       {getCategoryIcon(faq.category)}
                       <span>{faq.question}</span>
-                      <Badge variant="outline" className="ml-auto">
+                      <Badge variant="outline" className="ml-auto text-xs sm:text-sm">
                         {faq.category}
                       </Badge>
                     </div>
                   </AccordionTrigger>
-                  <AccordionContent className="text-muted-foreground">{faq.answer}</AccordionContent>
+                  <AccordionContent className="text-muted-foreground text-xs sm:text-base">{faq.answer}</AccordionContent>
                 </AccordionItem>
               ))}
             </Accordion>

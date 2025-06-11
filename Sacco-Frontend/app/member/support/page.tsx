@@ -141,14 +141,14 @@ export default function MemberSupportPage() {
 
   return (
     <DashboardLayout role="member" user={user}>
-      <div className="space-y-6">
+      <div className="space-y-6 px-2 sm:px-4 md:px-8">
         {/* Header */}
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Support Center</h1>
-          <p className="text-muted-foreground">Get help with your SACCO account or submit a support request.</p>
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Support Center</h1>
+          <p className="text-muted-foreground text-sm sm:text-base">Get help with your SACCO account or submit a support request.</p>
         </div>
 
-        <div className="grid gap-6 md:grid-cols-2">
+        <div className="grid gap-6 grid-cols-1 md:grid-cols-2">
           {/* Contact Information */}
           <Card>
             <CardHeader>
@@ -268,8 +268,8 @@ export default function MemberSupportPage() {
         {/* Support Tickets */}
         <Card>
           <CardHeader>
-            <CardTitle>Your Support Tickets</CardTitle>
-            <CardDescription>Track the status of your submitted support requests</CardDescription>
+            <CardTitle className="text-base sm:text-lg">Your Support Tickets</CardTitle>
+            <CardDescription className="text-xs sm:text-base">Track the status of your submitted support requests</CardDescription>
           </CardHeader>
           <CardContent>
             {loading ? (
@@ -279,28 +279,28 @@ export default function MemberSupportPage() {
             ) : (
               <div className="space-y-4">
                 {tickets.map((ticket) => (
-                  <div key={ticket._id} className="flex items-center justify-between p-4 border rounded-lg">
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-2">
-                        <span className="font-medium">{ticket.subject || ticket.title}</span>
-                        <Badge variant="outline">{ticket.category}</Badge>
+                  <div key={ticket._id} className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 p-4 border rounded-lg">
+                    <div className="space-y-1 w-full">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="font-medium text-sm sm:text-base">{ticket.subject || ticket.title}</span>
+                        <Badge variant="outline" className="text-xs sm:text-sm">{ticket.category}</Badge>
                       </div>
-                      <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                      <div className="flex flex-wrap gap-2 text-xs sm:text-sm text-muted-foreground">
                         <span>Ticket ID: {ticket._id}</span>
                         <span>Date: {new Date(ticket.createdAt).toLocaleDateString()}</span>
                         <span>Priority: {ticket.priority}</span>
                       </div>
                       <div>
-                        <span className="font-semibold">Status: </span>
-                        <Badge className={getStatusColor(ticket.status)}>{ticket.status}</Badge>
+                        <span className="font-semibold text-xs sm:text-sm">Status: </span>
+                        <Badge className={getStatusColor(ticket.status) + " text-xs sm:text-sm"}>{ticket.status}</Badge>
                       </div>
                       {ticket.responses && ticket.responses.length > 0 && (
                         <div className="mt-2">
-                          <span className="font-semibold">Admin Responses:</span>
+                          <span className="font-semibold text-xs sm:text-sm">Admin Responses:</span>
                           <ul className="ml-4 list-disc">
                             {ticket.responses.map((resp: any, idx: number) => (
-                              <li key={idx}>
-                                <span className="text-xs text-gray-600">{new Date(resp.date).toLocaleString()}:</span>{" "}
+                              <li key={idx} className="text-xs sm:text-sm">
+                                <span className="text-gray-600">{new Date(resp.date).toLocaleString()}:</span>{" "}
                                 {resp.message}
                               </li>
                             ))}
