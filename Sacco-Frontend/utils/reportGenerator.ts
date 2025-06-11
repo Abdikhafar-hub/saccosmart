@@ -50,13 +50,13 @@ export const generatePDFReport = async (): Promise<Blob> => {
 
   const token = localStorage.getItem("token");
   const [dashboardData, contributionsTrend, loanStatusData] = await Promise.all([
-    fetch("http://localhost:5000/api/dashboard/admin", {
+    fetch("https://saccosmart.onrender.com/api/dashboard/admin", {
       headers: { Authorization: `Bearer ${token}` },
     }).then((res) => res.json()),
-    fetch("http://localhost:5000/api/analytics/contributions-trend", {
+    fetch("https://saccosmart.onrender.com/api/analytics/contributions-trend", {
       headers: { Authorization: `Bearer ${token}` },
     }).then((res) => res.json()),
-    fetch("http://localhost:5000/api/analytics/loan-status-distribution", {
+    fetch("https://saccosmart.onrender.com/api/analytics/loan-status-distribution", {
       headers: { Authorization: `Bearer ${token}` },
     }).then((res) => res.json()),
   ]);
