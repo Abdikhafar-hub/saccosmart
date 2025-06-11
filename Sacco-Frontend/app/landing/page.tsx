@@ -141,6 +141,28 @@ function DashboardVideo() {
   )
 }
 
+// USSD Frame Component
+function USSDFrame() {
+  return (
+    <div className="relative">
+      <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-8 border border-white/20">
+        <div className="relative">
+          <img
+            src="https://res.cloudinary.com/ddkkfumkl/image/upload/v1749624298/Screenshot_from_2025-06-10_07-12-09_ssajvh.png"
+            alt="SaccoSmart USSD Demo"
+            className="w-full h-auto rounded-xl shadow-2xl"
+            style={{
+              maxWidth: "100%",
+              height: "auto",
+              aspectRatio: "9/16",
+            }}
+          />
+        </div>
+      </div>
+    </div>
+  )
+}
+
 // Blog data (sample, Kenyan financial sector)
 const blogs = [
   {
@@ -558,26 +580,30 @@ export default function LandingPage() {
                   )}
               </div>
                 {/* Feature Highlights */}
-              <div className="flex items-center space-x-6 text-white/90">
-                <div className="flex items-center space-x-2">
-                  <CheckCircle className="h-5 w-5 text-sacco-green" />
-                  <span className="text-shadow">No setup fees</span>
+                <div className="flex items-center space-x-6 text-white/90">
+                  <div className="flex items-center space-x-2">
+                    <CheckCircle className="h-5 w-5 text-sacco-green" />
+                    <span className="text-shadow">No setup fees</span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <CheckCircle className="h-5 w-5 text-sacco-green" />
+                    <span className="text-shadow">30-day free trial</span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <CheckCircle className="h-5 w-5 text-sacco-green" />
+                    <span className="text-shadow">24/7 support</span>
+                  </div>
                 </div>
-                <div className="flex items-center space-x-2">
-                  <CheckCircle className="h-5 w-5 text-sacco-green" />
-                  <span className="text-shadow">30-day free trial</span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <CheckCircle className="h-5 w-5 text-sacco-green" />
-                  <span className="text-shadow">24/7 support</span>
-                </div>
-              </div>
             </div>
               {/* Right: Dashboard/Relevant Image */}
               <div className="flex-1 flex justify-center items-center w-full lg:w-auto mt-12 lg:mt-0">
                 {/* Only show DashboardVideo for first slide */}
                 {idx === 0 ? (
-            <DashboardVideo />
+                  <DashboardVideo />
+                ) : null}
+                {/* Show USSDFrame for third slide */}
+                {idx === 2 ? (
+                  <USSDFrame />
                 ) : null}
           </div>
             </div>
