@@ -142,18 +142,18 @@ export default function MemberNotificationsPage() {
 
   return (
     <DashboardLayout role="member" user={user}>
-      <div className="space-y-8">
+      <div className="space-y-8 px-2 sm:px-4 md:px-8">
         {/* Header */}
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h1 className="text-4xl font-extrabold text-sacco-blue mb-1">Notifications</h1>
-            <p className="text-gray-600 mt-1 text-lg">Stay updated with important messages and announcements</p>
+            <h1 className="text-2xl sm:text-4xl font-extrabold text-sacco-blue mb-1">Notifications</h1>
+            <p className="text-gray-600 mt-1 text-sm sm:text-lg">Stay updated with important messages and announcements</p>
           </div>
-          <div className="flex items-center space-x-4">
+          <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 w-full sm:w-auto items-start sm:items-center">
             <Badge variant="secondary" className="text-sm bg-yellow-400 text-white px-3 py-1 rounded-full">
               {unreadCount} unread
             </Badge>
-            <Button onClick={markAllAsRead} variant="outline" size="sm" className="rounded-full border-sacco-blue text-sacco-blue hover:bg-sacco-blue/10">
+            <Button onClick={markAllAsRead} variant="outline" size="sm" className="rounded-full border-sacco-blue text-sacco-blue hover:bg-sacco-blue/10 w-full sm:w-auto">
               Mark All as Read
             </Button>
           </div>
@@ -199,19 +199,20 @@ export default function MemberNotificationsPage() {
         {/* Notifications List */}
         <Card className="shadow-lg rounded-2xl">
           <CardHeader>
-            <CardTitle className="text-2xl font-bold text-sacco-blue flex items-center gap-2">
+            <CardTitle className="text-xl sm:text-2xl font-bold text-sacco-blue flex items-center gap-2">
               <Bell className="h-6 w-6" /> Messages
             </CardTitle>
-            <CardDescription className="text-base">View and manage your notifications from SACCO administrators</CardDescription>
+            <CardDescription className="text-sm sm:text-base">View and manage your notifications from SACCO administrators</CardDescription>
           </CardHeader>
           <CardContent>
             <Tabs value={activeTab} onValueChange={setActiveTab}>
-              <TabsList className="grid w-full grid-cols-3 rounded-full bg-sacco-blue/10 mb-4">
-                <TabsTrigger value="all" className="rounded-full data-[state=active]:bg-sacco-blue data-[state=active]:text-white transition">All ({totalCount})</TabsTrigger>
-                <TabsTrigger value="unread" className="rounded-full data-[state=active]:bg-yellow-400 data-[state=active]:text-white transition">Unread ({unreadCount})</TabsTrigger>
-                <TabsTrigger value="read" className="rounded-full data-[state=active]:bg-green-500 data-[state=active]:text-white transition">Read ({totalCount - unreadCount})</TabsTrigger>
-              </TabsList>
-
+              <div className="overflow-x-auto">
+                <TabsList className="grid w-full min-w-[350px] grid-cols-3 rounded-full bg-sacco-blue/10 mb-4">
+                  <TabsTrigger value="all" className="rounded-full data-[state=active]:bg-sacco-blue data-[state=active]:text-white transition">All ({totalCount})</TabsTrigger>
+                  <TabsTrigger value="unread" className="rounded-full data-[state=active]:bg-yellow-400 data-[state=active]:text-white transition">Unread ({unreadCount})</TabsTrigger>
+                  <TabsTrigger value="read" className="rounded-full data-[state=active]:bg-green-500 data-[state=active]:text-white transition">Read ({totalCount - unreadCount})</TabsTrigger>
+                </TabsList>
+              </div>
               <TabsContent value={activeTab} className="mt-6">
                 <div className="space-y-4">
                   {getFilteredNotifications().length === 0 ? (
