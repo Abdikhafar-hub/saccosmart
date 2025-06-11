@@ -84,23 +84,23 @@ export default function MemberDocumentsPage() {
 
   return (
     <DashboardLayout role="member" user={user}>
-      <div className="space-y-6">
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+      <div className="space-y-6 px-2 sm:px-4 md:px-8">
+        <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
           <div>
             <h1 className="text-2xl font-bold">Documents</h1>
-            <p className="text-gray-600">View and download SACCO documents and policies</p>
+            <p className="text-gray-600 text-sm sm:text-base">View and download SACCO documents and policies</p>
           </div>
-          <div className="flex gap-2">
+          <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
             <Input
               placeholder="Search documents..."
               value={search}
               onChange={e => setSearch(e.target.value)}
-              className="w-64"
+              className="w-full sm:w-64"
             />
             <select
               value={typeFilter}
               onChange={e => setTypeFilter(e.target.value)}
-              className="border rounded px-2 py-1"
+              className="border rounded px-2 py-1 w-full sm:w-auto"
             >
               <option value="">All Types</option>
               {types.map(type => (
@@ -114,7 +114,11 @@ export default function MemberDocumentsPage() {
             <CardTitle>Document Library</CardTitle>
           </CardHeader>
           <CardContent>
-            <DataTable columns={columns} data={filtered} />
+            <div className="overflow-x-auto rounded-lg">
+              <div className="min-w-[350px]">
+                <DataTable columns={columns} data={filtered} />
+              </div>
+            </div>
           </CardContent>
         </Card>
       </div>
