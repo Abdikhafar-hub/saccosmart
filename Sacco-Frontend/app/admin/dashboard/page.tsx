@@ -180,9 +180,31 @@ export default function AdminDashboard() {
   }, [])
 
   const handleGenerateReport = async () => {
-    setIsGenerating(true)
-    await generatePDFReport()
-    setIsGenerating(false)
+    try {
+      setIsGenerating(true)
+      const blob = await generatePDFReport()
+      const url = window.URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `saccosmart-report-${new Date().toISOString().split('T')[0]}.pdf`
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      window.URL.revokeObjectURL(url)
+      toast({
+        title: "Report Generated",
+        description: "Your report has been downloaded successfully.",
+      })
+    } catch (error) {
+      console.error('Error generating report:', error)
+      toast({
+        title: "Error",
+        description: "Failed to generate report. Please try again.",
+        variant: "destructive",
+      })
+    } finally {
+      setIsGenerating(false)
+    }
   }
 
   // Loading and error handling
