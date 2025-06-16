@@ -20,7 +20,7 @@ const parseFullName = (fullName) => {
   };
 };
 
-// Store active sessions
+
 const activeSessions = new Map();
 
 // Valid service code

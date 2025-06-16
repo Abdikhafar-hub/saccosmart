@@ -13,7 +13,7 @@ exports.memberDashboard = async (req, res) => {
     const contributions = await Contribution.find({ user: userId }).sort({ date: 1 }); // Sort by date for calculations
     const loans = await Loan.find({ user: userId }).sort({ date: -1 }); // Sort by date for latest loan
 
-    // --- Calculations for Dashboard Stats --- //
+    // --- Calculations for Dashboard Stats --- //m  
 
     // Total Contributions Trend
     const totalContributions = contributions.reduce((sum, c) => sum + (c.amount || 0), 0);
